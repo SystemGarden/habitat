@@ -1,0 +1,45 @@
+.TH "killclock" "1" "0.99.3" "Nigel Stuckey" "Habitat"
+.SH "NAME"
+.LP 
+killclock \- Stops clockwork, Habitat's collection agent
+.SH "SYNTAX"
+.LP 
+killclock
+.SH "DESCRIPTION"
+.LP 
+Stops the public instance of clockwork running on the local machine.
+
+This shell script locates the lock file for clockwork, which is the 
+collection agent for the Habitat suite.
+It prints the process id, owning user, controlling terminal and start time 
+of the daemon, before sending it a SIGTERM.
+
+No check is made that the clockwork process has terminated before this
+script ends.
+
+Private instances of clockwork (started with \-j option) can not be stopped 
+by this method, as they do not register in a lock file.
+Instead, they should be controlled by conventional process control methods.
+.SH "FILES"
+.LP 
+\fI/tmp/clockwork.run\fP 
+.br 
+\fI/var/run/clockwork.run\fP 
+.SH "EXAMPLES"
+.LP 
+Typing the following:\-
+.LP 
+killclock
+.LP 
+will result in a display similar to below and the termination of the 
+clockwork daemon.
+.LP 
+Stopping pid 2781, user nigel and started on /dev/pts/2 at 25\-May\-04 08:08:55 AM
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+clockwork(1), ghabitat(1), habget(1), habput(1), irs(1), 
+habedit(1), habprobe(1), habmeth(1), habconf(5)
+

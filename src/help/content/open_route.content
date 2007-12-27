@@ -1,0 +1,18 @@
+%title%
+open data from a route
+%body%
+<img src=open_route.png align=left> 
+This simple pop-up form asks for a route specification.
+Any route can be used so long as it follows the standard addressing 
+specification to extract data.
+<p>
+SQLRS, the format of the repository, can be used as in the <i>open host</i>
+pop-up. If you know the machine is in the repository, try
+<code> <b>sqlrs:</b><i>host</i> </code>
+which should find <i>host</i> (if there) and display it.
+<p>
+Other routes that support standard addressing (or may do) include
+<b>http:</b> and <b>rs:</b>.
+<p>
+Click <b>OK</b> to load, or <b>finished</b> to remove the pop-up.
+

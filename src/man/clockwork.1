@@ -1,0 +1,308 @@
+.TH "clockwork" "1" "0.99.3" "Nigel Stuckey, System Garden Ltd" "Habitat"
+.SH "NAME"
+.LP 
+
+clockwork \- collection daemon for the Habitat suite
+.SH "SYNTAX"
+.LP 
+clockwork [\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
+[\fI\-e <fmt>\fP] [\fI\-dDhsv\fP] [\fI\-j <jobs>\fP]
+.SH "DESCRIPTION"
+.LP 
+Clockwork is the local agent for the Habitat suite.
+It runs as a daemon process on each machine to be monitored and is designed
+to carry out data collection, log file monitoring, data\-driven actions and 
+the distribution of collected data.
+.LP 
+The default jobs are to collect system, network, storage and uptime
+statistics on the local machine and make them available in a standard place.
+The collection of process data and file monitoring is available by
+configuring the jobs that drive clockwork.
+Configuration can be carried out at a local, regional and global level
+to allow deligation.
+One public and many private instances of clockwork 
+can exist on a single 
+machine, allowing individual users to carry out custom data collection 
+Data is normally held in ring buffers or queues on the local machine
+using custom datastores to be self contained and scalable.
+Periodic replication of data rings to a repository is used for archiving
+and may be done in reverse for central data transmission.
+.SH "OPTIONS"
+.LP 
+.TP 
+\fB\-c\fR \fI<purl>\fP
+Append user configuration data from the route <purl>, rather than the default 
+file ~/.habrc.
+.TP 
+\fB\-C\fR \fI<cfcmd>\fP
+Append a list of configuration directives from <cfcmd>, separated by semicolons.
+.TP 
+\fB\-d\fR
+Place \fBclockwork\fR in diagnostic mode, giving an additional 
+level of logging and sending the text to stderr rather than the default 
+or configured destinations.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-D\fR
+Place \fBclockwork\fR in debug mode. 
+As \-d above but generating a great deal more information, designed to be 
+used in conjunction with the source code. 
+Also overrides normal outputs and will send the text to stderr.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-e\fR \fI<fmt>\fP
+Change the logging output to one of eight preset alternative formats, 
+some showing additional information.
+<fmt> must be 0\-7.
+See LOGGING below.
+.TP 
+\fB\-h\fR
+Print a help message to stdout and exit
+.TP 
+\fB\-v\fR
+Print the version to stdout and exit
+.TP 
+\fB\-j\fR \fI<jobs>\fP
+Override public job table with a private one provided by the route
+<jobs>.
+\fBClockwork\fR will not daemonise, run a data service or take an 
+exclusive system lock (there can only be one public \fBclockwork\fR
+instance).
+Implies \-s and alters the logging output to stderr, unless overridden
+with the range of \fBelog\fR configuration directives.
+.TP 
+\fB\-s\fR
+Disable the public data service from being run, but will continue to save data 
+as dictated by configuration.
+.SH "DEFAULTS"
+.LP 
+When clockwork starts it reads $HAB/etc/habitat.conf and ~/.habrc for
+configuration data (see CONFIGURATION for more details).
+Unless overridden, clockwork will then look for its jobs inside the default
+public datastore for that machine, held in \fI$HAB/var/<hostname>.rs\fR
+(the route address is \fIrs:$HAB/var/<hostname>.rs,jobs,0\fR, see below for 
+an explanation).
+If it does not find the jobs, clockwork bootstaps itself by copying a
+default job template from the file \fI$HAB/lib/clockwork.jobs\fR into the 
+public datastore and then carries on using the datastore version.
+.LP 
+The default jobs run system, network and storage data gathering probes
+every 60 seconds.
+It saves results to the public datastore using the template route 
+\fIrs:$HAB/var/<hostname>.rs,<jobname>,60\fR and errors to 
+\fIrs:$HAB/var/<hostname>.rs,err_<jobname>,60\fR
+.LP 
+All other errors are placed in \fIrs:$HAB/var/<hostname>.rs,log,0\fR
+.SH "ROUTES"
+.LP 
+To move data around in clockwork, an enhanced URL is used as a form of 
+addressing and is called a 'route' (also known as a pseudo\-url or p\-url 
+in documentation).
+The format is <driver>:<address>, where driver must be 
+one of the following:\-
+.TP 
+\fBfile:\fR \fBfileov:\fR
+reads and write to paths on the filesystem.
+The format is file:<file path>, which will always append text to the
+file when writing.
+The fileov: driver will overwrite text when first writing and is 
+suitable for configuration files or states.
+.TP 
+\fBhttp:\fR \fBhttps:\fR
+reads and writes using HTTP or HTTPS to a network address.
+The address is the server name and object name as a normal URL convention.
+.TP 
+\fBrs:\fR
+read and writes to a ring store, the primary local storage mechanism.
+Tabular data is stored in a time series in a queue or ring buffer 
+structure.
+Multiple rings of data can be stored in a single ringstore file, using
+different names and durations.
+.TP 
+\fBsqlrs:\fR
+reads and writes tabular data to a remote repository service using the 
+SQL Ringstore method, which is implemented over the HTTP protocol.
+Harvest provides repository services.
+Stores tabular data in a time series, addressed by host name, ring name
+and duration.
+Data is stored in a wueue or ring buffer storage.
+.SH "CONFIGURATION"
+By default, \fBclockwork\fR will collect system, network and storage statistics for
+the system on which it runs. 
+All the data is read and written from a local datastore, apart from 
+configuration items which come from external sources.
+These external configuration sources govern the operation of all the habitat
+commands and applications.
+
+Refer to the \fIhabconf\fR(5) man page for more details.
+.SH "JOB DEFINITIONS"
+.LP 
+Jobs are defined in a multi columned text format, headed by the magic 
+string 'job 1'.
+Comments may appear anywhere, starting with '#' and running to the end 
+of the line.
+.LP 
+Each job is defined on a single line containing 11 arguments, which in
+order are:\-
+.TP 
+1. start
+when to start the job, in seconds from the starting of clockwork
+.TP 
+2. period
+how often to repeat the job, in seconds
+.TP 
+3. phase
+not yet implemented
+.TP 
+4. count
+how many times the job should be run, with 0 repeating forever
+.TP 
+5. name
+name of the job
+.TP 
+6. requester
+who requested the job, by convention the email address
+.TP 
+7. results
+the route where results should be sent
+.TP 
+8. errors
+the route where errors should be sent
+.TP 
+9. nslots
+the number of slots created in the 'results' and 'errors' routes, 
+if applicable (applies to timestore and tablestore).
+.TP 
+10.method
+the job method
+.TP 
+11.command
+the arguments given to each method
+.LP 
+See the \fBhabmeth(1)\fR manpage for details of the possible methods that may be 
+specified and the commands that can accept.
+.SH "DATA ORGANISATION"
+.LP 
+Data is stored in sequences of tabular information.
+All data has an ordered independently of time, allowing multiple separate
+samples that share the same time interval.
+This data is stored in a ringbuffer, which allows data to grow to a certain 
+number of samples before the oldest are removed and their space recycled.
+Throughout the documentation, each collection of samples is known as
+a \fBring\fR, and may be configured to be a simple queue, where data 
+management is left up to administrators.
+.LP 
+To limit the amount of storage used, data in a ring can be sampled 
+periodically to form new summary data and stored in a new ring with 
+a different period.
+In \fBhabitat\fR, this is known as \fBcascading\fR and takes place on 
+all the default collection rings.
+Several levels of cascading can take place over several new rings, 
+This allows summaries at different frequencies to be collected and tuned
+to local requirements.
+.LP 
+See the \fBhabmeth\fR(1) man page for more information about the \fBcascade\fR method.
+.SH "DATA REPLICATION"
+.LP 
+Any ring of information can be sent to or from the repository at 
+known intervals, allowing a deterministic way of updating both repository 
+and collection agent.
+.LP 
+This is implemented as a regular job which runs the \fBreplicate\fR method.
+Data for the method is provided by configuration parameters which can be 
+set and altered in the organisation. 
+Thus the replication job does not normally need to be altered to change 
+the behaviour.
+.LP 
+See the \fBhabmeth\fR(1) man page for the replicate method and the 
+formation of the configuration data.
+.SH "LOGGING"
+.LP 
+\fBClockwork\fR and the probes that provide data, also generate 
+information and error messages. By convention, these are stored in the 
+route specification \fIts:$hab/var/<host>.ts,log\fR
+The convention for probes is to store their errors in
+\fIts:$HAB/var/\fB<host>\fR.ts,e.\fB<jobname>\fR\fR.
+
+To override the logging location, use the range of \fBelog\fR 
+configuration directives, or rely on the options \-d, \-D, \-j, 
+which will alter the location to stderr as a side effect.
+See habconf(5) for details.
+Probe logging is configurable for each job in the job table.
+
+The logging format can be customised using one of a set of configuration
+directives (see habconf(5)).
+For convenience, the \-e flag specifies one of eight preconfigured
+text formats that will be sent to the configured location:\-
+.TP 
+0 
+all 17 possible log variables
+.TP 
+1 
+severity character & text
+.TP 
+2 
+severity & text
+.TP 
+3 
+severity, text, file, function & line
+.TP 
+4 
+long severity, short time, short program name, file, function, line & text
+.TP 
+5 
+date time, severity, long program name, process id, file, function, line, origin, code & text
+.TP 
+6 
+unix ctime, seconds since 1970, short program name, process id, thread id, file, function, line, origin, code & text
+.TP 
+7 
+severity, file, line, origin, code, text
+.SH "FILES"
+.LP 
+If run from a single directory $HAB:\-
+.br 
+\fI$HAB/bin/clockwork\fP
+.br 
+\fI$HAB/var/<hostname>.rs\fP, \fI$HAB/lib/clockwork.jobs\fP
+.br 
+\fI/tmp/clockwork.run\fP
+.br 
+\fI~/.habrc\fP, \fI$HAB/etc/habitat.conf\fP
+.LP 
+If run from installed Linux locations:\-
+.br 
+\fI/usr/bin/habitat\fP
+.br 
+\fI/var/lib/habitat/<hostname>.rs\fP, \fI/usr/lib/habitat/clockwork.jobs\fP
+.br 
+\fI/var/lib/habitat/clockwork.run\fP
+.br 
+\fI~/.habrc\fP, \fI/etc/habitat.conf\fP
+.SH "ENVIRONMENT VARIABLES"
+.LP 
+
+.SH "EXAMPLES"
+.LP 
+Type the following to run \fBclockwork\fR in the standard way.
+This assumes it is providing public data using the standard job file, 
+storing in a known place and using the standard network port for the
+data service.
+
+clockwork
+
+On a more secure system, you can prevent the data service from being started
+
+clockwork \-s
+
+Alternatively you can run it in a private mode by specifying '\-j' and a
+replacement job file.
+
+clockwork \-j <file>
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+killclock(1), ghabitat(1), habget(1), habput(1), irs(1), 
+habedit(1), habprobe(1), habmeth(1), habconf(5)

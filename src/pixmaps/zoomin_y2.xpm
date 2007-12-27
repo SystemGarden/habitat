@@ -1,0 +1,32 @@
+/* XPM */
+static char * zoomin_y2[] = {
+/* width height ncolors cpp [x_hot y_hot] */
+"16 16 10 1",
+/* colors */
+" 	c #C0FFFF",
+".	c #FF8000",
+"X	c #C05800",
+"o	c #800000",
+"O	c #585858",
+"+	c black",
+"@	c #808080",
+"#	c red",
+"$	c #bdbdbd",
+"%	c #a0a0a0",
+/* pixels */
+"   .            ",
+"  XX.           ",
+" XXXX.          ",
+"oooXXX.         ",
+"  oX.  OOO      ",
+"  oX.+++O+@@    ",
+"  oX.+O # +@    ",
+"  oX+O  #  +@   ",
+"  oX+O#####+@   ",
+"  oX+O  #  +@   ",
+"  oX.+O # O@$   ",
+"  oX.++OOO++O%$ ",
+"oXXX...+++  +OO$",
+" oXXXX       ++O",
+"  oXX          +",
+"   o            "};

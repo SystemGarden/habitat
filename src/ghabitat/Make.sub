@@ -1,0 +1,57 @@
+# Module for the gui commands within habitat, currently ghabitat
+# Nigel Stuckey, July 2002
+#
+# Copyright System Garden Ltd 1996-2002. All rights reserved.
+
+GHABSRC =	 	\
+ghabitat/callbacks.c	\
+ghabitat/ghchoice.c	\
+ghabitat/gmcgraph.c	\
+ghabitat/gtkaction.c	\
+ghabitat/gtkdatabox.c	\
+ghabitat/gtkhtimeline.c	\
+ghabitat/interface.c	\
+ghabitat/rt_gtkgui.c	\
+ghabitat/main.c		\
+ghabitat/misc.c		\
+ghabitat/support.c	\
+ghabitat/uichoice.c	\
+ghabitat/uidata.c	\
+
+GHABOBJ    := $(patsubst %.c, %.o, $(GHABSRC))
+GHABBIN    := ghabitat/ghabitat
+GHABFATBIN := ghabitat/ghabitat-fat
+SRC        += $(GHABSRC)
+BIN        += $(GHABBIN)
+LIB        += ghabitat/ghabitat.rc
+#XLIBPATH   := /usr/X11R6/lib
+#VPATH      += $(XLIBPATH)
+THINLIBS   := -liiab -ldl -lm -lgdbm -lcurl -lXi -lXext -lX11
+FATLIBS    := -lgtk -lgdk -lgmodule -lglib 
+
+# Special dependency on version number: callbacks contain the about...
+# popup, which needs to have an up-to-date idea of version
+ghabitat/callbacks.o: VERSION
+
+# Declare the libraries I need and the link methods
+$(GHABBIN): $(GHABOBJ) -liiab -lgtk -lgdk -lgmodule -lglib -ldl -lXi \
+		-lXext -lX11 -lm #$(FATLIBS) $(THINLIBS)
+	$(LINK.c) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
+		$(call dep_libdir,$^) $(call dep_libname,$^)
+
+#	$(LINK.c) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+#		$(LOADLIBES) $(LDLIBS) \
+#		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+#		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
+
+#	$(LINK.c) -o $@ $^ $(LOADLIBES) $(LDLIBS) -Liiab -liiab
+
+
+
+# Special 'fat' binary of ghabitat
+$(GHABFATBIN): $(GHABOBJ) $(THINLIBS)
+	$(LINK.c) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+		-Wl,-Bstatic $(FATLIBS) \
+		-Wl,-Bdynamic $(LOADLIBES) $(LDLIBS) \
+		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))

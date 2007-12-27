@@ -1,0 +1,85 @@
+.TH "habput" "1" "0.99.3" "Nigel Stuckey" "Habitat"
+.SH "NAME"
+.LP 
+habput \- Store habitat data from stdin
+.SH "SYNTAX"
+.LP 
+habput [\-s <nslots> \-t <desc>] 
+[\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
+[\fI\-e <fmt>\fP] [\fI\-dDhv\fP] <\fIroute\fP>
+.SH "DESCRIPTION"
+.LP 
+Open <route> using habitat's \fBroute\fR addressing and send
+data from stdin to the route.
+
+See \fIclockwork\fR(1) for an explanation of the route syntax
+.SH "OPTIONS"
+.TP 
+\fB\-c\fR \fI<purl>\fP
+Append user configuration data from the route <purl>, rather than 
+the default file ~/.habrc.
+.TP 
+\fB\-C\fR \fI<cfcmd>\fP
+Append a list of configuration directives from <cfcmd>, separated 
+by semicolons.
+.TP 
+\fB\-d\fR
+Place \fBghabitat\fR in diagnostic mode, giving an additional 
+level of logging and sending the text to stderr rather than the 
+default or configured destinations.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-D\fR
+Place \fBghabitat\fR in debug mode. 
+As \-d above but generating a great deal more information, designed to be 
+used in conjunction with the source code. 
+Also overrides normal outputs and will send the text to stderr.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-e\fR \fI<fmt>\fP
+Change the logging output to one of eight preset alternative formats, 
+some showing additional information.
+<fmt> must be 0\-7.
+See LOGGING below.
+.TP 
+\fB\-h\fR
+Print a help message to stdout and exit
+.TP 
+\fB\-v\fR
+Print the version to stdout and exit
+.TP 
+\fB\-s <nslots>\fR
+Number of slots for creating ringed routes (default 1000); <nslots> of 0
+gives a queue behaviour where the oldest data is not lost
+.TP 
+\fB\-t <desc>\fR
+text description for creating ringed routes
+.SH "EXAMPLES"
+.LP 
+To append a sample of tabular data to a table store, use a tablestore 
+driver. This will create a ring which can store 1,000 slots of data.
+.LP 
+habput tab:var/myfile.ts,myring
+.LP 
+To save the same data, but limit the ring to just the most recent
+10 slots and give the ring a description
+.LP 
+habput \-s 10 \-t "my description" tab:var/myfile.ts,myring
+.LP 
+The same data, stored to the same location, but with an unlimited
+history (technically a queue).
+To make the ring readable in ghabitat with current conventions, 
+we store with the prefix \fB'.r'\fR
+.LP 
+habput \-s 0 \-t "my description" tab:var/myfile.ts,r.myring
+.LP 
+To save an error record, use a timestore driver
+.LP 
+habput \-s 100 \-t "my logs" ts:var/myfile.ts,mylogs
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+clockwork(1), killclock(1), ghabitat(1), habget(1), irs(1), 
+habedit(1), habprobe(1), habmeth(1), habconf(5)

@@ -1,0 +1,124 @@
+%title%
+send data via e-mail
+%body%
+This pop-up form will send the current data set to an e-mail recipient
+so they can use the data you can see too.
+The current data set is either displayed in a table or drawn as a graph
+and it doesn't matter if you have zoomed-in, moved about, selected
+specific curves or instances -- everything in the time period is sent!
+<p>
+<table>
+<tr>
+  <td valign=top>
+     <b>Step 1</b> Choose tab or comma separated data format
+  </td>
+  <td rowspan=5 valign=top><img src=data_email.png></td>
+</tr>
+<tr>
+  <td valign=top>
+     <b>Step 2</b> Select name and/or information rows 
+     above each column (see below)
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+    <b>Step 3</b> Select time and sequence columns in addition to data
+    (see below)
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+    <b>Step 4</b> Address the e-mail using <b>To:</b>, <b>From:</b> and
+    give it a description in <b>subject:</b>
+  </td>
+</tr>
+<tr>
+  <td valign=top>
+    <b>Step 5</b> Check the details, then click <b>Send</b> to 
+    dispach the data; errors will appear above the buttons.
+    When you have done, click <b>Finished</b>
+  </td>
+</tr>
+</table>
+
+<p>
+
+<table>
+<tr>
+  <td valign=top><b>column names</b></td>
+  <td valign=top>
+    A row of names will be output as the fist line, with each name
+    corresponding to the columns below it.
+    <pre>
+tom  dick  harry
+1    2     3
+4    5     6
+    </pre>
+  </td>
+</tr>
+<tr>
+  <td valign=top><b>column information</b></td>
+  <td valign=top>
+    Several information rows will be placed after the column names and
+    before the data rows. Each row represents a peice of information that
+    <b>habitat</b> holds on each column, such as a description.
+    <p>
+    Information is printed in column order and an <u>additional</u> 
+    unlabeled column is printed at the end to name the information row.
+    This is unusual as it 'throws' some scanners that require all rows
+    to have constant columns.
+    Additionally, a single line containing two dashes, `--', is
+    inserted before the data lines as a delimiter.
+    <pre>
+tom    dick    harry
+thomas richard henry alternate
+--
+1      2       3
+4      5       6
+    </pre>
+    In the above example, we see an info line called <b>alternate</b>
+    giving more information about each column.
+  </td>
+</tr>
+<tr>
+  <td valign=top><b>insertion time</b></td>
+  <td valign=top>
+    An additional column will be placed in the output, named <b>inserted</b>
+    that contains the time of the sample, generally the insertion time.
+    The format is <b>time_t</b> in C-speak, which is the number of 
+    seconds since the unix epoch, Janurary 1 1970.
+    <pre>
+inserted   tom  dick  harry
+998337060  1    2     3
+998337120  4    5     6
+    </pre>
+  </td>
+</tr>
+<tr>
+  <td valign=top><b>sequence number</b></td>
+  <td valign=top>
+    An additional column will be placed in the output, named <b>sequence</b>
+    that contains an internally generated sequence number, running from 0
+    positively and wrapping at 2<sup>31</sup>.
+    <p>
+    It is useful for two reasons: Firstly it determins the order of data
+    when multiple samples arrive at the datastore during the same second.
+    Secondly, it groups multi line samples together, unseful in 
+    processing the same attributes from multiple instances like disk 
+    statistics.
+    <pre>
+inserted   sequence  read/s  write/s  disk
+998337060  0         1       2        1
+998337060  0         4       5        2
+998337060  1         7       8        1
+998337060  1         10      11       2
+    </pre>
+    The table above shows two samples over four rows. As the 
+    <b>inserted</b> time column is the same, only the two values from 
+    <b>sequence</b> tells us there are two sets of samples. 
+    In this case <b>disk</b> changes and will be the instance.
+  </td>
+</tr>
+
+</table>
+

@@ -1,0 +1,123 @@
+# Module for iiab library, the core habitat library
+# Nigel Stuckey, July 2002
+#
+# Copyright System Garden Ltd 1996-2002. All rights reserved.
+
+IIABSRC := 		\
+iiab/util.c		\
+iiab/elog.c		\
+iiab/nmalloc.c		\
+iiab/strbuf.c		\
+iiab/tree.c		\
+iiab/itree.c		\
+iiab/cf.c		\
+iiab/table.c		\
+iiab/route.c		\
+iiab/rt_none.c		\
+iiab/rt_file.c		\
+iiab/rt_std.c		\
+iiab/rt_http.c		\
+iiab/rt_sqlrs.c		\
+iiab/rt_rs.c		\
+iiab/rs.c 		\
+iiab/rs_gdbm.c		\
+iiab/hash.c		\
+iiab/iiab.c		\
+iiab/callback.c		\
+iiab/sig.c		\
+iiab/http.c		\
+iiab/tableset.c		\
+iiab/meth.c		\
+iiab/meth_b.c		\
+iiab/cascade.c		\
+iiab/runq.c		\
+iiab/job.c		\
+iiab/event.c		\
+iiab/httpd.c		\
+iiab/rep.c		\
+iiab/pattern.c		\
+iiab/timeline.c		\
+#iiab/record.c		\
+#iiab/rt_store.c		\
+#iiab/holstore.c 	\
+#iiab/timestore.c	\
+#iiab/ringbag.c		\
+#iiab/spanstore.c	\
+#iiab/tablestore.c	\
+#iiab/versionstore.c	\
+#iiab/conv.c		\
+
+SRC += $(IIABSRC)
+INC += $(patsubst %.c, %.h, $(IIABSRC))
+IIABOBJ := $(patsubst %.c, %.o, $(IIABSRC))
+SOLIB += iiab/libiiab.so
+
+# Library product dependences
+iiab/libiiab.so: $(IIABOBJ) pd/red-black/rb.o \
+			-lgdbm -ldl -lcurl -lz -lssl -lcrypto
+	$(LINK.o) -shared -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
+		$(call dep_libdir,$^) $(call dep_libname,$^)
+
+#	$(LINK.o) -shared -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+#		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+#		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
+
+#	$(LINK.o) -shared -o $@ $^ \
+#		$(patsubst %/,$(RPATHSUB),$(dir $(filter %.so,$^))) \
+
+
+
+
+# Unit testing files
+IIABTESTSRC :=		\
+iiab/itree.c		\
+iiab/tree.c		\
+iiab/cf.c		\
+iiab/elog.c		\
+iiab/table.c		\
+iiab/hash.c		\
+iiab/route.c		\
+iiab/iiab.c		\
+iiab/rs_gdbm.c		\
+iiab/rs.c		\
+iiab/cascade.c		\
+iiab/event.c		\
+iiab/runq.c		\
+iiab/job.c		\
+iiab/http.c		\
+iiab/httpd.c		\
+iiab/rt_http.c		\
+iiab/rt_file.c		\
+iiab/rt_sqlrs.c		\
+iiab/rep.c		\
+iiab/pattern.c		\
+iiab/timeline.c		\
+iiab/meth.c		\
+#iiab/record.c		\
+#iiab/holstore.c		\
+#iiab/timestore.c	\
+#iiab/tablestore.c	\
+#iiab/spanstore.c	\
+#iiab/versionstore.c	\
+#iiab/nroute.c		\
+#iiab/conv.c		\
+#iiab/ringbag.c		\
+#iiab/rt_std.c		\	# works but requires interaction
+#iiab/rt_store.c		\
+
+
+TESTSRC += $(IIABTESTSRC)
+
+# Special dependency on version number
+iiab/iiab.o: VERSION
+
+# Special dependencies on testing
+#test/t.meth: test/t.meth.exec.so test/t.meth.sh.so
+
+test/t.meth.exec.so: iiab/t.meth.exec.c
+	$(COMPILE.c) -o $@ $^
+
+test/t.meth.sh.so: iiab/t.meth.sh.c
+	$(COMPILE.c) -o $@ $^
+
+test-all: test/t.meth.exec.so test/t.meth.sh.so

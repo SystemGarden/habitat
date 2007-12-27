@@ -1,0 +1,103 @@
+job 1
+#
+# Job table for clockwork, part of Habitat.
+# Contains the timings for probes to gather data and to process it 
+# afterwards.
+# 
+# Copyright System Garden Ltd 1996-2004, All rights reserved.
+#
+# Line format is:-
+#   start   period   phase   count   name   requester   results   errors   nrings   method   command
+
+#
+# ----- one off probes -----
+#
+# name probe: on startup
+0 0 0 1 name    sysgar    rs:%h.rs,%j,%d rs:%h.rs,err,0 20 probe names
+
+#
+# ----- probes for uptime and downtime -----
+# the alive probe implements a heartbeat, showing when the last recorded
+# time the system was alive. The down probe is run once per invocation and
+# attempts to find any recent down time that was recorded and the
+# last time the machine was up. Finally, uptime runs once a day to give a
+# the inverse of down time: how log the machine has been running.
+#
+# tstamp probe: each minute
+0 60    0 0 alive   sysgar rs:%h.rs,%j,%d rs:%h.rs,err,0 60  tstamp -
+
+# down time probe: once at each restart
+0 0     0 1 down    sysgar rs:%h.rs,%j,%d rs:%h.rs,err,0 60  probe "down rs:%h.rs,boot,0 rs:%h.rs,alive,60"
+
+# uptime probe: once a few seceonds after restart and then each day 
+5 0     0 1 up,0     sysgar rs:%h.rs,%j   rs:%h.rs,err,0 60  probe up
+0 86400 0 0 up,86400 sysgar rs:%h.rs,up,0 rs:%h.rs,err,0 60  probe up
+
+#
+# ----- probes with cascading data to conserve space -----
+#
+#
+# system probes: 4h@1m, 1d@5m, 7d@15m, 1mo@1h
+#
+0 60    0 0 sys,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 240 probe sys
+0 300   0 0 sys,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 288 sample "avg rs:%h.rs,sys,60"
+0 900   0 0 sys,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,sys,300"
+0 3600  0 0 sys,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,sys,900"
+
+#
+# io (disk) probes: 4h@1m, 1d@5m, 7d@15m, 1mo@1h
+#
+0 60    0 0 io,%d  sysgar rs:%h.rs,%j rs:%h.rs,err,0 240 probe io
+0 300   0 0 io,%d  sysgar rs:%h.rs,%j rs:%h.rs,err,0 288 sample "avg rs:%h.rs,io,60"
+0 900   0 0 io,%d  sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,io,300"
+0 3600  0 0 io,%d  sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,io,900"
+
+#
+# network probes: 4h@1m, 1d@5m, 7d@15m, 1mo@1h
+#
+0 60    0 0 net,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 240 probe net
+0 300   0 0 net,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 288 sample "avg rs:%h.rs,net,60"
+0 900   0 0 net,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,net,300"
+0 3600  0 0 net,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,net,900"
+
+#
+# interrupt probes: 4h@1m, 1d@5m, 7d@15m, 1mo@1h
+# disabled as it is only rarely useful
+#
+0 60    0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 240 probe intr
+0 300   0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 288 sample "avg rs:%h.rs,intr,60"
+0 900   0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,intr,300"
+0 3600  0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 672 sample "avg rs:%h.rs,intr,900"
+
+#
+# process probe: 1h@60s
+# disabled as the data volume is high and chews cpu; uncomment if needed
+#
+#0 60    0 0 ps,%d   sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  probe ps
+
+#
+# ----- probes for watching data -----
+#
+# demonstration probe to watch for data patterns
+#
+#0 2     0 0 watch1  sysgar stdout             stdout 1000 pattern "rs:%h.rs,patact,0 rs:%h.rs,watched,0"
+
+#
+# ----- archiving and updating methods -----
+#
+# replication communicates with harvest instances, sending data for archival,
+# analysis and fectching new configurations. 
+# 
+# The job below (commented out by default) triggers a replication 
+# every 23 hours. Log output does into rep,82800; state goes into rstate,0.
+# See the habrep(1) command to run replication from the command line.
+# See www.systemgarden.com for details of the on-line harvest web service
+#0 82800 0 0 rep,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  replicate "replicate.in replicate.out rs:%h.rs,rstate,0"
+
+#
+# ----- clean up and housekeeping -----
+#
+# checkpoint the data store, which reclaims unused space and keeps the
+# storage small
+#
+#0 3600  0 0 ckpt    sysgar rs:%h.rs,log,0 rs:%h.rs,log,0 1000 exec "bin/checkpoint %h.rs"

@@ -1,0 +1,90 @@
+.TH "habprobe" "1" "0.99.3" "Nigel Stuckey" "Habitat"
+.SH "NAME"
+.LP 
+habprobe \- Run Habitat's data probes on the command line
+.SH "SYNTAX"
+.LP 
+habprobe [\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
+[\fI\-e <fmt>\fP] [\fI\-dDhv\fP] <\fIcommand\fP>
+.SH "DESCRIPTION"
+.LP 
+Runs a Habitat method, that would be available to jobs 
+within the \fBclockwork\fR collection program.
+
+<Command> should start with the name of the method and the
+remaining arguments to be applied to the methods.
+
+With no arguments, a list of available methods are printed.
+Some methods do not require additional arguments other 
+than the method name.
+.SH "OPTIONS"
+.TP 
+\fB\-c\fR \fI<purl>\fP
+Append user configuration data from the route <purl>, rather than 
+the default file ~/.habrc.
+.TP 
+\fB\-C\fR \fI<cfcmd>\fP
+Append a list of configuration directives from <cfcmd>, separated 
+by semicolons.
+.TP 
+\fB\-d\fR
+Place \fBghabitat\fR in diagnositc mode, giving an additional 
+level of logging and sending the text to stderr rather than the 
+default or configured destinations.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-D\fR
+Place \fBghabitat\fR in debug mode. 
+As \-d above but generating a great deal more information, designed to be 
+used in conjunction with the source code. 
+Also overrides normal outputs and will send the text to stderr.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-e\fR \fI<fmt>\fP
+Change the logging output to one of eight preset alternative formats, 
+some showing additional information.
+<fmt> must be 0\-7.
+See LOGGING below.
+.TP 
+\fB\-h\fR
+Print a help message to stdout and exit
+.TP 
+\fB\-v\fR
+Print the version to stdout and exit
+.SH "EXAMPLES"
+.LP 
+To find the available methods
+.LP 
+habmeth
+.LP 
+run a habitat method stand alone, where methods are:\-
+.br 
+exec        Direct submission to exec(2)
+.br 
+sh          Test submit command line to sh(1)
+.br 
+snap        Take a snapshot of a route
+.br 
+tstamp      Timestamp in seconds since 1/1/1970 00:00:00
+.br 
+sample      Sample tables from a timestore and produce a single table
+.br 
+pattern     Match patterns on groups of routes to raise events
+.br 
+event       Process event queues to carry out instructions
+.br 
+replicate   Replicate rings to and from a repository
+.LP 
+The tstamp method returns the time in seconds from the epoch.
+The example would be
+.LP 
+$ habmeth tstamp
+.br 
+1094314985
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+clockwork(1), killclock(1), ghabitat(1), habget(1), habput(1), irs(1), 
+habedit(1), habmeth(1), habconf(5)

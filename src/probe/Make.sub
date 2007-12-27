@@ -1,0 +1,44 @@
+# Module for probe, the habitat data collection probes
+# Nigel Stuckey, July 2002
+#
+# Copyright System Garden Ltd 1996-2002. All rights reserved.
+
+PRLIBSRC +=		\
+probe/psolsys.c		\
+probe/psolio.c		\
+probe/psolps.c		\
+probe/psolintr.c	\
+probe/psoltimer.c	\
+probe/psolnames.c	\
+probe/psolup.c		\
+probe/psoldown.c	\
+probe/plinps.c		\
+probe/plinintr.c	\
+probe/plinio.c		\
+probe/plinnames.c	\
+probe/plinsys.c		\
+probe/plinnet.c		\
+probe/plinup.c		\
+probe/plindown.c	\
+probe/meth_probe.c	\
+
+SRC += $(PRLIBSRC)	\
+probe/habprobe.c	\
+
+INC +=			\
+probe/probe.h		\
+probe/plinio.h		\
+probe/psolsys.h		\
+
+BIN += probe/habprobe
+SOLIB += probe/libprobe.so
+
+# Binary dependencies
+probe/habprobe: -lprobe -liiab
+
+# Library product
+probe/libprobe.so: $(patsubst %.c, %.o, $(filter probe/%.c, $(PRLIBSRC)))
+	$(LINK.o) -shared -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+		$(LOADLIBES) $(LDLIBS) \
+		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))

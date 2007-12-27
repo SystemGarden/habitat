@@ -1,0 +1,19 @@
+# Module for public domain licensed, third party libraries
+# Nigel Stuckey, July 2002
+# 
+# Copyright System Garden Ltd 1996-2002
+
+# Representative dependency (generally single) for each library
+SRC += pd/red-black/rb.c
+
+# Special rule to make the dependency, which makes the entire lot instead
+# of the subset
+pd/red-black/rb.o: pd/red-black/rb.c
+	cd pd/red-black; make CFLAGS='$(CFLAGS)'
+
+# Maintenance targets using / => - convention of target
+clean-pd-red-black:
+	cd pd/red-black; make clean
+
+cleanall-pd-red-black:
+	cd pd/red-black; make cleanall

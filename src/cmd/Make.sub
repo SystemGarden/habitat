@@ -1,0 +1,52 @@
+# Module for command line programs, part of habitat
+# Nigel Stuckey, July 2002
+#
+# Copyright System Garden Ltd 1996-2002. All rights reserved.
+
+SRC += 			\
+cmd/habput.c 		\
+cmd/habget.c 		\
+cmd/irs.c		\
+cmd/habmeth.c		\
+cmd/clockwork.c 	\
+cmd/killclock.sh	\
+cmd/habedit.sh		\
+cmd/habrep.sh		\
+cmd/habitat.sh		\
+#cmd/track.c 		\
+#cmd/checkpoint.c 	\
+#cmd/habimport.c		\
+#cmd/habexport.c		\
+#cmd/fha2csv.c		\
+
+CMDBIN := 	\
+cmd/habput 	\
+cmd/habget 	\
+cmd/habmeth	\
+cmd/clockwork 	\
+cmd/killclock	\
+cmd/habedit	\
+cmd/habrep	\
+#cmd/checkpoint 	\
+#cmd/habimport	\
+#cmd/habexport	\
+#cmd/fha2csv	\
+
+# The below need libterm & curses linked in
+CMDTBIN :=	\
+cmd/irs		\
+#cmd/track 	\
+
+# Scripts for /etc/init.d
+INITBIN =	\
+cmd/habitat	\
+
+
+BIN += $(CMDBIN) $(CMDTBIN)
+LIB += cmd/clockwork.jobs
+ETC += cmd/habitat.conf
+
+# Manual dependency to link in with iiab, trm and probe libraries
+$(CMDBIN): -liiab
+$(CMDTBIN): -liiab -ltrm
+cmd/clockwork: -lprobe
