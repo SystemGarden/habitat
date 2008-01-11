@@ -331,7 +331,7 @@ int cf_getint(CF_VALS cf, 	/* Parsed configuration values */
      entry = tree_find(cf, key);
      if (entry == TREE_NOVAL)
 	  return CF_UNDEF;
-     return atoi(entry->data.arg);
+     return strtol(entry->data.arg, (char**)NULL, 10);
 }
 
 /* Extracts a string from the tree. Does NOT malloc any storage.

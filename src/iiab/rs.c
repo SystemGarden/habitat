@@ -259,14 +259,17 @@ RS    rs_open(RS_METHOD method	/* method vectors */,
      ring->errstr     = "no error";
      ring->ringname   = xnstrdup(table_getcurrentcell(ringdir, "name"));
      ring->generation = super->generation;
-     ring->ringid     = atoi(table_getcurrentcell(ringdir, "id"));
-     ring->nslots     = atoi(table_getcurrentcell(ringdir, "nslots"));
+     ring->ringid     = strtol(table_getcurrentcell(ringdir, "id"), 
+			       (char**)NULL, 10);
+     ring->nslots     = strtol(table_getcurrentcell(ringdir, "nslots"), 
+			       (char**)NULL, 10);
      ring->youngest   = 0;	/* force update in rs_get() */
      ring->oldest     = 0;
      ring->current    = -1;
      ring->youngest_t    = ring->oldest_t    = 0;
      ring->youngest_hash = ring->oldest_hash = 0;
-     ring->duration      = atoi(table_getcurrentcell(ringdir, "dur"));
+     ring->duration      = strtol(table_getcurrentcell(ringdir, "dur"), 
+				  (char**)NULL, 10);
      ring->hdcache       = itree_create();
      table_destroy(ringdir);
      rs_free_superblock(super);
@@ -334,7 +337,7 @@ int   rs_destroy(RS_METHOD method	/* method vectors */,
 	  table_destroy(ringdir);
 	  return 0;
      }
-     ringid = atoi(table_getcurrentcell(ringdir, "id"));
+     ringid = strtol(table_getcurrentcell(ringdir, "id"), (char**)NULL, 10);
      table_rmcurrentrow(ringdir);
      if ( ! method->ll_write_rings(lld, ringdir) ) {
 	  method->ll_unlock(lld);
@@ -380,9 +383,11 @@ int   rs_destroy(RS_METHOD method	/* method vectors */,
      } else {
 	  /* purge all the ring's elements */
 	  table_first(ringindex);
-	  from_seq = atoi(table_getcurrentcell(ringindex, "seq"));
+	  from_seq = strtol(table_getcurrentcell(ringindex, "seq"),
+			    (char**)NULL, 10);
 	  table_last(ringindex);
-	  to_seq = atoi(table_getcurrentcell(ringindex, "seq"));
+	  to_seq = strtol(table_getcurrentcell(ringindex, "seq"),
+			  (char**)NULL, 10);
 	  method->ll_expire_dblock(lld, ringid, from_seq, to_seq);
 	  table_destroy(ringindex);
      }
@@ -462,7 +467,8 @@ int   rs_put(RS    ring	/* ring descriptor */,
      /* append the dblocks to the sequence of them on disk */
      if (table_nrows(index)) {
 	  table_last(index);
-	  seq = atoi(table_getcurrentcell(index, "seq")) + 1;
+	  seq = strtol(table_getcurrentcell(index, "seq"),
+		       (char**)NULL, 10) + 1;
      } else {
 	  seq = 0;
      }
@@ -495,7 +501,8 @@ elog_printf(DEBUG, "put -- o %d y %d c %d ==> ", ring->oldest, ring->youngest,
 	  /* purge the index of any expired dblocks */
 	  table_first(index);
 	  while ( ! table_isbeyondend(index) ) {
-	       if (atoi(table_getcurrentcell(index, "seq")) < ring->oldest)
+	       if (strtol(table_getcurrentcell(index, "seq"),
+			  (char**)NULL, 10) < ring->oldest)
 		    table_rmcurrentrow(index);
 	       else
 		    table_next(index);
@@ -1003,7 +1010,8 @@ int   rs_goto_time(RS ring	/* ring descriptor */,
      /* seach for the time in the index, either for an exact match or 
       * for the first time that is greater than asked for. */
      table_traverse(index) {
-	  if (atoi(table_getcurrentcell(index, "time")) > time)
+             if (strtol(table_getcurrentcell(index, "time"),
+			(char**)NULL, 10) > time)
 	       break; 
      }
      return table_getcurrentrowkey(index);
@@ -1073,9 +1081,9 @@ TABLE rs_mget_range (RS  ring		/* ring descriptor */,
           return NULL;
      }
      table_first(myindex);
-     first = atoi(table_getcurrentcell(myindex, "seq"));
+     first = strtol(table_getcurrentcell(myindex, "seq"), (char**)NULL, 10);
      table_last(myindex);
-     last = atoi(table_getcurrentcell(myindex, "seq"));
+     last = strtol(table_getcurrentcell(myindex, "seq"), (char**)NULL, 10);
      table_destroy(index);
      table_destroy(myindex);
      tableset_destroy(myset);
@@ -1237,7 +1245,7 @@ TABLE  rs_mget_cons  (RS_METHOD method, char *filename, char *ringname,
      tablist   = itree_create();
      outtab    = table_create();
      table_traverse(myrings) {
-          id = atoi(table_getcurrentcell(myrings, "id"));
+          id = strtol(table_getcurrentcell(myrings, "id"), (char**)NULL, 10);
 	  elog_printf(DEBUG, "hunting ring %s id %d dur %s from %s to %s", 
 		      ringname, id, table_getcurrentcell(myrings, "dur"), 
 		      hunt_from, hunt_to);
@@ -1261,13 +1269,16 @@ TABLE  rs_mget_cons  (RS_METHOD method, char *filename, char *ringname,
 	  table_first(myindex);
 	  nfree(hunt_to);
 	  hunt_to  = xnstrdup( util_i32toa( 
-		       atoi( table_getcurrentcell(myindex, "time")) - 1 ));
-	  seq_from = atoi(table_getcurrentcell(myindex, "seq"));
+			strtol( table_getcurrentcell(myindex, "time"), 
+				(char**)NULL, 10) - 1 ));
+	  seq_from = strtol(table_getcurrentcell(myindex, "seq"),
+			    (char**)NULL, 10);
 	  /*elog_printf(DEBUG, "from %s  ", hunt_to);*/
 	  table_last(myindex);
 	  /*elog_printf(DEBUG, "to %s ", 
 	    table_getcurrentcell(myindex, "time"));*/
-	  seq_to   = atoi(table_getcurrentcell(myindex, "seq"));
+	  seq_to   = strtol(table_getcurrentcell(myindex, "seq"),
+			    (char**)NULL, 10);
 	  dblocks = method->ll_read_dblock(lld,id,seq_from,seq_to-seq_from+1);
 
 	  /* turn blocks into tables */
@@ -1459,11 +1470,15 @@ int   rs_purge(RS ring		/* ring descriptor */,
           ring->current = ring->oldest;
      if (table_nrows(newindex) > 0) {
           table_first(newindex);
-	  ring->oldest_t    = atoi(table_getcurrentcell(newindex, "time"));
-	  ring->oldest_hash = atoi(table_getcurrentcell(newindex, "hd_hash"));
+	  ring->oldest_t    = strtol(table_getcurrentcell(newindex, "time"),
+				     (char**)NULL, 10);
+	  ring->oldest_hash = strtol(table_getcurrentcell(newindex, "hd_hash"),
+				     (char**)NULL, 10);
 	  table_last(newindex);
-	  ring->youngest_t   = atoi(table_getcurrentcell(newindex, "time"));
-	  ring->youngest_hash= atoi(table_getcurrentcell(newindex, "hd_hash"));
+	  ring->youngest_t   = strtol(table_getcurrentcell(newindex, "time"),
+				      (char**)NULL, 10);
+	  ring->youngest_hash= strtol(table_getcurrentcell(newindex,"hd_hash"),
+				      (char**)NULL, 10);
      } else {  
           ring->youngest_t    = ring->oldest_t    = 0;
 	  ring->youngest_hash = ring->oldest_hash = 0;
@@ -1664,7 +1679,8 @@ TABLE rs_inforings(RS_METHOD method	/* method vectors */,
           table_addcol(rings, "yseq",  NULL);
           table_addcol(rings, "ytime", NULL);
           table_traverse(rings) {
-	       ringid = atoi(table_getcurrentcell(rings, "id"));
+	       ringid = strtol(table_getcurrentcell(rings, "id"),
+			       (char**)NULL, 10));
 	       index    = method->ll_read_index(lld, ringid);
 	       if (index && table_nrows(index) > 0) {
 		    table_first(index);
@@ -1741,14 +1757,17 @@ TABLE rs_infoconsrings(RS_METHOD method	/* method vectors */,
           /* fetch the index for the current ring and find the times of
 	   * the oldest and youngest data */
           name   = table_getcurrentcell(rings, "name");
-          ringid = atoi(table_getcurrentcell(rings, "id"));
+          ringid = strtol(table_getcurrentcell(rings, "id"),
+			  (char**)NULL, 10);
 	  index  = method->ll_read_index(lld, ringid);
 	  if (index) {
 	       if (table_nrows(index)) {
 		    table_first(index);
-		    otime = atoi(table_getcurrentcell(index, "time"));
+		    otime = strtol(table_getcurrentcell(index, "time"),
+				   (char**)NULL, 10);
 		    table_last(index);
-		    ytime = atoi(table_getcurrentcell(index, "time"));
+		    ytime = strtol(table_getcurrentcell(index, "time"),
+				   (char**)NULL, 10);
 	       } else {
 		    otime = ytime = 0;
 	       }
@@ -2344,12 +2363,13 @@ ITREE *rs_priv_table_to_dblock(TABLE tab,	  /* table containing data */
 	       /* select out the data */
 	       tableset_reset(tset);
 	       tableset_where(tset, "_seq", eq, tree_getkey(seqs));
-	       ikey = atoi(tree_getkey(seqs));
+	       ikey = strtol(tree_getkey(seqs), (char**)NULL, 10);
 	       itab = tableset_into(tset);
 	       table_first(itab);
 	       d = xnmalloc(sizeof(struct rs_data_block));
 	       if (hastime)
-		    d->time = atoi(table_getcurrentcell(itab, "_time"));
+		    d->time = strtol(table_getcurrentcell(itab, "_time"),
+				     (char**)NULL, 10);
 	       else
 		    d->time = time(NULL);	/* if no _time: use now */
 	       table_rmcol(itab, "_seq");
@@ -2368,7 +2388,7 @@ ITREE *rs_priv_table_to_dblock(TABLE tab,	  /* table containing data */
           times = table_uniqcolvals(tab, "_time", NULL);
 	  itree_traverse(times) {
 	       /* select out the data */
-	       ikey = atoi(tree_getkey(times));
+	       ikey = strtol(tree_getkey(times), (char**)NULL, 10);
 	       tableset_reset(tset);
 	       tableset_where(tset, "_time", eq, tree_getkey(times));
 	       tableset_excludet(tset, "_time _dur");
@@ -2544,13 +2564,19 @@ int    rs_priv_load_index(RS ring, TABLE *index)
 	  return 0;	/* failure */
      if (table_nrows(it)) {
 	  table_first(it);
-	  ring->oldest      = atoi(table_getcurrentcell(it, "seq"));
-	  ring->oldest_t    = atoi(table_getcurrentcell(it, "time"));
-	  ring->oldest_hash = atoi(table_getcurrentcell(it, "hd_hash"));
+	  ring->oldest      = strtol(table_getcurrentcell(it, "seq")
+				     , (char**)NULL, 10);
+	  ring->oldest_t    = strtol(table_getcurrentcell(it, "time"), 
+				     (char**)NULL, 10);
+	  ring->oldest_hash = strtol(table_getcurrentcell(it, "hd_hash"), 
+				     (char**)NULL, 10);
 	  table_last(it);
-	  ring->youngest      = atoi(table_getcurrentcell(it, "seq"));
-	  ring->youngest_t    = atoi(table_getcurrentcell(it, "time"));
-	  ring->youngest_hash = atoi(table_getcurrentcell(it, "hd_hash"));
+	  ring->youngest      = strtol(table_getcurrentcell(it, "seq"),
+				       (char**)NULL, 10);
+	  ring->youngest_t    = strtol(table_getcurrentcell(it, "time"), 
+				       (char**)NULL, 10);
+	  ring->youngest_hash = strtol(table_getcurrentcell(it, "hd_hash"),
+				       (char**)NULL, 10);
      } else {
 	  ring->oldest      = ring->youngest      = -1;
 	  ring->oldest_t    = ring->youngest_t    = -1;

@@ -378,17 +378,17 @@ RS_SUPER rs_gdbm_read_super_fd   (GDBM_FILE fd	/* GDBM file descriptor */ )
      /* break down the superblock string representation into the
       * superblock structure */
      super = xnmalloc(sizeof(struct rs_superblock));     
-     super->version    = atoi(    util_strtok_sc(NULL, "|"));
-     super->created    = atoi(    util_strtok_sc(NULL, "|"));
+     super->version    = strtol(  util_strtok_sc(NULL, "|"), NULL, 10);
+     super->created    = strtol(  util_strtok_sc(NULL, "|"), NULL, 10);
      super->os_name    = xnstrdup(util_strtok_sc(NULL, "|"));
      super->os_release = xnstrdup(util_strtok_sc(NULL, "|"));
      super->os_version = xnstrdup(util_strtok_sc(NULL, "|"));
      super->hostname   = xnstrdup(util_strtok_sc(NULL, "|"));
      super->domainname = xnstrdup(util_strtok_sc(NULL, "|"));
      super->machine    = xnstrdup(util_strtok_sc(NULL, "|"));
-     super->timezone   = atoi(    util_strtok_sc(NULL, "|"));
-     super->generation = atoi(    util_strtok_sc(NULL, "|"));
-     super->ringcounter= atoi(    util_strtok_sc(NULL, "|"));
+     super->timezone   = strtol(  util_strtok_sc(NULL, "|"), NULL, 10);
+     super->generation = strtol(  util_strtok_sc(NULL, "|"), NULL, 10);
+     super->ringcounter= strtol(  util_strtok_sc(NULL, "|"), NULL, 10);
      free(d.dptr);	/* malloc memory */
 
      return super;
@@ -907,7 +907,7 @@ ITREE *rs_gdbm_read_dblock(RS_LLD lld,	  /* low level descriptor */
 	   * hold a reference to it so that mem can be released
 	   * with rs_free_dblock() */
 	  d = xnmalloc(sizeof(struct rs_data_block));
-	  d->time = atoi(strtok(value, "|"));
+	  d->time = strtol(strtok(value, "|"), NULL, 10);
 	  d->hd_hashkey = strtoul(strtok(NULL, "|"), NULL, 10);
 	  d->data = strtok(NULL, "|");
 	  d->__priv_alloc_mem = value;

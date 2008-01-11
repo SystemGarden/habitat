@@ -463,26 +463,26 @@ void tableset_priv_execute_where(TABSET tset)
 		         clause_true++;
 	            break;
 	       case gt:
-	            a = atoi(value);
-	            b = atoi(cond->value);
+		    a = strtol(value, (char**)NULL, 10);
+		    b = strtol(cond->value, (char**)NULL, 10);
 	            if (a > b)
 		         clause_true++;
 	            break;
 	       case lt:
-	            a = atoi(value);
-	            b = atoi(cond->value);
+		    a = strtol(value, (char**)NULL, 10);
+		    b = strtol(cond->value, (char**)NULL, 10);
 	            if (a < b)
 		         clause_true++;
 	            break;
 	       case ge:
-	            a = atoi(value);
-	            b = atoi(cond->value);
+		    a = strtol(value, (char**)NULL, 10);
+		    b = strtol(cond->value, (char**)NULL, 10);
 	            if (a >= b)
 		         clause_true++;
 	            break;
 	       case le:
-	            a = atoi(value);
-	            b = atoi(cond->value);
+		    a = strtol(value, (char**)NULL, 10);
+	            b = strtol(cond->value, (char**)NULL, 10);
 	            if (a <= b)
 		         clause_true++;
 	            break;
@@ -534,7 +534,7 @@ void tableset_priv_execute_where(TABSET tset)
 		    value = table_getcell(tset->tab, 
 					  (int) itree_get(tset->rownums), 
 					  tset->sortby);
-		    itree_add(isorted, atoi(value), 
+		    itree_add(isorted, strtol(value, (char**)NULL, 10), 
 			      (void *) itree_get(tset->rownums));
 	       }
 	  }

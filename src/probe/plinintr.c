@@ -167,7 +167,7 @@ void plinintr_col_intr(TABLE tab, ITREE *idata) {
 	  for (i=1; i <= plinintr_ncpu; i++) {
 	       if (itree_find(idata, i) == ITREE_NOVAL)
 		    return;
-	       val += atoi(itree_get(idata));
+	       val += strtol(itree_get(idata), NULL, 10);
 	  }
 
 	  if (itree_n(idata) == plinintr_ncpu + 1)

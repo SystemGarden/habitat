@@ -716,8 +716,10 @@ TABLE tab_mget_byseqs(TAB_RING t, int ufrom, int uto)
 	  return NULL;
 
      table_traverse(stab) {
-	  sseq   = atoi( table_getcurrentcell(stab, SPANS_FROMCOL) );
-	  eseq   = atoi( table_getcurrentcell(stab, SPANS_TOCOL) );
+          sseq   = strtol( table_getcurrentcell(stab, SPANS_FROMCOL),
+			   NULL, 10);
+	  eseq   = strtol( table_getcurrentcell(stab, SPANS_TOCOL),
+			   NULL, 10);
 	  header = table_getcurrentcell(stab, SPANS_DATACOL);
 	  /*printf("span: %d-%d <<%s>>\n", sseq, eseq, header);*/
 
@@ -977,7 +979,7 @@ int tab_getconsbytime(ITREE *olst,	/* list into which to add data */
      }
      if (periodstr == NULL)
 	  return -1;		/* name not structured with period */
-     period = atoi(periodstr);
+     period = strtol(periodstr, NULL, 10);
      if (period == 0)
 	  return -1;		/* name not structured with period */
 
@@ -1030,8 +1032,8 @@ int tab_getconsbytime(ITREE *olst,	/* list into which to add data */
      /* traverse the span to build the table */
      table_traverse(stab) {
 	  /* convert the data */
-	  sseq  = atoi(   table_getcurrentcell(stab, SPANS_FROMCOL) );
-	  eseq  = atoi(   table_getcurrentcell(stab, SPANS_TOCOL) );
+          sseq  = strtol( table_getcurrentcell(stab, SPANS_FROMCOL), NULL, 10);
+          eseq  = strtol( table_getcurrentcell(stab, SPANS_TOCOL), NULL, 10;
 	  stime = strtoul(table_getcurrentcell(stab, SPANS_FROMDTCOL),NULL,0);
 	  etime = strtoul(table_getcurrentcell(stab, SPANS_TODTCOL),  NULL,0);
 	  header=         table_getcurrentcell(stab, SPANS_DATACOL);

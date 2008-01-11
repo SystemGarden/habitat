@@ -121,10 +121,10 @@ void  plinup_col_uptime(TABLE tab, char *data)
      if (boot == 0)
 	  /* calculate (now-uptime) version of boot time */
 	  table_replacecurrentcell_alloc(tab, "boot", 
-					 util_i32toa(now-atoi(uptime)));
+					 util_i32toa(now-strtol(uptime, NULL, 10)));
 
      table_replacecurrentcell_alloc(tab, "suspend", 
-				    util_i32toa((now-atoi(uptime))-boot));
+				    util_i32toa((now-strtol(uptime, NULL, 10))-boot));
 }
 
 

@@ -352,7 +352,8 @@ int conv_mem2ring(char *intext, 	/* input text */
 		* by sequence or time */
 	       if (hasseqcol) {
 		    /* batch by sequence */
-		    if (atoi(table_getcurrentcell(tab, CONV_SEQSTR)) != seq) {
+		    if (strtol(table_getcurrentcell(tab, CONV_SEQSTR), 
+			       NULL, 10) != seq) {
 			 /* new sequence: save current batch and start a 
 			  * new one. Attempt to keep the right time with
 			  * the batch */
@@ -366,18 +367,20 @@ int conv_mem2ring(char *intext, 	/* input text */
 			      table_destroy(batchtab);
 			 }
 			 batchtab = table_create_fromdonor(tab);
-			 seq = atoi(table_getcurrentcell(tab, CONV_SEQSTR));
+			 seq = strtol(table_getcurrentcell(tab, CONV_SEQSTR),
+				      NULL, 10);
 			 if (hastimecol)
-			      instime = atoi(table_getcurrentcell(
-				   tab, CONV_TIMESTR));
+			      instime = strtol(
+				      table_getcurrentcell(tab, CONV_TIMESTR),
+				      NULL, 10);
 		    }
 		    /* add to batch */
 		    row = table_getcurrentrow(tab);
 		    table_addrow_noalloc(batchtab, row);
 	       } else if (hastimecol) {
 		    /* batch by time */
-		    if (atoi(table_getcurrentcell(tab, CONV_TIMESTR)) != 
-			instime) {
+		    if (strtol(table_getcurrentcell(tab, CONV_TIMESTR),
+			       NULL, 10) != instime) {
 			 /* new sequence: save current batch and start a 
 			  * new one */
 			 if (instime != -1) {
@@ -387,8 +390,8 @@ int conv_mem2ring(char *intext, 	/* input text */
 			      table_destroy(batchtab);
 			 }
 			 batchtab = table_create_fromdonor(tab);
-			 instime = atoi(table_getcurrentcell(tab, 
-							     CONV_TIMESTR));
+			 instime = strtol(table_getcurrentcell(tab, 
+						CONV_TIMESTR), NULL, 10);
 		    }
 		    /* add to batch */
 		    row = table_getcurrentrow(tab);
@@ -439,9 +442,9 @@ int conv_mem2ring(char *intext, 	/* input text */
 
 	       /* find insertion time and sequence of each row */
 	       if (hastimecol)
-		    instime = atoi(tree_find(row, CONV_TIMESTR));
+		    instime = strtol(tree_find(row, CONV_TIMESTR), NULL, 10);
 	       if (hasseqcol)
-		    seq = atoi(tree_find(row, CONV_SEQSTR));
+		    seq = strtol(tree_find(row, CONV_SEQSTR), NULL, 10);
 
 	       /* find data */
 	       tree_traverse(row) {
@@ -606,7 +609,7 @@ char *conv_ring2mem(char *holname,	/* holstore file name */
 	  if (dtformat != NULL && *dtformat != '\0') {
 	       /* transform epoc time into a formatted date time */
 	       table_traverse(tab) {
-		    t = atoi(table_getcurrentcell(tab, "_time"));
+		    t = strtol(table_getcurrentcell(tab, "_time"), NULL, 10);
 		    strftime(tmstr, 30, dtformat, localtime(&t));
 		    table_replacecurrentcell_alloc(tab, "_time", tmstr);
 	       }

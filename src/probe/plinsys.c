@@ -172,7 +172,7 @@ void plinsys_init() {
      /* get the tick frequency */
      ticks = getenv("HZ");
      if ( ticks )
-	  plinsys_hz = atoi(ticks);
+          plinsys_hz = strtol(ticks, NULL, 10);
      else {
 	  elog_send(DEBUG, "HZ environment variable missing, assuming 100");
 	  plinsys_hz = 100;
@@ -346,32 +346,32 @@ void  plinsys_col_meminfo(TABLE tab, char *data)
 	  return;
      }
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_tot", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_used", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_free", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_shared", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_buf", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " \n");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "mem_cache", kvalue);
      table_freeondestroy(tab, kvalue);
 
@@ -382,17 +382,17 @@ void  plinsys_col_meminfo(TABLE tab, char *data)
 	  return;
      }
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "swap_tot", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " ");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "swap_used", kvalue);
      table_freeondestroy(tab, kvalue);
 
      value = strtok(NULL, " \n");
-     kvalue = xnstrdup(util_i32toa(atoi(value)/1024));
+     kvalue = xnstrdup(util_i32toa(strtol(value, NULL, 10)/1024));
      table_replacecurrentcell(tab, "swap_free", kvalue);
      table_freeondestroy(tab, kvalue);
 }
@@ -437,11 +437,11 @@ void  plinsys_col_meminfo26(TABLE tab, ITREE *lol)
     }
 
      /* calculate derived values */
-     result = atoi(table_getcurrentcell(tab, "mem_tot")) -
-       atoi(table_getcurrentcell(tab, "mem_free"));
+     result = strtol(table_getcurrentcell(tab, "mem_tot"), NULL, 10) -
+       strtol(table_getcurrentcell(tab, "mem_free"), NULL, 10);
      table_replacecurrentcell_alloc(tab, "mem_used", util_i32toa(result));
-     result = atoi(table_getcurrentcell(tab, "swap_tot")) -
-       atoi(table_getcurrentcell(tab, "swap_free"));
+     result = strtol(table_getcurrentcell(tab, "swap_tot"), NULL, 10) -
+       strtol(table_getcurrentcell(tab, "swap_free"), NULL, 10);
      table_replacecurrentcell_alloc(tab, "swap_used", util_i32toa(result));
 
      /* now get the shared memory from sysinfo structure */
@@ -668,16 +668,26 @@ void plinsys_derive(TABLE prev, TABLE cur)
 
      /* extract cpu tick figures from old table */
      table_first(prev);
-     new_tick_user   = atoi (table_getcurrentcell (cur,  "cpu_tick_user"));
-     new_tick_nice   = atoi (table_getcurrentcell (cur,  "cpu_tick_nice"));
-     new_tick_system = atoi (table_getcurrentcell (cur,  "cpu_tick_system"));
-     new_tick_idle   = atoi (table_getcurrentcell (cur,  "cpu_tick_idle"));
-     new_tick_wait   = atoi (table_getcurrentcell (cur,  "cpu_tick_wait"));
-     old_tick_user   = atoi (table_getcurrentcell (prev, "cpu_tick_user"));
-     old_tick_nice   = atoi (table_getcurrentcell (prev, "cpu_tick_nice"));
-     old_tick_system = atoi (table_getcurrentcell (prev, "cpu_tick_system"));
-     old_tick_idle   = atoi (table_getcurrentcell (prev, "cpu_tick_idle"));
-     old_tick_wait   = atoi (table_getcurrentcell (prev, "cpu_tick_wait"));
+     new_tick_user   = strtol (table_getcurrentcell (cur,  "cpu_tick_user"),
+			       NULL, 10);
+     new_tick_nice   = strtol (table_getcurrentcell (cur,  "cpu_tick_nice"),
+			       NULL, 10);
+     new_tick_system = strtol (table_getcurrentcell (cur,  "cpu_tick_system"),
+			       NULL, 10);
+     new_tick_idle   = strtol (table_getcurrentcell (cur,  "cpu_tick_idle"),
+			       NULL, 10);
+     new_tick_wait   = strtol (table_getcurrentcell (cur,  "cpu_tick_wait"),
+			       NULL, 10);
+     old_tick_user   = strtol (table_getcurrentcell (prev, "cpu_tick_user"),
+			       NULL, 10);
+     old_tick_nice   = strtol (table_getcurrentcell (prev, "cpu_tick_nice"),
+			       NULL, 10);
+     old_tick_system = strtol (table_getcurrentcell (prev, "cpu_tick_system"),
+			       NULL, 10);
+     old_tick_idle   = strtol (table_getcurrentcell (prev, "cpu_tick_idle"),
+			       NULL, 10);
+     old_tick_wait   = strtol (table_getcurrentcell (prev, "cpu_tick_wait"),
+			       NULL, 10);
 
      /* calculate % */
      diff_ticks =   new_tick_user   + new_tick_nice 

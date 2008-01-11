@@ -2196,7 +2196,8 @@ int main()
      table_traverse(tab1) {
 	  /* check the 10 elements returned by mget */
 	  r = sprintf(datbuf1, "element %d", 
-		      atoi(table_getcurrentcell(tab1, "_seq")) +1);
+		      strtol(table_getcurrentcell(tab1, "_seq"), 
+			     (char**)NULL, 10) +1);
 	  if (r != strlen(table_getcurrentcell(tab1, "Value")))
 	       route_die(err, "[14-%d] Incorrect length %d, should be %d\n", 
 			 table_getcurrentrowkey(tab1),

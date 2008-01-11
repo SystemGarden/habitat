@@ -321,7 +321,7 @@ void plinps_col_stat(TABLE tab, char *ps, ITREE *uidtoname)
       */
 
      value = strtok(ps, " ");
-     pid = atoi(value);
+     pid = strtol(value, NULL, 10);
      table_replacecurrentcell(tab, "pid",       value);
 
      /* command is parenthetised; remove them */
@@ -398,13 +398,13 @@ elog_printf(DEBUG, "tty = %s", value);
      table_replacecurrentcell(tab, "cmajfaults", value);
 
      value = strtok(NULL, " ");
-     _utime = atoi(value);
+     _utime = strtol(value, NULL, 10);
      value = strtok(NULL, " ");
-     _stime = atoi(value);
+     _stime = strtol(value, NULL, 10);
      value = strtok(NULL, " ");
-     _cutime = atoi(value);
+     _cutime = strtol(value, NULL, 10);
      value = strtok(NULL, " ");
-     _cstime = atoi(value);
+     _cstime = strtol(value, NULL, 10);
      table_replacecurrentcell_alloc(tab, "time", util_jiffytoa(_utime+_stime));
      table_replacecurrentcell_alloc(tab, "childtime", 
 			  util_jiffytoa(_cutime+_cstime/*-_utime-_stime*/));
@@ -421,10 +421,10 @@ elog_printf(DEBUG, "tty = %s", value);
 
      value = strtok(NULL, " ");
      table_replacecurrentcell_alloc(tab, "irealvalue", 
-				    util_jiffytoa(atoi(value)));
+				    util_jiffytoa(strtol(value, NULL, 10)));
 
      value = strtok(NULL, " ");
-     runstart = plinps_boot_t + (atoi(value) / 100);
+     runstart = plinps_boot_t + (strtol(value, NULL, 10) / 100);
      table_replacecurrentcell_alloc(tab, "start", util_i32toa(runstart));
 
      /* %cpu -- algorithm: time taken on CPU over life of process
@@ -436,10 +436,10 @@ elog_printf(DEBUG, "tty = %s", value);
      table_replacecurrentcell_alloc(tab, "pc_cpu",    util_ftoa(pcpu));
 
      value = strtok(NULL, " ");
-     table_replacecurrentcell_alloc(tab, "size",      util_ftoa(
-				      (float) atoi(value) / 1024.0));
+     table_replacecurrentcell_alloc(tab, "size",
+			util_ftoa((float) strtol(value, NULL, 10) / 1024.0));
      value = strtok(NULL, " ");
-     rss = (float) atoi(value) * plinps_pagetokb;
+     rss = (float) strtol(value, NULL, 10) * plinps_pagetokb;
      table_replacecurrentcell_alloc(tab, "rss",       util_ftoa(rss));
 				      
 
@@ -571,14 +571,14 @@ void plinps_col_status(TABLE tab, char *ps, ITREE *uidtoname)
 		    val = itree_get(cols);
 		    table_replacecurrentcell(tab, "uid",    val);
 		    table_replacecurrentcell(tab, "pwname", 
-			             plinps_getuser(atoi(val), uidtoname));
+			plinps_getuser(strtol(val, NULL, 10), uidtoname));
 
 		    /* effective uid */
 		    itree_next(cols);
 		    val = itree_get(cols);
 		    table_replacecurrentcell(tab, "euid",    val);
 		    table_replacecurrentcell(tab, "epwname", 
-			    plinps_getuser(atoi(val), uidtoname));
+			plinps_getuser(strtol(val, NULL, 10), uidtoname));
 #if 0
 		    itree_next(cols);
 		    val = itree_get(cols);	/* suid - saved user id */
@@ -664,25 +664,30 @@ void plinps_col_statm(TABLE tab, char *ps, ITREE *uidtoname)
      value = strtok(ps, " ");	/* size */
      value = strtok(NULL, " ");	/* rss */
      value = strtok(NULL, " ");	/* share */
-     table_replacecurrentcell_alloc(tab, "shared",    util_i32toa(atoi(value)
+     table_replacecurrentcell_alloc(tab, "shared", 
+				    util_i32toa(strtol(value, NULL, 10)
 							  *plinps_pagetokb));
      value = strtok(NULL, " ");	/* text_size */
 #if 0
-     table_replacecurrentcell_alloc(tab, "text_size", util_i32toa(atoi(value)
+     table_replacecurrentcell_alloc(tab, "text_size", 
+				    util_i32toa(strtol(value, NULL, 10)
 							  *plinps_pagetokb));
 #endif
      value = strtok(NULL, " ");	/* data_size */
 #if 0
-     table_replacecurrentcell_alloc(tab, "data_size", util_i32toa(atoi(value)
+     table_replacecurrentcell_alloc(tab, "data_size", 
+				    util_i32toa(strtol(value, NULL, 10)
 							  *plinps_pagetokb));
 #endif
      value = strtok(NULL, " ");	/* library */
 #if 0
-     table_replacecurrentcell_alloc(tab, "library",   util_i32toa(atoi(value)
+     table_replacecurrentcell_alloc(tab, "library",
+				    util_i32toa(strtol(value, NULL, 10)
 							  *plinps_pagetokb));
 #endif
      value = strtok(NULL, " ");	/* dirty */
-     table_replacecurrentcell_alloc(tab, "dirty",     util_i32toa(atoi(value)
+     table_replacecurrentcell_alloc(tab, "dirty", 
+				    util_i32toa(strtol(value, NULL, 10)
 							  *plinps_pagetokb));
 }
 
@@ -695,7 +700,7 @@ time_t plinps_getboot_t() {
      t = time(NULL);
      data = probe_readfile("/proc/uptime");
      if (data) {
-	  t -= atoi(strtok(data, " "));
+          t -= strtol(strtok(data, " ", NULL, 10));
      } else {
 	  elog_printf(ERROR, "unable to read uptime, setting ps boot to 0");
 	  t = 0;
@@ -721,7 +726,7 @@ long plinps_gettotal_mem() {
 	  pt += 9;
 	  while (*pt && *pt == ' ')
 	       pt++;
-	  return atoi(strtok(pt, " "));
+	  return strtol(strtok(pt, " ", NULL, 10));
      } else {
 	  elog_printf(ERROR, "unable to read meminfo, setting size to 1");
 	  return 1;

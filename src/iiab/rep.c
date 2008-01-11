@@ -99,7 +99,8 @@ int rep_action(ROUTE out,		/* route output */
 	  /* read back values */
 	  local_ring  = table_getcurrentcell(state, "lname");
 	  remote_ring = table_getcurrentcell(state, "rname");
-	  remote_seq  = atoi(table_getcurrentcell(state, "rseq"));
+	  remote_seq  = strtol(table_getcurrentcell(state, "rseq"), 
+			       (char**)NULL, 10);
 
 	  /* run fetch method using standard ringstore addressing */
 	  r = snprintf(purl, REP_PURL_LEN, "%s,*,s=%d-", remote_ring, 
@@ -148,8 +149,9 @@ int rep_action(ROUTE out,		/* route output */
 		    desc = strncpy(purl, 
 				   table_getcurrentcell(info, "description"), 
 				   REP_PURL_LEN);
-		    nslots = atoi(table_getcurrentcell(info, 
-						       "number of slots"));
+		    nslots = strtol(table_getcurrentcell(info, 
+							 "number of slots"), 
+				    (char**)NULL, 10);
 		    table_destroy(info);
 	       }
 	       rt = route_open(local_ring, desc, NULL, nslots);
@@ -177,7 +179,8 @@ int rep_action(ROUTE out,		/* route output */
 	  seq_i = itree_create();
 	  seq_a = table_uniqcolvals(io, "_seq", NULL);
 	  tree_traverse(seq_a)
-	       itree_add(seq_i, atoi(tree_getkey(seq_a)), tree_getkey(seq_a));
+	    itree_add(seq_i, strtol(tree_getkey(seq_a, (char**)NULL, 10)), 
+		      tree_getkey(seq_a));
 	  itree_traverse(seq_i) {
 	       seq_data = table_selectcolswithkey(io, "_seq", 
 						  (char *) itree_get(seq_i),
@@ -237,7 +240,8 @@ int rep_action(ROUTE out,		/* route output */
 	  /* read back state values */
 	  local_ring  = table_getcurrentcell(state, "lname");
 	  remote_ring = table_getcurrentcell(state, "rname");
-	  local_seq   = atoi(table_getcurrentcell(state, "lseq"));
+	  local_seq   = strtol(table_getcurrentcell(state, "lseq"), 
+						    (char**)NULL, 10);
 
 	  /* select data to send */
 	  elog_printf(DIAG, "replicating outbound local %s,s=%d- "
@@ -452,10 +456,10 @@ int main(int argc, char **argv) {
 		table_getcurrentcell(tab1, "name")) != 0)
 	  elog_die(FATAL, "[2a] name is not expected: %s",
 		   table_getcurrentcell(tab1, "name"));
-     seq1 = atoi(table_getcurrentcell(tab1, "lseq"));
+     seq1 = strtol(table_getcurrentcell(tab1, "lseq"), (char**)NULL, 10);
      if (seq1 == 0)
 	  elog_die(FATAL, "[2a] lseq should not be 0");
-     seq1 = atoi(table_getcurrentcell(tab1, "rseq"));
+     seq1 = strtol(table_getcurrentcell(tab1, "rseq"), (char**)NULL, 10);
      if (seq1 == 0)
 	  elog_die(FATAL, "[2a] rseq should not be 0");
 
@@ -466,14 +470,14 @@ int main(int argc, char **argv) {
      if (!tab2)
 	  elog_die(FATAL, "[2b] no state table returned");
      table_first(tab2);
-     seq1 = atoi(table_getcurrentcell(tab1, "lseq"));
-     seq2 = atoi(table_getcurrentcell(tab2, "lseq"));
+     seq1 = strtol(table_getcurrentcell(tab1, "lseq"), (char**)NULL, 10);
+     seq2 = strtol(table_getcurrentcell(tab2, "lseq"), (char**)NULL, 10);
      if (seq1 != seq2)
 	  elog_die(FATAL, 
 		   "[2b] lseq is different after a empty rep: %d != %d", 
 		   seq1, seq2);
-     seq1 = atoi(table_getcurrentcell(tab1, "rseq"));
-     seq2 = atoi(table_getcurrentcell(tab2, "rseq"));
+     seq1 = strtol(table_getcurrentcell(tab1, "rseq"), (char**)NULL, 10);
+     seq2 = strtol(table_getcurrentcell(tab2, "rseq"), (char**)NULL, 10);
      if (seq1 != seq2)
 	  elog_die(FATAL, 
 		   "[2b] rseq is different after a empty rep: %d != %d", 
@@ -500,7 +504,7 @@ int main(int argc, char **argv) {
      puts(table_print(tab1));
 #if 0
      table_first(tab1);
-     seq1 = atoi(table_getcurrentcell(tab1, "lseq"));
+     seq1 = strtol(table_getcurrentcell(tab1, "lseq"), (char**)NULL, 10);
 #endif
 
      fprintf(stderr, "%s: tests finished successfully\n", argv[0]);

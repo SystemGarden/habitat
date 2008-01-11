@@ -1225,8 +1225,10 @@ ITREE *ghchoice_tree_ring_tab(TREE *nodeargs)
 	  uichoice_addchild(pnode, cnode);
 
 	  /* calculate the approximate start time of the ring */
-	  start = atoi(table_getcurrentcell(rings, "otime"));
-	  end = atoi(table_getcurrentcell(rings, "ytime"));
+	  start = strtol(table_getcurrentcell(rings, "otime"),
+			 (char**)NULL, 10);
+	  end = strtol(table_getcurrentcell(rings, "ytime"),
+		       (char**)NULL, 10);
 
 	  /* iterate over the predefined timebases, working out which
 	   * ones are applicable and make child tree items from them */
@@ -1421,7 +1423,7 @@ ITREE *ghchoice_tree_consring_tab(TREE *nodeargs)
 	  if (ringex && tree_find(ringex, ringname) != TREE_NOVAL)
 	       continue;
 	  if (ringicon && tree_find(ringicon, ringname) != TREE_NOVAL)
-	       iconenum = atoi(tree_get(ringicon));
+	       iconenum = strtol(tree_get(ringicon), (char**)NULL, 10);
 	  else
 	       iconenum = UI_ICON_TABLE;
 	  if (ringlab && tree_find(ringlab, ringname) != TREE_NOVAL)
@@ -1438,11 +1440,11 @@ ITREE *ghchoice_tree_consring_tab(TREE *nodeargs)
 	  value = table_getcurrentcell(rings, "otime");
 	  if (!value)
 	       value = table_getcurrentcell(rings, "oldest time");
-	  start = atoi(value);
+	  start = strtol(value, (char**)NULL, 10);
 	  value = table_getcurrentcell(rings, "ytime");
 	  if (!value)
 	       value = table_getcurrentcell(rings, "youngest time");
-	  end = atoi(value);
+	  end = strtol(value, (char**)NULL, 10);
 
 	  /* iterate over the predefined timebases, working out which
 	   * ones are applicable and make child tree items from them */
@@ -1853,7 +1855,8 @@ ITREE *ghchoice_tree_seqs_tab(TREE *nodeargs)
 	       seq  = table_getcurrentcell(index, "_seq");
 	       when = table_getcurrentcell(index, "_time");
 	       sprintf(timestr, "%s %s", seq, 
-		       when ? util_decdatetime(atoi(when)) : "" );
+		       when ? 
+		       util_decdatetime(strtol(when, (char**)NULL, 10)) : "" );
 	       gcnode = uichoice_mknode(timestr, NULL, "click for data", 1, 
 				       UI_TABLE, UI_ICON_TABLE, NULL, NULL, 0,
 					uidata_get_route, 0, NULL);
@@ -2078,11 +2081,11 @@ ITREE *ghchoice_tree_ringdur_tab(TREE *nodeargs)
 	  value = table_getcurrentcell(rings, "otime");
 	  if (!value)
 	       value = table_getcurrentcell(rings, "oldest time");
-	  start = atoi(value);
+	  start = strtol(value, (char**)NULL, 10);
 	  value = table_getcurrentcell(rings, "ytime");
 	  if (!value)
 	       value = table_getcurrentcell(rings, "youngest time");
-	  end = atoi(value);
+	  end = strtol(value, (char**)NULL, 10);
 
 
 	  /* iterate over the predefined timebases, working out which

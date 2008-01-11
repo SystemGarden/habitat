@@ -177,7 +177,7 @@ int do_open(int argc, char **argv) {
 	  strtok(fname, ",");
 	  if ( (dur_s = strchr(rname, ',')) ) {
 	       dur_s++;
-	       dur = atoi(dur_s);
+	       dur = strtol(dur_s, (char**)NULL, 10);
 	       strtok(rname, ",");
 	  }
 	  if (!access(fname, R_OK))
@@ -191,7 +191,8 @@ int do_open(int argc, char **argv) {
      } else if (argc == 3) {
           return do_open_call(argv[1], argv[2], 0);
      } else if (argc == 4) {
-          return do_open_call(argv[1], argv[2], atoi(argv[3]));
+       return do_open_call(argv[1], argv[2], strtol(argv[3], (char**)NULL, 
+						    10));
      } else {
 	  printf("Usage: open <file> [<ring> [ <duration> ] ]\n");
 	  return 1;	/* fail */
@@ -213,7 +214,7 @@ int do_ring(int argc, char **argv) {
 	  return r;
      } else if (argc == 3) {
 	  sfile = xnstrdup(filepath);
-	  r = do_open_call(sfile, argv[1], atoi(argv[2]));
+	  r = do_open_call(sfile, argv[1], strtol(argv[2], (char**)NULL, 10));
 	  nfree(sfile);
 	  return r;
      } else {
@@ -236,7 +237,7 @@ int do_duration(int argc, char **argv) {
      } else if (argc == 2) {
 	  sfile = xnstrdup(filepath);
 	  rname = xnstrdup(ringname);
-	  r = do_open_call(sfile, rname, atoi(argv[1]));
+	  r = do_open_call(sfile, rname, strtol(argv[1], (char**)NULL, 10));
 	  nfree(sfile);
 	  nfree(rname);
 	  return r;
@@ -326,8 +327,8 @@ int do_create(int argc, char **argv) {
 	  printf("Unable to read file permissions\n");
 	  return 1;
      }
-     nslots = atoi(argv[6]);
-     dur = atoi(argv[7]);
+     nslots = strtol(argv[6], (char**)NULL, 10);
+     dur = strtol(argv[7], (char**)NULL, 10);
 
      /* Attempt to create new ringstore ring */
      rs = rs_open(&rs_gdbm_method, argv[1], mode, argv[3], argv[4],
@@ -372,7 +373,7 @@ int do_lastresort(int argc, char **argv) {
 	  strtok(fname, ",");
 	  if ( (dur_s = strchr(rname, ',')) ) {
 	       dur_s++;
-	       dur = atoi(dur_s);
+	       dur = strtol(dur_s, (char**)NULL, 10);
 	       strtok(rname, ",");
 	  }
      }     
@@ -391,7 +392,8 @@ int do_lastresort(int argc, char **argv) {
 	  if (argc == 2)
 	       r = do_open_call(argv[0], argv[1], 0);
 	  if (argc == 3)
-	       r = do_open_call(argv[0], argv[1], atoi(argv[2]));
+	    r = do_open_call(argv[0], argv[1], strtol(argv[2], (char**)NULL, 
+						      10));
      }
 
      return r;
@@ -557,9 +559,9 @@ int do_get(int argc, char **argv) {
 	   * after saving the values from the first row and print them as
 	   * a status line */
 	  table_first(dtab);
-	  seq = atoi(table_getcurrentcell(dtab, "_seq"));
-	  tim = atoi(table_getcurrentcell(dtab, "_time"));
-	  dur = atoi(table_getcurrentcell(dtab, "_dur"));
+	  seq = strtol(table_getcurrentcell(dtab, "_seq"), (char**)NULL, 10);
+	  tim = strtol(table_getcurrentcell(dtab, "_time"), (char**)NULL, 10);
+	  dur = strtol(table_getcurrentcell(dtab, "_dur"), (char**)NULL, 10);
 	  table_rmcol(dtab, "_seq");
 	  table_rmcol(dtab, "_time");
 	  table_rmcol(dtab, "_dur");
@@ -596,7 +598,7 @@ int do_mget(int argc, char **argv) {
      }
 
      /* Print results */
-     dtab = rs_mget_nseq(rsid, atoi(argv[1]));
+     dtab = rs_mget_nseq(rsid, strtol(argv[1], (char**)NULL, 10));
      if (dtab) {
 	  data = table_print(dtab);
 	  puts(data);
@@ -674,10 +676,10 @@ int do_jump(int argc, char **argv) {
 	  rs_youngest(rsid, &seq, &tim);
 	  r = rs_goto_seq(rsid, seq);
      } else if (*argv[1] == '-') {
-	  r = rs_rewind(rsid, atoi(argv[1]+1));
+       r = rs_rewind(rsid, strtol(argv[1]+1, (char**)NULL, 10));
      } else if (*argv[1] == '+' || isdigit((int)*argv[1])) {
 	  /* jump relative */
-	  r = rs_forward(rsid, atoi(argv[1]));
+       r = rs_forward(rsid, strtol(argv[1], (char**)NULL, 10));
      } else {
 	  printf("Usage: jump: [+-]<n> | oldest | youngest\n");
 	  return 1;
@@ -718,7 +720,7 @@ int do_jumpto(int argc, char **argv) {
 	  r = rs_goto_seq(rsid, seq);
      } else if (isdigit((int)*argv[1])) {
 	  /* jump absolute */
-	  r = rs_goto_seq(rsid, atoi(argv[1]));
+       r = rs_goto_seq(rsid, strtol(argv[1], (char**)NULL, 10));
      } else {
 	  printf("Usage: %s: <n> | oldest | youngest\n", argv[0]);
 	  return 1;
@@ -753,7 +755,7 @@ int do_resize(int argc, char **argv) {
 	  return 1;
      }
 
-     r = tab_resize(rsid, atoi(argv[1]));
+     r = tab_resize(rsid, strtol(argv[1], (char**)NULL, 10));
      if (!r) {
 	  printf("Failure\n");
 	  return 1;
@@ -897,7 +899,7 @@ int do_purge(int argc, char **argv) {
 	  return 1;
      }
 
-     if ( ! tab_purge(rsid, atoi(argv[1]))) {
+     if ( ! tab_purge(rsid, strtol(argv[1], (char**)NULL, 10))) {
 	  printf("Unable to purge\n");
 	  return 1;
      }
@@ -1069,10 +1071,10 @@ int do_change(int argc, char **argv) {
 		      "where <secs> must be an integer\n", argv[0]);
 	       return 1;
 	  }
-	  r = rs_change_duration(rsid, atoi(argv[2]));
+	  r = rs_change_duration(rsid, strtol(argv[2], (char**)NULL, 10));
 	  if ( ! r )
 	       return 1;
-	  duration = atoi(argv[2]);
+	  duration = strtol(argv[2], (char**)NULL, 10);
 	  sprintf(prompt, "%s,%s,%d> ", filename, ringname, duration);
 	  cmdln_setprompt(prompt);
 	  break;
@@ -1087,7 +1089,7 @@ int do_change(int argc, char **argv) {
 		      "where <nslots> must be an integer\n", argv[0]);
 	       return 1;
 	  }
-	  r = rs_resize(rsid, atoi(argv[2]));
+	  r = rs_resize(rsid, strtol(argv[2], (char**)NULL, 10));
 	  if ( ! r )
 	       return 1;
 	  break;

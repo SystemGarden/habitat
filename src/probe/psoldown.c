@@ -109,7 +109,7 @@ void psoldown_collect(TABLE tab) {
 	  elog_printf(DIAG, "No 'boot' timestamp at %s: "
 		      "stamping now boot=%d", psoldown_purl_boot, boot);
      } else {
-	  boot = atoi(bootstr);
+          boot = strtol(bootstr, NULL, 10);
      }
 
      alivestr = route_read(psoldown_purl_alive, NULL, &len);
@@ -121,7 +121,7 @@ void psoldown_collect(TABLE tab) {
 	  elog_printf(DIAG, "No 'last alive' timestamp at %s: "
 		      "stamping now alive=%d", psoldown_purl_alive, alive);
      } else {
-	  alive = atoi(alivestr);
+          alive = strtol(alivestr, NULL, 10);
      }
 
      /* do we have work to do? */

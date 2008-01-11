@@ -2553,7 +2553,7 @@ int   table_sortnumeric(TABLE t, char *primarykey, char *secondarykey)
      /* order */
      iorder = itree_create();
      itree_traverse(col)
-          itree_add(iorder, atoi((char *)itree_get(col)), 
+          itree_add(iorder, strtol((char *) itree_get(col), NULL, 10), 
 		    (void*) itree_getkey(col));
 
 #if 0

@@ -607,7 +607,7 @@ int    rt_storetab_twrite (RT_LLD lld, TABLE tab)
 
      if (table_hascol(tab, "_time")) {
 	  table_first(tab);
-	  samptime = atoi(table_getcurrentcell(tab, "_time"));
+	  samptime = strtol(table_getcurrentcell(tab, "_time"), NULL, 10);
 	  r = tab_put_withtime(rt->tab_id, tab, samptime);
      } else {
 	  r = tab_put(rt->tab_id, tab);

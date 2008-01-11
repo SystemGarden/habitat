@@ -238,12 +238,12 @@ TABLE cascade_aggregate(enum cascade_fn func, 	/* aggregation function */
      /* find the time span and duration of the dataset */
      table_first(dataset);
      if (table_hascol(dataset, "_dur"))
-          duration = atoi(table_getcurrentcell(dataset, "_dur"));
+          duration = strtol(table_getcurrentcell(dataset, "_dur"), NULL, 10);
      else
           duration = 0;
-     t1 = atoi(table_getcurrentcell(dataset, "_time"));
+     t1 = strtol(table_getcurrentcell(dataset, "_time"), NULL, 10);
      table_last(dataset);
-     t2 = atoi(table_getcurrentcell(dataset, "_time"));
+     t2 = strtol(table_getcurrentcell(dataset, "_time"), NULL, 10);
      tdiff = t2-t1+duration;
 
      /* go over the keyed table and apply our operators to each column 

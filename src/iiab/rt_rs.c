@@ -65,7 +65,7 @@ int    rt_rs_access(char *p_url, char *password, char *basename, int flag)
      }
 
      id = rs_open(&rs_gdbm_method, file, 0644, ring, "don't create", 
-		  "don't create", 0, atoi(dur), 0);
+		  "don't create", 0, strtol(dur, NULL, 10), 0);
 
      if (id) {
 	  rs_close(id);
@@ -149,11 +149,12 @@ RT_LLD rt_rs_open (char *p_url, char *comment, char *password, int keep,
 
      if (meta == rt_rs_none && !cons) {
           id = rs_open(&rs_gdbm_method, file, 0644, ring, "dont create",
-		       "dont create", 0, atoi(dur), 0);
+		       "dont create", 0, strtol(dur, NULL, 10), 0);
 	  if ( !id ) {
 	       if (keep)
 		    id = rs_open(&rs_gdbm_method, file, 0644, ring, ring,
-				 comment, keep, atoi(dur), RS_CREATE);
+				 comment, keep, strtol(dur, NULL, 10),
+				 RS_CREATE);
 	       if ( ! id ) {
 		    /* well... we tried */
 		    elog_printf(DEBUG, "Unable to open %sringstore "
@@ -181,7 +182,7 @@ RT_LLD rt_rs_open (char *p_url, char *comment, char *password, int keep,
      rt->p_url = p_url;
      rt->filepath = file;
      rt->ring = ring;
-     rt->duration = dur ? atoi(dur) : 0;
+     rt->duration = dur ? strtol(dur, NULL, 10) : 0;
      rt->password = password ? xnstrdup(password) : NULL;
      rt->rs_id = id;
      rt->from_t = (r_t >= 1) ? from_t : -1;

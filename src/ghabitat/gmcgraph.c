@@ -218,7 +218,8 @@ int gmcgraph_resdat2arrays(GMCGRAPH *g,	  /* graph structure */
 			 else
 			      lastval = 0.0;
 			 if ( timlst && itree_get(timlst) )
-			      lasttim = atoi(itree_get(timlst));
+			      lasttim = strtol(itree_get(timlst), 
+					       (char**)NULL, 10);
 			 else
 			      lasttim = mocktim;
 			 isfirst = 0;
@@ -228,7 +229,8 @@ int gmcgraph_resdat2arrays(GMCGRAPH *g,	  /* graph structure */
 			 else
 			      newval = 0.0;
 			 if ( timlst && itree_get(timlst) )
-			      newtim = atoi(itree_get(timlst));
+			      newtim = strtol(itree_get(timlst),
+					      (char**)NULL, 10);
 			 else
 			      newtim = mocktim;
 			 if (newtim - lasttim < 0)
@@ -256,7 +258,8 @@ int gmcgraph_resdat2arrays(GMCGRAPH *g,	  /* graph structure */
 		    else
 			 vals[i] = 0.0;
 		    if (timlst && itree_get(timlst))
-			 itree_add(idx, atoi(itree_get(timlst)), &vals[i]);
+		         itree_add(idx, strtol(itree_get(timlst),
+					       (char**)NULL, 10), &vals[i]);
 		    else
 			 itree_add(idx, mocktim, &vals[i]);
 		    if (timlst)

@@ -904,7 +904,7 @@ RESDAT uidata_get_route(TREE *nodeargs)
 	       return resdat;	/* in error */
 	  }
 	  lastonly = tree_find(nodeargs, "lastonly");
-	  lseqonly = *lastonly ? atoi(lastonly) : 0;
+	  lseqonly = *lastonly ? strtol(lastonly, (char**)NULL, 10) : 0;
 
 	  if ( *basepurl == '\0' ) {
 	       elog_printf(ERROR, "basepurl node argument is blank");

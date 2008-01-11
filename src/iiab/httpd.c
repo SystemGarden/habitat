@@ -359,7 +359,7 @@ void httpd_accept(void *fd)
 	 /* consume reqdata depending on the Content-length header */
 	 if (tree_find(headers, "Content-length") != TREE_NOVAL) {
 	      /* do we need to get more data from the socket? */
-	      content_length = atoi(tree_get(headers));
+	      content_length = strtol(tree_get(headers, NULL, 10));
 	      datalen = totbytes - (reqdata - buf);
 	      if (content_length > datalen) {
 		   /* we need more data that we have collected in the 
@@ -603,7 +603,7 @@ int httpd_header_send(int fd, TREE *headers, int user_status, char *mime_type,
      status = user_status;
      if (headers) {
 	  if (tree_find(headers, "Status") != TREE_NOVAL)
-	       status = atoi(tree_get(headers));
+	    status = strtol(tree_get(headers), NULL, 10);
 	  if (tree_find(headers, "Location") != TREE_NOVAL)
 	       status = 302;
      }

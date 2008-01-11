@@ -267,10 +267,12 @@ int pattern_load_patact(WATCHED w		/* watch instancce */ )
 		* the pattern list and act points to it */
 
 	       /* now patch up the action structure if changed */
-	       ivalue = atoi(table_getcurrentcell(patab, "embargo_time"));
+	       ivalue = strtol(table_getcurrentcell(patab, "embargo_time"),
+			       (char**)NULL, 10);
 	       if (act->embargo_time != ivalue)
 		    act->embargo_time  = ivalue;
-	       ivalue = atoi(table_getcurrentcell(patab, "embargo_count"));
+	       ivalue = strtol(table_getcurrentcell(patab, "embargo_count"),
+			       (char**)NULL, 10);
 	       if (act->embargo_count != ivalue)
 		    act->embargo_count = ivalue;
 	       if (act->embargo_count > 0)

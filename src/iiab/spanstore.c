@@ -183,16 +183,16 @@ int spans_getlatest(SPANS tab,		/* span table for ring */
 
      /* find the data */
      table_traverse(tab) {
-	  if (max < atoi( table_getcurrentcell(tab, SPANS_TOCOL) ) ) {
-	       max = atoi( table_getcurrentcell(tab, SPANS_TOCOL) );
+          if (max < strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) ) {
+	       max = strtol( table_getcurrentcell(tab, SPANS_TOCOL),NULL,10 );
 	       rowkey = table_getcurrentrowkey(tab);
 	  }
      }
 
      /* report the data if found */
      if (max > -1) {
-	  *from   =    atoi(table_getcell(tab,rowkey,SPANS_FROMCOL) );
-	  *to     =    atoi(table_getcell(tab,rowkey,SPANS_TOCOL) );
+          *from   =  strtol(table_getcell(tab,rowkey,SPANS_FROMCOL),NULL,10);
+	  *to     =  strtol(table_getcell(tab,rowkey,SPANS_TOCOL), NULL, 10 );
 	  *fromdt = strtoul(table_getcell(tab,rowkey,SPANS_FROMDTCOL),NULL,0);
 	  *todt   = strtoul(table_getcell(tab,rowkey,SPANS_TODTCOL),  NULL,0);
 	  *data   =         table_getcell(tab,rowkey,SPANS_DATACOL);
@@ -222,16 +222,16 @@ int spans_getoldest(SPANS tab,		/* span table for ring */
 
      /* find the data */
      table_traverse(tab) {
-	  if (min > atoi( table_getcurrentcell(tab, SPANS_TOCOL) ) ) {
-	       min = atoi( table_getcurrentcell(tab, SPANS_TOCOL) );
+          if (min > strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) ) {
+	       min = strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) );
 	       rowkey = table_getcurrentrowkey(tab);
 	  }
      }
 
      /* report the data if found */
      if (min < INT_MAX) {
-	  *from   =    atoi(table_getcell(tab,rowkey,SPANS_FROMCOL) );
-	  *to     =    atoi(table_getcell(tab,rowkey,SPANS_TOCOL) );
+          *from   =  strtol(table_getcell(tab,rowkey,SPANS_FROMCOL),NULL,10);
+	  *to     =  strtol(table_getcell(tab,rowkey,SPANS_TOCOL),NULL,10);
 	  *fromdt = strtoul(table_getcell(tab,rowkey,SPANS_FROMDTCOL),NULL,0);
 	  *todt   = strtoul(table_getcell(tab,rowkey,SPANS_TODTCOL),  NULL,0);
 	  *data   =         table_getcell(tab,rowkey,SPANS_DATACOL);
@@ -263,8 +263,9 @@ int spans_getseq(SPANS tab,		/* span table for ring */
 
      /* find the data */
      table_traverse(tab) {
-	  if (seq >= atoi( table_getcurrentcell(tab, SPANS_FROMCOL) ) &&
-	      seq <= atoi( table_getcurrentcell(tab, SPANS_TOCOL) ) ) {
+          if (seq >= strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10)
+	      &&
+	      seq <= strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) {
 	       found++;
 	       break;
 	  }
@@ -272,8 +273,8 @@ int spans_getseq(SPANS tab,		/* span table for ring */
 
      /* report the data if found */
      if (found) {
-	  *from   =    atoi(table_getcurrentcell(tab, SPANS_FROMCOL) );
-	  *to     =    atoi(table_getcurrentcell(tab, SPANS_TOCOL) );
+          *from   =  strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10);
+	  *to     =  strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10);
 	  *fromdt = strtoul(table_getcurrentcell(tab, SPANS_FROMDTCOL),NULL,0);
 	  *todt   = strtoul(table_getcurrentcell(tab, SPANS_TODTCOL),  NULL,0);
 	  *data   =         table_getcurrentcell(tab, SPANS_DATACOL);
@@ -345,8 +346,8 @@ int spans_gettime(SPANS tab,		/* span table for ring */
 
      /* report the data if found */
      if (found) {
-	  *from   =    atoi(table_getcurrentcell(tab, SPANS_FROMCOL) );
-	  *to     =    atoi(table_getcurrentcell(tab, SPANS_TOCOL) );
+          *from   =  strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10);
+	  *to     =  strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10);
 	  *fromdt = strtoul(table_getcurrentcell(tab, SPANS_FROMDTCOL),NULL,0);
 	  *todt   = strtoul(table_getcurrentcell(tab, SPANS_TODTCOL),  NULL,0);
 	  *data   =         table_getcurrentcell(tab, SPANS_DATACOL);
@@ -383,8 +384,8 @@ int spans_search(SPANS tab,		/* span table for ring */
 
      /* report the data if found */
      if (found) {
-	  *from   =   atoi( table_getcurrentcell(tab, SPANS_FROMCOL) );
-	  *to     =   atoi( table_getcurrentcell(tab, SPANS_TOCOL) );
+          *from   = strtol( table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10);
+	  *to     = strtol( table_getcurrentcell(tab, SPANS_TOCOL),NULL,10);
 	  *fromdt = strtoul(table_getcurrentcell(tab, SPANS_FROMDTCOL),NULL,0);
 	  *todt   = strtoul(table_getcurrentcell(tab, SPANS_TODTCOL),  NULL,0);
 	  return 1;
@@ -412,8 +413,9 @@ int spans_extend(SPANS tab,	/* span table for ring */
 
      /* find the data */
      table_traverse(tab) {
-	  if (from == atoi( table_getcurrentcell(tab, SPANS_FROMCOL) ) &&
-	      to   == atoi( table_getcurrentcell(tab, SPANS_TOCOL) ) ) {
+          if (from == strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10)
+	      &&
+	      to   == strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10)) {
 	       found++;
 	       break;
 	  }
@@ -446,11 +448,13 @@ int spans_purge(SPANS tab,		/* span table for ring */
 
      /* traverse the list to find purged spans */
      table_traverse(tab) {
-	  if ( atoi(table_getcurrentcell(tab, SPANS_TOCOL)) < oldestseq ) {
+          if ( strtol(table_getcurrentcell(tab, SPANS_TOCOL),
+		      NULL,10) < oldestseq ) {
 	       /* the span is toast */
 	       table_rmcurrentrow(tab);
 	       n++;
-	  } else if (atoi(table_getcurrentcell(tab,SPANS_FROMCOL)) <oldestseq){
+	  } else if (strtol(table_getcurrentcell(tab,SPANS_FROMCOL),
+			    NULL,10) <oldestseq) {
 	       /* the span needs `from' to be adjusted */
 	       table_replacecurrentcell_alloc(tab, SPANS_FROMCOL, 
 					      util_i32toa(oldestseq));
@@ -536,8 +540,9 @@ int spans_overlap(SPANS tab,		/* table of a ring's spans */
 
      table_traverse(tab) {
 	  /* from overlaps */
-	  if (from >= atoi(table_getcurrentcell(tab, SPANS_FROMCOL)) &&
-	      from <= atoi(table_getcurrentcell(tab, SPANS_TOCOL  )) ) {
+          if (from >= strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10)
+	      &&
+	      from <= strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10)) {
 
 	       rowkey = table_getcurrentrowkey(tab);
 	       tmp = table_printrow(tab, rowkey);
@@ -548,8 +553,8 @@ int spans_overlap(SPANS tab,		/* table of a ring's spans */
 	  }
 
 	  /* to overlaps */
-	  if (to >= atoi(table_getcurrentcell(tab, SPANS_FROMCOL)) &&
-	      to <= atoi(table_getcurrentcell(tab, SPANS_TOCOL  )) ) {
+	  if (to >= strtol(table_getcurrentcell(tab, SPANS_FROMCOL),NULL,10) &&
+	      to <= strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) ) {
 
 	       rowkey = table_getcurrentrowkey(tab);
 	       tmp = table_printrow(tab, rowkey);
@@ -561,8 +566,9 @@ int spans_overlap(SPANS tab,		/* table of a ring's spans */
 
 
 	  /* contains overlap */
-	  if (atoi(table_getcurrentcell(tab, SPANS_FROMCOL)) >= from &&
-	      atoi(table_getcurrentcell(tab, SPANS_TOCOL  )) <= to ) {
+	  if (strtol(table_getcurrentcell(tab, SPANS_FROMCOL),
+		     NULL,10) >= from &&
+	      strtol(table_getcurrentcell(tab, SPANS_TOCOL),NULL,10) <= to ) {
 
 	       rowkey = table_getcurrentrowkey(tab);
 	       tmp = table_printrow(tab, rowkey);
@@ -759,8 +765,9 @@ TREE *spans_getheader_byseqrange(SPANS tab, int fromseq, int toseq)
      hds = tree_create();
      table_traverse(tab) {
 	  /* convert seq to int */
-	  oldest_seq = atoi( table_getcurrentcell(tab, SPANS_FROMCOL) );
-	  newest_seq = atoi( table_getcurrentcell(tab, SPANS_TOCOL) );
+          oldest_seq = strtol( table_getcurrentcell(tab, SPANS_FROMCOL),
+			       NULL,10);
+	  newest_seq = strtol( table_getcurrentcell(tab, SPANS_TOCOL),NULL,10);
 
 	  /* check for containment */
 	  if ( ( toseq   >= oldest_seq && toseq   <= newest_seq ) ||

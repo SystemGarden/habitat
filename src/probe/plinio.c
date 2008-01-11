@@ -286,7 +286,8 @@ void plinio_col_stat(TABLE tab, ITREE *lol) {
 		    if (i==0)
 		         continue;
 		    table_replacecell_noalloc(tab, i-1, "c_nread", 
-					      util_i32toa( atoi(itree_get(row)) ));
+					      util_i32toa( strtol(
+						itree_get(row), NULL, 10) ));
 	       }
 	  } else if ( strcmp(attr, "disk_wblk") == 0 ) {
 	       /* number of disk blocks read - linux 2.2 */
@@ -299,7 +300,8 @@ void plinio_col_stat(TABLE tab, ITREE *lol) {
 		    if (i==0)
 		         continue;
 		    table_replacecell_noalloc(tab, i-1, "c_nwritten", 
-					      util_i32toa( atoi(itree_get(row))) );
+					      util_i32toa( strtol(
+						itree_get(row), NULL, 10)) );
 	       }
 	  } else if ( strcmp(attr, "disk_io:") == 0) {
 	       /* complete disk stats - linux 2.4 */

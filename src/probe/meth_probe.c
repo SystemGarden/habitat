@@ -390,10 +390,10 @@ TO BE DONE
 	       rdiff++) {
 	       difftype = table_getinfocell(dinfo->new, "type", rdiff->source);
 	       if (strcmp(difftype, "i32")) {
-		    idiff = atoi(table_getcurrentcell(dinfo->new, 
-						      rdiff->source)) - 
-			    atoi(table_getcurrentcell(dinfo->old, 
-						      rdiff->source));
+		    idiff = strtol(table_getcurrentcell(dinfo->new, 
+						rdiff->source), NULL, 10) - 
+			    strtol(table_getcurrentcell(dinfo->old, 
+							rdiff->source), NULL, 10);
 		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
 						   util_i32toa(idiff));
 	       } else if (strcmp(difftype, "u32")) {
@@ -406,10 +406,10 @@ TO BE DONE
 		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
 						   util_u32toa(udiff));
 	       } else if (strcmp(difftype, "i64")) {
-		    lldiff = atoi(table_getcurrentcell(dinfo->new, 
-						       rdiff->source)) - 
-			     atoi(table_getcurrentcell(dinfo->old, 
-						       rdiff->source));
+		    lldiff = strtol(table_getcurrentcell(dinfo->new, 
+							 rdiff->source), NULL, 10) - 
+			     strtol(table_getcurrentcell(dinfo->old, 
+							 rdiff->source), NULL, 10);
 		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
 						   util_i64toa(lldiff));
 	       } else if (strcmp(difftype, "u64")) {

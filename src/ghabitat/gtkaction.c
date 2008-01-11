@@ -1236,7 +1236,7 @@ void gtkaction_choice_update()
      table_last(tab);
      youngest_str = table_getcurrentcell(tab, "_time");
      if (youngest_str) {
-	  youngest_t = atoi(youngest_str);
+       youngest_t = strtol(youngest_str, (char**)NULL, 10);
 	  tsecs = time(NULL) - (youngest_t+1);
      } else {
 	  elog_printf(DIAG, "no _time column, can't update with recent "
@@ -1334,7 +1334,7 @@ void gtkaction_choice_update()
 	  youngest_str = table_getcurrentcell(
 	       itree_get(datapres_data.d.tablst), "_time");
 	  if (youngest_str)
-	       youngest_t = atoi(youngest_str);
+	    youngest_t = strtol(youngest_str, (char**)NULL, 10);
      }
 
      /* Expire old data
@@ -1354,7 +1354,7 @@ void gtkaction_choice_update()
 	  youngest_str = table_getcurrentcell(
 	       itree_get(datapres_data.d.tablst), "_time");
 	  if (youngest_str) {
-	       test_young_t = atoi(youngest_str);
+	    test_young_t = strtol(youngest_str, (char**)NULL, 10);
 	       if (test_young_t < oldest_t) {
 		    /* Remove table from list if old */
 		    elog_printf(DEBUG, "removing old data: youngest_t=%d",
@@ -1370,7 +1370,7 @@ void gtkaction_choice_update()
 		    oldest_str = table_getcurrentcell(
 			 itree_get(datapres_data.d.tablst), "_time");
 		    if (oldest_str)
-			 oldest_t = atoi(oldest_str);
+		      oldest_t = strtol(oldest_str, (char**)NULL, 10);
 		    else
 			 oldest_t = -1;
 		    break;
@@ -1528,7 +1528,7 @@ GtkWidget *gtkaction_mktable(RESDAT dres)
 	  itree_traverse( hdorder ) {
 	       cell = table_getcurrentcell(dtab, itree_get(hdorder));
 	       if (strncmp(itree_get(hdorder), "_time", 5) == 0) {
-		 cols[i++] = util_decdatetime(atoi(cell));
+		 cols[i++] = util_decdatetime(strtol(cell, (char**)NULL, 10));
 	       } else {
 		 cols[i++] = cell;
 	       }
@@ -2703,7 +2703,7 @@ void gtkaction_elog_raise(const char *errtext, 	/* text containing error */
 
      /* isolate the components of the error string */
      ecode = *strtok(errtext_dup, "|");
-     etime = atoi(strtok(NULL, "|"));
+     etime = strtol(strtok(NULL, "|"), (char**)NULL, 10);
      esev  = strtok(NULL, "|");
      efile = strtok(NULL, "|");
      efunc = strtok(NULL, "|");
