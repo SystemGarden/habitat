@@ -290,12 +290,6 @@ void iiab_init_routes() {
      route_register(&rt_http_method);
      route_register(&rt_https_method);
      route_register(&rt_sqlrs_method);
-#if 0
-     route_register(&rt_storehol_method);
-     route_register(&rt_storetime_method);
-     route_register(&rt_storetab_method);
-     route_register(&rt_storever_method);
-#endif
      route_register(&rt_rs_method);
 }
 

@@ -38,13 +38,7 @@ iiab/rep.c		\
 iiab/pattern.c		\
 iiab/timeline.c		\
 #iiab/record.c		\
-#iiab/rt_store.c		\
-#iiab/holstore.c 	\
-#iiab/timestore.c	\
 #iiab/ringbag.c		\
-#iiab/spanstore.c	\
-#iiab/tablestore.c	\
-#iiab/versionstore.c	\
 #iiab/conv.c		\
 
 SRC += $(IIABSRC)
