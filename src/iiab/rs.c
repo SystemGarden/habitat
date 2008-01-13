@@ -1680,7 +1680,7 @@ TABLE rs_inforings(RS_METHOD method	/* method vectors */,
           table_addcol(rings, "ytime", NULL);
           table_traverse(rings) {
 	       ringid = strtol(table_getcurrentcell(rings, "id"),
-			       (char**)NULL, 10));
+			       (char**)NULL, 10);
 	       index    = method->ll_read_index(lld, ringid);
 	       if (index && table_nrows(index) > 0) {
 		    table_first(index);

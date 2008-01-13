@@ -359,7 +359,7 @@ void httpd_accept(void *fd)
 	 /* consume reqdata depending on the Content-length header */
 	 if (tree_find(headers, "Content-length") != TREE_NOVAL) {
 	      /* do we need to get more data from the socket? */
-	      content_length = strtol(tree_get(headers, NULL, 10));
+	      content_length = strtol(tree_get(headers), NULL, 10);
 	      datalen = totbytes - (reqdata - buf);
 	      if (content_length > datalen) {
 		   /* we need more data that we have collected in the 

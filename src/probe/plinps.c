@@ -700,7 +700,7 @@ time_t plinps_getboot_t() {
      t = time(NULL);
      data = probe_readfile("/proc/uptime");
      if (data) {
-          t -= strtol(strtok(data, " ", NULL, 10));
+          t -= strtol(strtok(data, " "), NULL, 10);
      } else {
 	  elog_printf(ERROR, "unable to read uptime, setting ps boot to 0");
 	  t = 0;
@@ -726,7 +726,7 @@ long plinps_gettotal_mem() {
 	  pt += 9;
 	  while (*pt && *pt == ' ')
 	       pt++;
-	  return strtol(strtok(pt, " ", NULL, 10));
+	  return strtol(strtok(pt, " "), NULL, 10);
      } else {
 	  elog_printf(ERROR, "unable to read meminfo, setting size to 1");
 	  return 1;

@@ -179,8 +179,8 @@ int rep_action(ROUTE out,		/* route output */
 	  seq_i = itree_create();
 	  seq_a = table_uniqcolvals(io, "_seq", NULL);
 	  tree_traverse(seq_a)
-	    itree_add(seq_i, strtol(tree_getkey(seq_a, (char**)NULL, 10)), 
-		      tree_getkey(seq_a));
+	       itree_add(seq_i, strtol(tree_getkey(seq_a), (char**)NULL, 10), 
+			 tree_getkey(seq_a));
 	  itree_traverse(seq_i) {
 	       seq_data = table_selectcolswithkey(io, "_seq", 
 						  (char *) itree_get(seq_i),

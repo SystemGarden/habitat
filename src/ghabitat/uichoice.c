@@ -21,10 +21,6 @@
 #include "../iiab/util.h"
 #include "../iiab/route.h"
 #include "../iiab/cf.h"
-#include "../iiab/holstore.h"
-#include "../iiab/timestore.h"
-#include "../iiab/spanstore.h"
-#include "../iiab/versionstore.h"
 
 /*
  * Implements a choice or decision tree catering for user interfaces.

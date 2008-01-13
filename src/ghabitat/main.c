@@ -22,7 +22,6 @@
 #include "main.h"
 #include "../iiab/route.h"
 #include "../iiab/elog.h"
-#include "../iiab/holstore.h"
 #include "../iiab/iiab.h"
 #include "../iiab/util.h"
 
