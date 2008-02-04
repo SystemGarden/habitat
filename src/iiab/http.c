@@ -41,21 +41,27 @@ void http_fini()
  * Interact with a web server using the GET protocol.
  * Authorisation details are passed in a TABLE, one row per host, with
  * the following columns:-
- *    host		name of the web server
+ *    host		name of web server, key for url
  *    userpwd		web server account details in the form user:password
- *    proxy		name of proxy server
- *    proxyuserpwd	proxy host account details in the form user:password
+ *    proxy		url of the proxy server
+ *    proxyuserpwd	proxy server account credentials - user:password
  *    sslkeypwd		password to unlock private key
  *    certfile		certificate file (held in etc)
- * The cookies tree may be modified by the received web page
- * Both cookies and auth may be NULL if you have nothing to pass
+ * Cookie is a key-value TREE list, the contents of which gets added 
+ * to the stored cookies fron the cookie jar.
+ * The cookie jar is a file name on the local machine to store the 
+ * sookies from the web response, such as the session key for authentication.
+ * Cookies may be NULL if there is nothing to pass. cookiejar may be NULL to
+ * disable cookie storage, '-' to send then to stdout (debugging) or the 
+ * value of a valid filename.
  * Returns the text of the page if successful or NULL for error.
  * The text should be nfree()ed after use
  */
-char *http_get(char *url, 	/* standard url */
-		TREE *cookies,	/* cookies: key-value list */
-		TABLE auth,	/* authorisation table */
-		int flags	/* flags */ )
+char *http_get(char   *url, 	/* standard url */
+	       CF_VALS cookies,	/* input cookies */
+	       char   *cookiejar,/* filename for storage of returned cookies */
+	       TABLE   auth,	/* authorisation table */
+	       int     flags	/* flags */ )
 {
      struct http_buffer buf = {NULL,0};
      CURLcode r;
@@ -63,22 +69,24 @@ char *http_get(char *url, 	/* standard url */
      char *host, *certpath, cookies_str[HTTP_COOKIESTRLEN], *proxy=NULL;
      char errbuf[CURL_ERROR_SIZE];
      int hostlen, rowkey, i;
+     TREE *cookie_list;
 
      /* Get host from url and look up in the auth table */
+     host = strstr(url, "://");
+     if (!host) {
+          elog_printf(ERROR, "url '%s' in unrecognisable format", url);
+	  return NULL;
+     }
+     host += 3;
+     hostlen = strcspn(host, ":/");
+     if (hostlen) {
+          host = xnmemdup(host, hostlen+1);
+	  host[hostlen] = '\0';
+     } else
+          host = xnstrdup("localhost");
+
+     /* lookup auth and proxy config */
      if (auth) {
-	  host = strstr(url, "://");
-	  if (!host) {
-	       elog_printf(ERROR, "url '%s' in unrecognisable format", 
-			   url);
-	       return NULL;
-	  }
-	  host += 3;
-	  hostlen = strspn(host, "/");
-	  if (hostlen) {
-	       host = xnmemdup(host, hostlen+1);
-	       host[hostlen] = '\0';
-	  } else
-	       host = xnstrdup("localhost");
 	  rowkey = table_search(auth, "host", host);
 	  if (rowkey != -1) {
 	       userpwd      = table_getcurrentcell(auth, "userpwd");
@@ -108,43 +116,52 @@ char *http_get(char *url, 	/* standard url */
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLCERT, certpath);
      }
 
-     /* load request with cookies */
-     if (cookies && !tree_empty(cookies)) {
+     /* load request with cookies, which expects the format 
+      * cookie=value; [c=v; ...] */
+     if (cookies) {
+          cookie_list = cf_gettree(cookies);
 	  i=0;
-	  tree_traverse(cookies) {
+	  tree_traverse(cookie_list) {
 	       i += snprintf(cookies_str + i, HTTP_COOKIESTRLEN - i, 
 			     "%s=%s; ", 
-			     tree_getkey(cookies), (char *) tree_get(cookies));
+			     tree_getkey(cookie_list), 
+			     (char *) tree_get(cookie_list));
 	       if (i > HTTP_COOKIESTRLEN) {
 		    cookies_str[HTTP_COOKIESTRLEN-1] = '\0';
 		    break;
 	       }
 	  }
 	  curl_easy_setopt(http_curlh, CURLOPT_COOKIE, cookies_str);
+	  tree_clearoutandfree(cookie_list);
+	  tree_destroy(cookie_list);
      }
+     if (cookiejar)
+	  curl_easy_setopt(http_curlh, CURLOPT_COOKIEJAR, cookiejar);
 
      /* Diagnostic dump */
-     elog_printf(DIAG, "HTTP GET %s", url);
-     elog_printf(DIAG, "     ... userpwd=%s, proxy=%s, proxyuserpwd=%s, "
-		       "sslkeypwd=%s, certpath=%s", 
-		 userpwd      ? userpwd : "(none)",
-		 proxy        ? proxy   : "(none)",
+     elog_printf(DIAG, "HTTP GET %s  ... userpwd=%s, proxy=%s, "
+		 "proxyuserpwd=%s, sslkeypwd=%s, certpath=%s, cookies=<<%s>>"
+		 "cookiejar=%s", 
+		 url,
+		 userpwd      ? userpwd      : "(none)",
+		 proxy        ? proxy        : "(none)",
 		 proxyuserpwd ? proxyuserpwd : "(none)",
 		 sslkeypwd    ? sslkeypwd    : "(none)",
-                 cert         ? certpath     : "(none)" );
-     elog_printf(DIAG, "     ... cookies=%s", cookies ? cookies_str : "(none)");
+                 cert         ? certpath     : "(none)",
+		 cookies      ? cookies_str  : "(none)",
+		 cookiejar    ? cookiejar    : "(none)");
 
      /* action the GET */
      r = curl_easy_perform(http_curlh);
      if (r)
-	  elog_printf(ERROR, "HTTP GET error: %s", errbuf);
+          elog_printf(DIAG, "HTTP GET error: %s (url=%s)", errbuf, url);
      else
-	  elog_printf(DIAG,  "HTTP GET success");
+	  elog_printf(DIAG, "HTTP GET success");
 
      /* free and return */
      if (cert)
 	  nfree(certpath);
-     if (auth)
+     if (host)
 	  nfree(host);
      return(buf.memory);
 }
@@ -153,24 +170,31 @@ char *http_get(char *url, 	/* standard url */
  * document content
  * Authorisation details are passed in a TABLE, one row per host, with
  * the following columns:-
- *    host		name of the web server
+ *    host		name of web server, key for url
  *    userpwd		web server account details in the form user:password
- *    proxy		name of the proxy server
- *    proxyuserpwd	proxy host account details in the form user:password
+ *    proxy		url of the proxy server
+ *    proxyuserpwd	proxy server account credentials - user:password
  *    sslkeypwd		password to unlock private key
  *    certfile		certificate file (held in etc)
- * The cookies tree may be modified by the received web page
+ * Cookie is a key-value TREE list, the contents of which gets added 
+ * to the stored cookies fron the cookie jar.
+ * The cookie jar is a file name on the local machine to store the 
+ * sookies from the web response, such as the session key for authentication.
+ * Cookies may be NULL if there is nothing to pass. cookiejar may be NULL to
+ * disable cookie storage, '-' to send then to stdout (debugging) or the 
+ * value of a valid filename.
  * Returns the text sent back from the web server as a result of the 
  * form POST or NULL if there was a failure.
  * Returned text should be freed with nfree().
  */
-char *http_post(char *url, 	/* standard url */
-		TREE *form, 	/* key-value list of form items */
-		TREE *files, 	/* file list: key=send name val=filename */
-		TREE *upload, 	/* file list: key=send name val=data */
-		TREE *cookies,	/* key-value list of cookies */
-		TABLE auth,	/* authorisation table */
-		int flags	/* flags */ )
+char *http_post(char   *url, 	/* standard url */
+		TREE   *form, 	/* key-value list of form items */
+		TREE   *files, 	/* file list: key=send name val=filename */
+		TREE   *upload,	/* file list: key=send name val=data */
+		CF_VALS cookies,/* input cookies */
+		char   *cookiejar,/* filenane to store returned cookies */
+		TABLE   auth,	/* authorisation table */
+		int     flags	/* flags */ )
 {
      struct http_buffer buf = {NULL,0};
      CURLcode r;
@@ -180,6 +204,7 @@ char *http_post(char *url, 	/* standard url */
      int hostlen, rowkey, i;
      struct HttpPost *formpost=NULL;
      struct HttpPost *lastptr=NULL;
+     TREE *cookie_list;
 
      /* Get host from url and look up in the auth table */
      if (auth) {
@@ -223,20 +248,27 @@ char *http_post(char *url, 	/* standard url */
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLCERT, certpath);
      }
 
-     /* load form with cookies */
-     if (cookies && !tree_empty(cookies)) {
+     /* load request with cookies, which expects the format 
+      * cookie=value; [c=v; ...] */
+     if (cookies) {
+          cookie_list = cf_gettree(cookies);
 	  i=0;
-	  tree_traverse(cookies) {
+	  tree_traverse(cookie_list) {
 	       i += snprintf(cookies_str + i, HTTP_COOKIESTRLEN - i, 
 			     "%s=%s; ", 
-			     tree_getkey(cookies), (char *) tree_get(cookies));
+			     tree_getkey(cookie_list), 
+			     (char *) tree_get(cookie_list));
 	       if (i > HTTP_COOKIESTRLEN) {
 		    cookies_str[HTTP_COOKIESTRLEN-1] = '\0';
 		    break;
 	       }
 	  }
 	  curl_easy_setopt(http_curlh, CURLOPT_COOKIE, cookies_str);
+	  tree_clearoutandfree(cookie_list);
+	  tree_destroy(cookie_list);
      }
+     if (cookiejar)
+	  curl_easy_setopt(http_curlh, CURLOPT_COOKIEJAR, cookiejar);
 
      /* load environment with form parameters */
      if (form && !tree_empty(form)) {
@@ -277,15 +309,18 @@ char *http_post(char *url, 	/* standard url */
      }
 
      /* Diagnostic dump */
-     elog_printf(DIAG, "HTTP POST %s", url);
-     elog_printf(DIAG, "     ... userpwd=%s, proxy=%s, proxyuserpwd=%s, "
-		       "sslkeypwd=%s, certpath=%s", 
-		 userpwd      ? userpwd : "(none)",
-		 proxy        ? proxy   : "(none)",
+     elog_printf(DIAG, "HTTP POST %s  ... userpwd=%s, proxy=%s, "
+		 "proxyuserpwd=%s, sslkeypwd=%s, certpath=%s, cookies=<<%s>>"
+		 "cookiejar=%s", 
+		 url,
+		 userpwd      ? userpwd      : "(none)",
+		 proxy        ? proxy        : "(none)",
 		 proxyuserpwd ? proxyuserpwd : "(none)",
 		 sslkeypwd    ? sslkeypwd    : "(none)",
-                 cert         ? certpath     : "(none)" );
-     elog_printf(DIAG, "     ... cookies=%s", cookies ? cookies_str : "(none)");
+                 cert         ? certpath     : "(none)",
+		 cookies      ? cookies_str  : "(none)",
+		 cookiejar    ? cookiejar    : "(none)");
+
      if (form) {
 	  tree_traverse(form)
 	       elog_printf(DIAG, "     ... form %s=%s", tree_getkey(form), 
@@ -302,7 +337,8 @@ char *http_post(char *url, 	/* standard url */
 	       summary[40] = '\0';
 	       i=strlen(tree_get(upload));
 	       elog_printf(DIAG, "     ... upload %s=%s%s (%d)", 
-			   tree_getkey(upload), summary, i>40 ? "..." : "", i);
+			   tree_getkey(upload), summary, 
+			   i>40 ? "...(truncated)" : "", i);
 
 	  }
      }
@@ -381,7 +417,7 @@ int main(int argc, char **argv) {
      http_init();
 
      /* test 1: get a sample page from localhost with no options */
-     text = http_get("http://localhost", NULL, NULL, 0);
+     text = http_get("http://localhost", NULL, NULL, NULL, 0);
      if (!text)
 	  elog_die(FATAL, "[1] no text returned");
 
@@ -398,7 +434,7 @@ int main(int argc, char **argv) {
 
      /* test 2: get a list of hosts in harvest */
      printf("fetching %s\n", sqlrs);
-     text = http_get(sqlrs, NULL, NULL, 0);
+     text = http_get(sqlrs, NULL, NULL, NULL, 0);
      if (!text)
 	  elog_die(FATAL, "[2] no text returned");
      puts(text);

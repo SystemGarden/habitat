@@ -533,12 +533,14 @@ void route_die(ROUTE rt,		/* route */
  * Different methods (channels opened by a p-url) read different quantities.
  *   ringstore - get the data from the last sequence
  *   file      - return the whole file.
- * Returns a pointer to a nmalloc'ed buffer if successful or NULL
+ * Returns a pointer to an nmalloc'ed buffer if successful or NULL.
+ * A pointer should be passed to store the length of the buffer; set to
+ * NULL if you don't want the buffer size.
  * if unable to get a message. Please free buffer after use.
  */
 char *route_read(char *p_url,		/* pseudo url */
 		 char *password,	/* password (if supported) */
-		 int  *length		/* return length of message */ )
+		 int  *length		/* return length of message or NULL*/)
 {
      ROUTE rt;
      int r, len, seq;
@@ -569,7 +571,9 @@ char *route_read(char *p_url,		/* pseudo url */
           return NULL;
      itree_last(chain);
      buf = ((ROUTE_BUF *) itree_get(chain))->buffer;
-     *length = ((ROUTE_BUF *) itree_get(chain))->buflen;
+     if (length) {
+          *length = ((ROUTE_BUF *) itree_get(chain))->buflen;
+     }
      nfree(itree_get(chain));
      itree_destroy(chain);
 

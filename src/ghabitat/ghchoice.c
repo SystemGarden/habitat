@@ -128,7 +128,7 @@ struct uichoice_feature rsfeatures[] = {
    {"errors",               "ler","log", "Error logs",        "No help", 1, UI_SPLASH, UI_ICON_ERROR,   NULL, ghchoice_tree_ringdur_tab, 0, uidata_get_route, 0, ghchoice_args_err},
   {"replication",           "rep", NULL, "Replication",       "No help", 1, UI_SPLASH, UI_ICON_REP,     NULL, NULL,   0, NULL, 0, NULL},
    {"log",                  "rlg","rep", "Replication logs",  "No help", 1, UI_SPLASH, UI_ICON_LOG,     NULL, ghchoice_tree_seqs_tab, 0, uidata_get_route, 0, ghchoice_arg_begin_rep},
-  {"state",                "rst","rep", "Replication state", "No help", 1, UI_TABLE,  UI_ICON_REP,     NULL, NULL,    0, uidata_get_route, 0, ghchoice_args_rstate},
+  {"state",                 "rst","rep", "Replication state", "No help", 1, UI_TABLE,  UI_ICON_REP,     NULL, NULL,    0, uidata_get_route, 0, ghchoice_args_rstate},
   {"jobs",                  "job", NULL, "Job table",         "No help", 1, UI_TABLE,  UI_ICON_JOB,     NULL, NULL,   0, uidata_get_jobs, 300, NULL},
   {"data",                  "raw", NULL, "Unintrepreted data","No help", 1, UI_SPLASH, UI_ICON_RAW,     NULL, NULL,   0, NULL, 0, NULL},
    {"ringstore charts",     "rsc","raw", NULL,                "No help", 1, UI_SPLASH, UI_ICON_GRAPH,   NULL, ghchoice_tree_ring_graph, 0, uidata_get_route, 0, NULL},
@@ -169,7 +169,7 @@ struct uichoice_feature topfeatures[] = {
    {"perf charts",    "gra", "this","performance charts","No help",1,UI_SPLASH, UI_ICON_GRAPH, NULL, ghchoice_tree_consring_graph, 0, uidata_get_route_cons, 0, ghchoice_args_perf},
 #endif
   {"my files",        "file", NULL, NULL,              "No help", 0, UI_SPLASH, UI_ICON_FILE,  NULL, NULL, 0, NULL, 0, NULL},
-  {"my hosts",        "mhos",NULL, NULL,              "No help", 0, UI_SPLASH, UI_ICON_NET,   NULL, NULL, 0, NULL, 0, NULL},
+  {"my hosts",        "mhos", NULL, NULL,              "No help", 0, UI_SPLASH, UI_ICON_NET,   NULL, NULL, 0, NULL, 0, NULL},
   {"repository",      "rep",  NULL, NULL,              "No help", 1, UI_SPLASH, UI_ICON_NET,   NULL, ghchoice_tree_group_tab, 86400, NULL, 0, NULL},
 #if 0
   {"my services",     "mserv",NULL, NULL,              "No help", 0, UI_SPLASH, UI_ICON_NET,   NULL, NULL, 0, NULL, 0, NULL},
@@ -214,26 +214,27 @@ struct uichoice_feature servfeatures[] = {
 
 /* Timebase constants */
 struct ghchoice_timebase timebase[] = {
-     {"5 minutes", 300,	     1, 30},
-     {"1 hour",	   3600,     1, 300},
-     {"4 hours",   14400,    0, 600},
-     {"8 hours",   28800,    1, 600},
-     {"12 hours",  43200,    0, 600},
-     {"24 hours",  86400,    1, 600},
-     {"7 days",	   604800,   1, 0},
-     {"2 weeks",   1209600,  1, 0},
-     {"4 weeks",   2419200,  1, 0},
-     {"2 months",  4838400,  0, 0},
-     {"3 months",  7257600,  1, 0},
-     {"4 months",  9676800,  0, 0},
-     {"6 months",  15768000, 1, 0},
-     {"1 year",	   31536000, 1, 0},
-     {"2 years",   63072000, 1, 0},
-     {"5 years",   157680000, 1, 0},
-     {"10 years",  315360000, 1, 0},
-     {"20 years",  630720000, 1, 0},
-     {"30 years",  946080000, 1, 0},
-     {NULL,        0,        0}
+     {"5 minutes", 300,	       1, 30},
+     {"1 hour",	   3600,       1, 300},
+     {"4 hours",   14400,      0, 600},
+     {"8 hours",   28800,      1, 600},
+     {"12 hours",  43200,      0, 600},
+     {"24 hours",  86400,      1, 600},
+     {"7 days",	   604800,     1, 600},
+     {"2 weeks",   1209600,    1, 600},
+     {"4 weeks",   2419200,    1, 600},
+     {"2 months",  4838400,    0, 600},
+     {"3 months",  7257600,    1, 600},
+     {"4 months",  9676800,    0, 600},
+     {"6 months",  15768000,   1, 600},
+     {"1 year",	   31536000,   1, 600},
+     {"2 years",   63072000,   1, 600},
+     {"5 years",   157680000,  1, 600},
+     {"10 years",  315360000,  1, 600},
+     {"20 years",  630720000,  1, 600},
+     {"30 years",  946080000,  1, 600},
+     {"40 years",  1261440000, 1, 600},
+     {NULL,        0,          0, 0}
 };
 
 
@@ -549,8 +550,9 @@ void   ghchoice_configure(CF_VALS cf)
 		    break;
 	       }
 	  }
+     } else {
+          elog_printf(INFO, "repository not configured");
      }
-
 }
 
 
@@ -689,7 +691,7 @@ TREE *ghchoice_getloadedfiles()
 
 
 /*
- * Open a route and make a description sumary from its meta information.
+ * Open a route and make a description summary from its meta information.
  * The route should refer to the top most component of the specification, 
  * for instance 'sqlrs:myhost' or 'rs:/path/to/ringstorefile' or
  * 'http://host[:port]/path/to/tab/fmt/server'.
@@ -728,7 +730,7 @@ ghchoice_loadroute(char *purl,			/* route spec p-url */
      snprintf(infopurl, 256, "%s?info", purl);
      tab = route_tread(infopurl, NULL);
      if ( ! tab ) {
-          elog_printf(ERROR, "unable to scan %s", purl);
+          elog_printf(DIAG, "unable to read %s as table", infopurl);
 	  *status = -1;
 	  return NULL;
      }
@@ -769,16 +771,17 @@ ghchoice_loadroute(char *purl,			/* route spec p-url */
      while (i >= 0 && hostinfo[i] != '/')	/* find dir separator */
 	  i--;
      if (i < 0) {
-	  /* no suitable trailing slash */
-	  elog_printf(WARNING, "basepurl '%s' cannot produce hostinfo",
-		      purl);
-	  hostinfo = xnrealloc(hostinfo, 3);
-	  *hostinfo = '\0';
+	  /* no suitable separating slash, so its a host request to the 
+	   * repository (sqlrs:host) and requires an '?info' appended */
+          i = strlen(hostinfo);
+	  hostinfo = xnrealloc(hostinfo, i+6);
+	  strcpy(&hostinfo[i], "?info");
      } else {
-	  /* append 'info' */
+	  /* its a single host, direct request to another habitat instance
+	   * append 'info' */
 	  hostinfo[++i] = '\0';
 	  hostinfo = xnrealloc( hostinfo, strlen(hostinfo) + 10 );
-	  strcpy(&hostinfo[i], "info");
+	  strcpy(&hostinfo[i], "info");		/* turns into '/info' */
      }
 
      /* file specific node arguments */
@@ -828,7 +831,7 @@ ghchoice_loadrepository(char *purl,			/* route spec p-url */
           return NULL;
      }
 
-     elog_printf(INFO, "loading and enabling repository");
+     elog_printf(INFO, "repository enabled");
 
      /* we do not check to see if the address if valid, this is
       * left to ghchoice_tree_group_tab(). All we do is to enable it
@@ -1346,14 +1349,14 @@ ITREE *ghchoice_tree_ring_graph(TREE *nodeargs)
  */
 ITREE *ghchoice_tree_consring_tab(TREE *nodeargs)
 {
-     char *ringname, *basepurl, purl[256], *value, *mylabel;
+     char *ringname, *basepurl, purl[256], *value, *mylabel, *key;
      TABLE rings;
      ITREE *ringnodetree;
      TREE *ringlab=NULL, *ringex=NULL, *ringicon=NULL;
      struct uichoice_node *pnode, *cnode;
      char timestr[60], *labels, *exclude, *icons, *tok, *tok2,
 	  *labelstr=NULL, *excludestr=NULL, *iconstr=NULL;
-     int i;
+     int i, pid;
      time_t now, secs, start, end;
      enum uichoice_icontype iconenum;
 
@@ -1407,7 +1410,22 @@ ITREE *ghchoice_tree_consring_tab(TREE *nodeargs)
      snprintf(purl, 256, "%s?clinfo", basepurl);
      rings = route_tread(purl, NULL);
      if ( ! rings ) {
-          elog_printf(ERROR, "unable to read %s", purl);
+          if (strcasestr(basepurl, "localhost") != NULL) {
+	       pid = is_clockwork_running(&key, NULL, NULL, NULL);
+	       if (pid)
+		    elog_printf(ERROR, "Unable to show data from this host. "
+				"It may respond if you restart local data "
+				"collection (Choose 'Collect->Local Data' "
+				"from the menu)");
+	       else
+		    elog_printf(ERROR, "Unable to show data from this host. "
+				"Data is not being collected locally but "
+				"can be started with 'Collect->Local Data' "
+				"from the menu");
+	  } else {
+	       elog_printf(ERROR, "Unable to show data. "
+			   "Check that the source has data");	    
+	  }
 	  return NULL;
      }
 
@@ -1551,17 +1569,16 @@ ITREE *ghchoice_tree_consring_graph(TREE *nodeargs)
  *                        +- <subgroup4> -+- [hostgroup7]
  *                                        \- [hostgroup8]
  *
- * There may be an arbitary number of hieraraical groups (shown by 
+ * There may be an arbitary number of hierarchical groups (shown by 
  * groups and subgroups above), each leaf group is set up to activate
  * ghchoice_tree_hostgroup_tab() (shown by [hostgroup] above), 
  * which will expand the hosts in each group. 
  * (Currently, parent is not produced)
  *
- * This routine expects nothing as a node argument and will use 
- * global defaults.
+ * This routine expects a repository address as a node argument
  * Each node has its node group addressed..
  *
- * Nodeargs in     repurl     base URL address
+ * Nodeargs in     repurl     base URL address (from the repository)
  *          out    group      leaf group name
  *                 grouppurl  route address of leaf group
  *
@@ -1579,7 +1596,7 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
      /* get args */
      basepurl = tree_find(nodeargs, "repurl");
      if ( basepurl == TREE_NOVAL ) {
-	  elog_printf(DEBUG, "repository not yet enabled");
+	  elog_printf(DIAG, "No respository address set up to query");
 	  return NULL;
      }
 
@@ -1592,7 +1609,8 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
      snprintf(purl, 256, "sqlrs:g=");
      groups = route_tread(purl, NULL);
      if ( ! groups ) {
-          elog_printf(ERROR, "unable to read %s", purl);
+          elog_printf(ERROR, "Unable to read choices from the repository. "
+		      "Check diagnostic logs with your administrator", purl);
 	  return NULL;
      }
 
@@ -1601,8 +1619,8 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
      table_renamecol(groups, "group_id",     "key");
      table_renamecol(groups, "group_parent", "parent");
      table_renamecol(groups, "group_name",   "label");
-     table_addcol(groups, "info", NULL);
-     table_addcol(groups, "help", NULL);
+     table_addcol   (groups, "info",         NULL);
+     table_addcol   (groups, "help",         NULL);
 
      /* create a node list from the table, which is returned from this
       * routine. Currently, it is expected to be attached to a repository

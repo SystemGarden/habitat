@@ -66,8 +66,8 @@ void cf_destroy(CF_VALS cf)
 
 /*
  * Scan the route for configuration tokens, placing their key/value pairs
- * into the passed list. Also scan for a magic `number', which is a single line
- * at the begining of the route's data. 
+ * into the passed list. Also scan for a magic line (if magic is not NULL), 
+ * which is a single line at the begining of the route's data. 
  * Use the scanning rules from util_scantext() for details.
  * If overwrite is set, details found will replace existing data; if false
  * scanned data will be ignored for that key.
@@ -97,8 +97,8 @@ int cf_scanroute(CF_VALS cf,		/* configuration list */
 
 /*
  * Scan the text buffer for configuration tokens, placing their key/value pairs
- * into the passed list. Also scan for a magic `number', which is a single line
- * at the begining of the buffer.
+ * into the passed list. Also scan for a magic line (if magic is not NULL), 
+ * which is a single line at the begining of the buffer.
  * Use the scanning rules from util_scantext() for details.
  * If overwrite is set, details found will replace existing data; if false
  * scanned data will be ignored for that key.
@@ -553,7 +553,7 @@ void cf_dump(CF_VALS cf		/* Parsed configuration values */ )
 /* Generates a table of configuration values in a normalised form of
  * three columns which handles vectors in constant columns. 
  * The three columns are name, argument number and value:
- * scalor values have blank argument numbers, vectors have their arguments 
+ * scalar values have blank argument numbers, vectors have their arguments 
  * split over several lines with the same value column, but their argument 
  * number to make the composite key of (name,argument) unique. */
 TABLE cf_getstatus(CF_VALS cf		/* Parsed configuration values */ )
@@ -601,6 +601,41 @@ TABLE cf_getstatus(CF_VALS cf		/* Parsed configuration values */ )
      tree_destroy(row);
 
      return tab;
+}
+
+
+/* Generates a TREE list of configuration values as key-value.
+ * The normalised form of cf_getstatus() is followed with the exception
+ * of vectors, whose values are concatenated with tabs as delimiters.
+ * Returned tree should have its data freed
+ */
+TREE *cf_gettree(CF_VALS cf		/* Parsed configuration values */ )
+{
+     struct cf_entval *entry;
+     char tmp[LINELEN], *tmpcpy;
+     TREE *list;
+     int n;
+
+     /* create list */
+     list = tree_create();
+
+     tree_traverse(cf) {
+	  entry = tree_get(cf);
+	  if (entry->vector) {
+	       n = 0;
+	       itree_traverse( entry->data.vec ) {
+		    n += snprintf(tmp+n, LINELEN-n, "%d\t", 
+				  itree_getkey(entry->data.vec));
+	       }
+	       tmp[n] = '\0';
+	       tree_add(list, nstrdup(tree_getkey(cf)), nstrdup(tmp));
+	  } else {
+	       tree_add(list, nstrdup(tree_getkey(cf)), 
+			nstrdup(entry->data.arg));
+	  }
+     }
+
+     return list;
 }
 
 

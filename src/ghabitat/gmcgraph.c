@@ -567,8 +567,10 @@ void gmcgraph_settimebase(GMCGRAPH *g, time_t min, time_t max)
 
      strcpy(min_str, util_shortadaptdatetime(min));
      strcpy(max_str, util_shortadaptdatetime(max));
+#if 0
      elog_printf(DEBUG, "timebase from min %s (%ld) .. max %s (%ld)", 
 		 min_str, min, max_str, max);
+#endif
      if (min > -1)
 	  g->start = min;
      if (max > -1)
@@ -609,8 +611,10 @@ int gmcgraph_settimebasebynode(GMCGRAPH *g, TREE *nodeargs)
 void gmcgraph_setallminmax(GMCGRAPH *g, float value)
 {
      struct gmcgraph_graph *gs;
+#if 0
      elog_printf(DEBUG, "setting minmax value to %f (%f asked)", 
 		 value * 1.05, value);
+#endif
      tree_traverse(g->graphs) {
 	  gs = tree_get(g->graphs);
 	  gs->minmax = value * 1.05;
@@ -655,9 +659,11 @@ void gmcgraph_updateaxis(struct gmcgraph_graph *gs)
 	  /* timebase not set */
 	  gtk_databox_rescale(GTK_DATABOX(gs->widget));
      }
+#if 0
      elog_printf(DEBUG, "axis updates on %s to min (%.2f,%.2f) "
 		 "max (%.2f,%.2f)",
 		 "unknown", min.x, min.y, max.x, max.y);
+#endif
 }
 
 
@@ -1081,9 +1087,11 @@ void gmcgraph_allgraph_zoomin_x(GMCGRAPH *g)
 	  GTK_DATABOX(gs->widget)->select.x = width/3*2;
 	  GTK_DATABOX(gs->widget)->select.y = height;
 	  gtk_databox_zoom_to_selection (gs->widget, GTK_DATABOX(gs->widget));
+#if 0
 	  elog_printf(DEBUG, 
 		      "X zoom: h=%d w=%d, marked=(%d,%d) select=(%d,%d)", 
 		      height, width, width/3, 0, width/3*2, height);
+#endif
      }
 }
 
@@ -1102,9 +1110,11 @@ void gmcgraph_allgraph_zoomin_y(GMCGRAPH *g)
 	  GTK_DATABOX(gs->widget)->select.x = width;
 	  GTK_DATABOX(gs->widget)->select.y = height/3*2;
 	  gtk_databox_zoom_to_selection (gs->widget, GTK_DATABOX(gs->widget));
+#if 0
 	  elog_printf(DEBUG, 
 		      "Y zoom: h=%d w=%d, marked=(%d,%d) select=(%d,%d)", 
 		      height, width, width/3, 0, width/3*2, height);
+#endif
      }
 }
 

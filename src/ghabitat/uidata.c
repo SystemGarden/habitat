@@ -1182,7 +1182,7 @@ RESDAT uidata_get_uptime(TREE *nodeargs)
       * The route address requests consolidation across rings 
       * of all duration */
      snprintf(purl, 512, "%s,up,0", basepurl);
-     elog_printf(DEBUG, "reading %s", purl);
+     /*elog_printf(DEBUG, "reading %s", purl);*/
      tab = route_tread(purl, NULL);
      if (!tab) {
           elog_printf(ERROR, "Unable to read '%s'", purl);
@@ -1215,7 +1215,7 @@ RESDAT uidata_get_uptime(TREE *nodeargs)
 
 /*
  * Return this host's info via a route.
- * Make a private tree, copy hostinfo to purl and call uidata_get_route().
+ * Make a private TREE list, copy hostinfo to purl and call uidata_get_route().
  * The data is cleaned up before returning the table.
  */
 RESDAT uidata_get_hostinfo(TREE *nodeargs)

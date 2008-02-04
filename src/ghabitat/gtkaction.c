@@ -3199,7 +3199,8 @@ void gtkaction_askclockwork()
 	       /* Don't ask, dont start */
 	       elog_printf(INFO, "local data not being collected "
 			   "(not asking & not auto starting). "
-			   "Select Collect->Local to change your mind");
+			   "Choose 'Collect->Local Data' from the menu to "
+			   "change your mind");
 	  } else {
 	       /* Ask to start */
 	       w = create_start_clockwork_window();

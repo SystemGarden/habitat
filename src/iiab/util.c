@@ -66,6 +66,9 @@ int util_parseroute(char *route,	/* pseudo-url of input route */
  * a /"/ followed immedeatly by whitespace or the end of line.
  * Multiline strings are not currently allowed [CHECK, I THINK IT IS NOW], 
  * but the string may contain the usual escape sequencies.
+ * The magic string is a line at the start of the text buffer that must
+ * match or -1 is returned and an elog ERROR is generated. Magic may be
+ * NULL in which case no magic line is checked.
  * Use util_freeparse() to free the storage.
  * Returns the number of lines that contain data (not comments, not blanks), 
  * 0 for empty data or -1 if there was an error.

@@ -74,7 +74,7 @@ RT_LLD rt_http_open (char *p_url,	/* address valid until ..close() */
      rt->magic = rt_http_magic();
      rt->prefix = rt_http_prefix();
      rt->description = rt_http_description();
-     rt->url = p_url;	/* garunteed to be valid by caller */
+     rt->url = p_url;	/* guaranteed to be valid by caller */
 
      return rt;
 }
@@ -99,21 +99,18 @@ void   rt_http_close (RT_LLD lld)
 int    rt_http_write (RT_LLD lld, const void *buf, int buflen)
 {
      RT_HTTPD rt;
+     char *rtext;
 
      rt = rt_http_from_lld(lld);
-
-     return -1;
-#if 0
 
      /* compile the form */
 
      /* post it */
-     text = http_post(rt->url, form, NULL, NULL, NULL, 0);
-     if (!text)
+     rtext = http_post(rt->url, NULL, NULL, NULL, NULL, "", NULL, 0);
+     if (!rtext)
 	  return -1;
      else
 	  return buflen;
-#endif
 }
 
 
@@ -129,6 +126,8 @@ int    rt_http_twrite (RT_LLD lld, TABLE tab)
      char *text;
      int r;
 
+     return -1;
+#if 0
      text = table_outtable(tab);
      if ( ! text)
        return 1;	/* empty table, successfully don't writing anything */
@@ -140,18 +139,6 @@ int    rt_http_twrite (RT_LLD lld, TABLE tab)
 	  return 0;
      else
 	  return 1;
-
-#if 0
-     rt = rt_http_from_lld(lld);
-
-     /* compile the form */
-
-     /* post it */
-     text = http_post(rt->url, form, NULL, NULL, NULL, 0);
-     if (!text)
-	  return 0;
-     else
-	  return buflen;
 #endif
 }
 
@@ -184,7 +171,7 @@ ITREE *rt_http_read  (RT_LLD lld, int seq, int offset)
 
      rt = rt_http_from_lld(lld);
 
-     text = http_get(rt->url, NULL, NULL, 0);
+     text = http_get(rt->url, NULL, NULL, NULL, 0);
      if (!text)
 	  return NULL;
 
@@ -219,7 +206,7 @@ TABLE rt_http_tread  (RT_LLD lld, int seq, int offset)
 
      rt = rt_http_from_lld(lld);
 
-     text = http_get(rt->url, NULL, NULL, 0);
+     text = http_get(rt->url, NULL, NULL, NULL, 0);
      if (!text)
 	  return NULL;
 

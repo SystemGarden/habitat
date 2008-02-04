@@ -13,11 +13,14 @@
 #include "route.h"
 
 /* General definitions */
-#define RT_SQLRS_LLD_MAGIC  503765
-#define RT_SQLRS_GET_URLKEY "route.sqlrs.geturl"
-#define RT_SQLRS_PUT_URLKEY "route.sqlrs.puturl"
-#define RT_SQLRS_WRITE_STATUS "sqlrs:_WRITE_STATUS_"
-#define RT_SQLRS_WRITE_RETURN "sqlrs:_WRITE_RETURN_"
+#define RT_SQLRS_LLD_MAGIC        503765
+#define RT_SQLRS_GET_URLKEY        "route.sqlrs.geturl"
+#define RT_SQLRS_PUT_URLKEY        "route.sqlrs.puturl"
+#define RT_SQLRS_AUTH_URLKEY       "route.sqlrs.authurl"
+#define RT_SQLRS_COOKIES_URLKEY    "route.sqlrs.cookieurl"
+#define RT_SQLRS_COOKIEJAR_FILEKEY "route.sqlrs.cookiejar"
+#define RT_SQLRS_WRITE_STATUS      "sqlrs:_WRITE_STATUS_"
+#define RT_SQLRS_WRITE_RETURN      "sqlrs:_WRITE_RETURN_"
 
 typedef struct rt_sqlrs_desc {
      int magic;
@@ -27,6 +30,8 @@ typedef struct rt_sqlrs_desc {
      char *addr;
      char *puturl;
      char *geturl;
+     char *ringdesc;
+     char *posttext;
 } * RT_SQLRSD;
 
 extern const struct route_lowlevel rt_sqlrs_method;

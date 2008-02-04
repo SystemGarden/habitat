@@ -1947,6 +1947,7 @@ on_open_host_open_btn_clicked          (GtkButton       *button,
      struct uichoice_node *hostnode, *myhosts=NULL;
      GtkCTreeNode *myhosts_treeitem;
      GtkWidget *open_host_name, *open_host_source_repository;
+     int from_repository;
 
      /* move the furniture */
      gtkaction_setprogress("searching for host", 0.0, 0);
@@ -1968,7 +1969,8 @@ on_open_host_open_btn_clicked          (GtkButton       *button,
       * correct address */
      open_host_source_repository = lookup_widget(GTK_WIDGET(button), 
 						 "open_host_source_repository");
-     if (GTK_TOGGLE_BUTTON (open_host_source_repository)->active)
+     from_repository = GTK_TOGGLE_BUTTON (open_host_source_repository)->active;
+     if (from_repository)
 	  snprintf(purl, 128, "sqlrs:%s", hostname);
      else
 	  snprintf(purl, 128, "http://%s:%d/localtsv/", hostname, 
@@ -1992,14 +1994,16 @@ on_open_host_open_btn_clicked          (GtkButton       *button,
 	  gtk_ctree_expand(GTK_CTREE(tree), myhosts_treeitem);
 	  break;
      case -1:
-	  elog_printf(ERROR, "Unable to read %s", purl);
+          elog_printf(ERROR, "Unable to read %s %s", hostname, 
+		      from_repository ? "from repository" : "directly");
 	  break;
      case -2:
-	  elog_printf(WARNING, "%s has already been loaded", purl);
+	  elog_printf(WARNING, "%s has already been loaded", hostname);
 	  break;
      case 0:
      default:
-	  elog_printf(ERROR, "Error loading %s", purl);
+          elog_printf(ERROR, "Failed to read %s %s", hostname, 
+		      from_repository ? "from repository" : "directly");
 	  break;
      }
 

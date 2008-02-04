@@ -18,6 +18,7 @@ struct http_buffer {
 
 void  http_init();
 void  http_fini();
-char *http_get(char *url, TREE *cookies, TABLE auth, int flags);
+char *http_get(char *url, TREE *cookies, char *cookiejar, TABLE auth, 
+	       int flags);
 char *http_post(char *url, TREE *form, TREE *files, TREE *parts, 
-		TREE *cookies, TABLE auth, int flags);
+		TREE *cookies, char *cookiejar, TABLE auth, int flags);

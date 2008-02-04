@@ -294,12 +294,15 @@ void nm_nfree(void *p, char *rfile, int rline, const char *rfunc) {
 
 /* As nfree above */
 void nm_xnfree(void *p, char *rfile, int rline, const char *rfunc) {
+     if (p == NULL)
+          return;
+
 #if NMALLOC
      if (nm_active)
 	  nm_rm(NM_XNFREE, p, rfile, rline, rfunc);
 #endif
-     if (p != NULL)
-	  free(p);
+
+     free(p);
 }
 
 /* As strdup(3) but with parameter checking and leak safeguards */

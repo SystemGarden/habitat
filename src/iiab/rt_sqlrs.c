@@ -1,8 +1,9 @@
 /*
  * Route driver for sqlrs, a set of format conventions for http
  *
- * Nigel Stuckey, August 2003
- * Copyright System Garden Ltd 2003. All rights reserved
+ * Nigel Stuckey, August 2003. 
+ * Updates for harvest repository authentication January 2008
+ * Copyright System Garden Ltd 2003-2008. All rights reserved
  */
 
 #include <stdio.h>
@@ -22,6 +23,7 @@
 
 /* private functional prototypes */
 RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld);
+void rt_sqlrs_get_credentials(TABLE *auth, CF_VALS *cookies, char **cookiejar);
 
 const struct route_lowlevel rt_sqlrs_method = {
      rt_sqlrs_magic,      rt_sqlrs_prefix,     rt_sqlrs_description,
@@ -31,7 +33,6 @@ const struct route_lowlevel rt_sqlrs_method = {
      rt_sqlrs_tread
 };
 CF_VALS rt_sqlrs_cf;
-char *rt_sqlrs_posttext=NULL;
 
 int    rt_sqlrs_magic()		{ return RT_SQLRS_LLD_MAGIC; }
 char * rt_sqlrs_prefix()	{ return "sqlrs"; }
@@ -53,10 +54,10 @@ int    rt_sqlrs_access(char *p_url, char *password, char *basename, int flag)
  * For successful operation, p-urls should be of the form 'sqlrs: ... !tsv'.
  * Returns a descriptor for success or NULL for failure */
 RT_LLD rt_sqlrs_open (char *p_url,	/* address valid until ..close() */
-		     char *comment,	/* comment, ignored in this method */
-		     char *password,	/* password, currently ignored */ 
-		     int keep,		/* flushed groups to keep, ignored */
-		     char *basename	/* non-prefix of p-url */)
+		      char *comment,	/* comment, used as ring description */
+		      char *password,	/* password, currently ignored */ 
+		      int   keep,	/* flushed groups to keep, ignored */
+		      char *basename	/* non-prefix of p-url */)
 {
      RT_SQLRSD rt;
      char *url;
@@ -94,7 +95,8 @@ RT_LLD rt_sqlrs_open (char *p_url,	/* address valid until ..close() */
 	  return NULL;
      }
      rt->puturl = util_strjoin(url, "?a=sqlrs:", basename, "!csv", NULL);
-     /*rt->puturl = xnstrdup(url);*/
+     rt->ringdesc = comment ? xnstrdup(comment) : NULL;
+     rt->posttext = NULL;
 
      return rt;
 }
@@ -109,6 +111,9 @@ void   rt_sqlrs_close (RT_LLD lld)
      nfree(rt->addr);
      nfree(rt->geturl);
      nfree(rt->puturl);
+     nfree(rt->ringdesc);
+     if (rt->posttext)
+	  nfree(rt->posttext);
      nfree(rt);
 }
 
@@ -119,15 +124,19 @@ void   rt_sqlrs_close (RT_LLD lld)
  * next call to rt_sqlrs_write(); they can be retrieved by reading the
  * special p_urls of 'sqlrs:_WRITE_STATUS_' (defined to 
  * RT_SQLRS_WRITE_STATUS) and 'sqlrs:_WRITE_RETURN_' (defined to 
- * RT_SQLRS_WRITE_RETURN)
+ * RT_SQLRS_WRITE_RETURN).
  * Data format is comma separated fat headed array: cvs fha and defined
- * by the habitat to harvest  protocol.
+ * by the habitat to harvest protocol.
  * Returns the number of characters written if successful or -1 for failure.
+ * On failure, read 'sqlrs:_WRITE_STATUS_' to see why
  */
 int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
 {
      RT_SQLRSD rt;
      TREE *form, *parts;
+     TABLE auth;
+     char *cookiejar;
+     CF_VALS cookies;
 
      rt = rt_sqlrs_from_lld(lld);
 
@@ -135,26 +144,49 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
      if (((char *)buf)[buflen])
 	  elog_die(FATAL, "buffer untruncated");
 
-     /* compile the form */
+     /* get authentication credentials */
+     rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+
+     /* compile the form - the route address (a) and host names are
+      * provided in the url, but the description and ring length is not
+      * and needs to be provided as additional form parameters.
+      * (We don't bother with ring length currently as its managed 
+      * independently by the repository, but this would be the place to put 
+      * it) */
      form = tree_create();
-     tree_add(form, "a",    rt->addr);
-     tree_add(form, "host", util_hostname());
-     parts = tree_create();
-     tree_add(parts, "upfile", (void *) buf);
+     /*tree_add(form,  "a",           rt->addr);*/
+     /*tree_add(form,  "host",        util_hostname());*/
+     tree_add(form,  "description", rt->ringdesc);
+
+     /* if the buffer is small, add it as a regular form parameter (updata),
+      * or if its big then add it as a file upload (upfile). This is due to
+      * efficiency */
+     if (buflen > 1000) {
+          parts = tree_create();
+          tree_add(parts, "upfile", (void *) buf);
+     } else {
+          parts = NULL;
+	  tree_add(form, "updata", (void *) buf);
+     }
+
+     /* clear the previous returned text, if any before starting next post */
+     if (rt->posttext) {
+	  nfree(rt->posttext);
+	  rt->posttext = NULL;
+     }
 
      /* post it */
-     if (rt_sqlrs_posttext) {
-	  nfree(rt_sqlrs_posttext);
-	  rt_sqlrs_posttext = NULL;
-     }
-     rt_sqlrs_posttext = http_post(rt->puturl, form, NULL, parts, NULL, 
-				   NULL, 0);
+     rt->posttext = http_post(rt->puturl, form, NULL, parts, cookies, 
+			      cookiejar, auth, 0);
      tree_destroy(form);
-     tree_destroy(parts);
-     if (rt_sqlrs_posttext && strncmp(rt_sqlrs_posttext, "OK", 2) == 0)
+     if (parts) 
+          tree_destroy(parts);
+     if (rt->posttext && strncmp(rt->posttext, "OK", 2) == 0) {
 	  return buflen;
-     else
+     } else {
+          elog_printf(DIAG, "Repository rejected post: %s", rt->posttext);
 	  return -1;
+     }
 }
 
 
@@ -166,7 +198,8 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
  * preserved. Do not free this text, as it will be managed by rt_sqlrs.
  * Returns 1 for success or 0 for failure
  */
-int    rt_sqlrs_twrite (RT_LLD lld, TABLE tab)
+int    rt_sqlrs_twrite (RT_LLD lld,	/* route low level descriptor */
+			TABLE tab	/* input table */)
 {
      char *text;
      RT_SQLRSD rt;
@@ -189,11 +222,15 @@ int    rt_sqlrs_twrite (RT_LLD lld, TABLE tab)
 }
 
 
-/* Sets position in file, position in sequence and modification time.
- * Currently sqlrs: is stateless, so the call will always succeed and
+/* Returns the current position in file, position in sequence and 
+ * modification time.
+ * Currently 'sqlrs:' is stateless, so the call will always succeed and
  * -1 (file), 0 (seq) will  be returned.
  * Returns 1 for success, 0 for failure */
-int    rt_sqlrs_tell  (RT_LLD lld, int *seq, int *size, time_t *modt)
+int    rt_sqlrs_tell  (RT_LLD lld,	/* route low level descriptor */
+		       int *seq, 	/* returned sequence */
+		       int *size,	/* returned size */
+		       time_t *modt	/* returned modification time */)
 {
      *seq=0;
      *size=-1;
@@ -217,35 +254,48 @@ int    rt_sqlrs_tell  (RT_LLD lld, int *seq, int *size, time_t *modt)
  * Returns an ordered list of sequence buffers, unless no data is available
  * or there is an error, when NULL is returned.
  */
-ITREE *rt_sqlrs_read  (RT_LLD lld, int seq, int offset)
+ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
+		       int seq,		/* IGNORED */
+		       int offset	/* position to offset bytes before 
+					 * returning data */)
 {
      ROUTE_BUF *storebuf;
      ITREE *buflist;
      RT_SQLRSD rt;
      char *text;
      int len;
+     CF_VALS cookies;
+     TABLE auth;
+     char *cookiejar;
 
      rt = rt_sqlrs_from_lld(lld);
 
+     /* special locations that return the status of the last write action */
      if (strcmp(RT_SQLRS_WRITE_STATUS, rt->url) == 0) {
-	  if (rt_sqlrs_posttext) {
-	       len = strcspn(rt_sqlrs_posttext, "\n");
-	       text = xnmemdup(rt_sqlrs_posttext, len+1);
+	  if (rt->posttext) {
+	       len = strcspn(rt->posttext, "\n");
+	       text = xnmemdup(rt->posttext, len+1);
 	  } else {
 	       len = 0;
 	       text = xnmalloc(1);
 	  }
 	  text[len] = '\0';
      } else if (strcmp(RT_SQLRS_WRITE_RETURN, rt->url) == 0) {
-	  if (rt_sqlrs_posttext) {
-	       len = strcspn(rt_sqlrs_posttext, "\n");
-	       text = xnstrdup(rt_sqlrs_posttext+len+1);
+	  if (rt->posttext) {
+	       len = strcspn(rt->posttext, "\n");
+	       text = xnstrdup(rt->posttext+len+1);
 	  } else {
 	       len = 0;
 	       text = xnstrdup("");
 	  }
      } else {
-	  text = http_get(rt->geturl, NULL, NULL, 0);
+          /* normal connection */
+
+          /* get authentication credentials */
+          rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+
+          text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
+
      }
      if (!text)
 	  return NULL;
@@ -272,24 +322,40 @@ ITREE *rt_sqlrs_read  (RT_LLD lld, int seq, int offset)
  * is comma separated fat headed array: csv fha.
  * NULL is returned if there is no data to read or if there is a failure.
  */
-TABLE rt_sqlrs_tread  (RT_LLD lld, int seq, int offset)
+TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
+		       int seq,		/* IGNORED */
+		       int offset	/* position to offset bytes before 
+					 * returning data */)
 {
      RT_SQLRSD rt;
-     char *text;
+     char *text, errtext[50];
      TABLE tab;
      int r, len;
+     CF_VALS cookies;
+     TABLE auth;
+     char *cookiejar;
 
      rt = rt_sqlrs_from_lld(lld);
 
      if (strcmp(RT_SQLRS_WRITE_STATUS, rt->url) == 0) {
-	  len = strcspn(rt_sqlrs_posttext, "\n");
-	  text = util_strjoin("status\n--\n", rt_sqlrs_posttext, NULL);
+	  len = strcspn(rt->posttext, "\n");
+	  text = util_strjoin("status\n--\n", rt->posttext, NULL);
 	  text[len+10] = '\0';
      } else if (strcmp(RT_SQLRS_WRITE_RETURN, rt->url) == 0) {
-	  len = strcspn(rt_sqlrs_posttext, "\n");
-	  text = xnstrdup(rt_sqlrs_posttext+len+1);
+	  len = strcspn(rt->posttext, "\n");
+	  text = xnstrdup(rt->posttext+len+1);
      } else {
-	  text = http_get(rt->geturl, NULL, NULL, 0);
+          /* normal connection */
+
+          /* get authentication credentials */
+          rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+
+	  /* carry out the fetch */
+          text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
+
+	  /* free data */
+	  if (auth) table_destroy(auth);
+	  if (cookies) cf_destroy(cookies);
      }
      if (!text)
 	  return NULL;
@@ -301,6 +367,15 @@ TABLE rt_sqlrs_tread  (RT_LLD lld, int seq, int offset)
 		    TABLE_HASRULER);
      if (r < 1) {
 	  /* empty table, no data or error */
+          len = strlen(text);
+	  if (len > 0) {
+	       strncpy(errtext, text, 50);
+	       errtext[49] = '\0';
+	       elog_printf(DIAG, "unable to parse table from text: %s%s "
+			   "(length %d)",
+			   errtext, len > 49 ? "...(truncated)" : "", len);
+	  }
+
 	  table_destroy(tab);
 	  tab = NULL;
      }
@@ -325,6 +400,110 @@ RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld	/* typeless low level data */)
 
      return (RT_SQLRSD) lld;
 }
+
+
+/* Return an auth table, cookie tree list, cookiejar filename string 
+ * from the config and data sources.
+ * Authorisation is held in a route pointed to by RT_SQLES_AUTH_URLKEY.
+ * It must be a table or be text that is parsable into a table.
+ * The route may not be sqlrs:, http: or https: to avoid infinite reursion
+ * and this routine will spot those driver prefixes, refuse to route_tread()
+ * and therefore avoid the loop; the returned auth will be set to NULL.
+ * Cookie jar is a simple filename referring to local storage.
+ * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY.
+ * This should be free text in a configuration format, parasable by the
+ * cf class. This config structure is then returned.
+ * Again, it must not be sqlrs: or http:
+ * Auth should be freed with table_destroy() if non-NULL, cookies with 
+ * cf_destroy() if non-NULL and cookiejar with nfree() if non-NULL.
+ * NEED TO REVIEW THE MEMORY ALLOCATIONS for TABLE an CF_VALS
+*/
+void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
+						 * & authorisation table*/
+			      CF_VALS *cookies,	/* returned cookies */
+			      char **cookiejar	/* returned cookiejar fname */)
+{
+  char *auth_purl, *cookies_purl;
+
+     /* get the configuration details */
+     if (rt_sqlrs_cf == NULL) {
+          elog_printf(DIAG, "no configuration, can't get credentials");
+	  *auth = NULL;
+	  *cookies = NULL;
+	  *cookiejar = NULL;
+     } else {
+          auth_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_AUTH_URLKEY);
+	  if (auth_purl == NULL) {
+	       elog_printf(DIAG, "authorisation configuration not found: %s, "
+			   "proceeding without authorisation", 
+			   RT_SQLRS_AUTH_URLKEY);
+	       *auth = NULL;
+	  } else {
+	       /* prevent loops with ourself */
+	       if (strncmp(auth_purl, "http:",  5) == 0 ||
+		   strncmp(auth_purl, "https:", 6) == 0 ||
+		   strncmp(auth_purl, "sqlrs:", 6) == 0) {
+	            elog_printf(DIAG, "can't use HTTP based routes to find "
+				"authentication for HTTP methods (%s=%s); "
+				"loop avoided, proceeding without "
+				"authentication configuration", 
+				RT_SQLRS_AUTH_URLKEY, auth_purl);
+		    *auth = NULL;
+	       } else {
+		    *auth = route_tread(auth_purl, NULL);
+		    if (table_ncols(*auth) == 1) {
+		         /* its not a table, so attempt to parse it */
+		    }
+		    /* COULD BE TABULAR OR COULD BE A FLAT FILE (IN WHICH CASE
+		     * THERE WILL ON BE 'DATA' AS A COLUMN. SO, IF ONLY
+		     * DATA, ATTEMPT TO PARSE IT IN TO A TABLE. IF THAT FAILS
+		     * THEN AUTH MUST BE MARKED AS NULL */
+	       }
+	  }
+          cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
+	  if (cookies_purl == NULL) {
+	       elog_printf(DIAG, "cookie configuration not found: %s, "
+			   "proceeding without configuration", 
+			   RT_SQLRS_COOKIES_URLKEY);
+		    *cookies = NULL;
+	  } else {
+	       /* prevent loops with ourself */
+	       if (strncmp(cookies_purl, "http:",  5) == 0 ||
+		   strncmp(cookies_purl, "https:", 6) == 0 ||
+		   strncmp(cookies_purl, "sqlrs:", 6) == 0) {
+	            elog_printf(DIAG, "can't use HTTP based routes to find "
+				"authentication for HTTP methods (%s=%s); "
+				"loop avoided, proceeding without "
+				"authentication configuration", 
+				RT_SQLRS_COOKIES_URLKEY, cookies_purl);
+		    *cookies = NULL;
+	       } else {
+		    /* parse the text as a key-value configuration file */
+		    *cookies = cf_create();
+		    if ( ! cf_scanroute(*cookies, NULL, cookies_purl, 1)) {
+		         /* unsuccessful parse */
+			 cf_destroy(*cookies);
+			 *cookies = NULL;
+		    }
+	       }
+	  }
+          *cookiejar = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIEJAR_FILEKEY);
+	  if (*cookiejar == NULL) {
+	       elog_printf(DIAG, "cookie jar configuration not found: %s, "
+			   "proceeding with out the jar",
+			   RT_SQLRS_COOKIEJAR_FILEKEY);
+	  }
+	  /* chop off any driver prefix given by mistake as CURL won't
+	   * understand it */
+	  if (strncmp(*cookiejar, "file:", 5) == 0)
+	       *cookiejar += 5;
+	  else if (strncmp(*cookiejar, "filea:", 6) == 0)
+	       *cookiejar += 6;
+	  else if (strncmp(*cookiejar, "fileov:", 7) == 0)
+	       *cookiejar += 7;
+     }
+}
+
 
 
 #if TEST

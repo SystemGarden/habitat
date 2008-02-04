@@ -52,6 +52,7 @@ int     cf_defined(CF_VALS cf, char *key);
 int     cf_isvector(TREE *cf, char *key);
 void    cf_dump(CF_VALS cf);
 TABLE   cf_getstatus(CF_VALS cf);
+TREE *  cf_gettree(CF_VALS cf);
 void    cf_addstr(CF_VALS cf, char *name, char *value);
 void    cf_entreplace(TREE *t, char *key, struct cf_entval *);
 void    cf_entfree(struct cf_entval *entry);
