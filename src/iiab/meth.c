@@ -787,7 +787,7 @@ int meth_actiononly(METHID run,		/* method specification */
      err = route_open(err_purl, command, NULL, keep);
      if (!out || !err) {
 	  elog_printf(FATAL, "unable to open one or more routes:-\n"
-		      "out: %s\nin:%s", res_purl, err_purl);
+		      "out: %s\nerr: %s", res_purl, err_purl);
 	  return 1;
      }
      /* preaction */

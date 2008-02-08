@@ -234,6 +234,7 @@ struct ghchoice_timebase timebase[] = {
      {"20 years",  630720000,  1, 600},
      {"30 years",  946080000,  1, 600},
      {"40 years",  1261440000, 1, 600},
+     {"50 years",  1576800000, 1, 600},
      {NULL,        0,          0, 0}
 };
 
@@ -620,7 +621,7 @@ ghchoice_loadfile(char *fname,			/* holstore filename */
 		   util_strjoin("rs:", fname, NULL));
      } else {
           /* not a ringstore, try a FHA */
-          elog_printf(INFO, "unable to read superblock from %s, assuming "
+          elog_printf(DIAG, "unable to read superblock from %s, assuming "
 		      "not a ringstore", fname);
 
           shortname = util_basename(fname);

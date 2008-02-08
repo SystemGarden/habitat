@@ -17,11 +17,27 @@ CHANGES
 -------
 This release includes the following changes over the 0.99.x series:- 
 
+
+	VERSION 1.1
+	- fixed several small problems with habmeth and habprobe
+	- More tuning off log messages
+	- Changed all apps to route_expand() entire config on initialisation
+	- Job table changed to file, not ringstore to allow for easier
+	  config changes in the future of the client
+	- Non-time data (like job table) redraw bug fixed and update
+	  routine refactored
+	- Sanitised a number log messages to make more clear to user
+	- Added cookiejar for session token
+	- Added cookies for account security
+	- Added basic authentication for site security
+	- Established communication with Harvest 2.0
+	- Fixed a class of atoi() bug
+
 	VERSION 1.0.0
-	- process instance identifier changed from pid to one made up from
+	- Process instance identifier changed from pid to one made up from
 	  the command and the pid, and called 'process'.
-	- added similar solaris human readable process id
-	- changed the solaris I/O probe id to be the mount point if one exists
+	- Added similar solaris human readable process id
+	- Changed the solaris I/O probe id to be the mount point if one exists
 	- Changed button text in log popup window to 'Close' from 'OK'
 	- Route p-urls now default to plain files if driver is not supplied
 	- Logo pixmap changed to have a mask

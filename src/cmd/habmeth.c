@@ -26,7 +26,7 @@ char *cfdefaults =
 char *usagetxt;
 
 char *mkusage();
-void listmeths(char *buf, int buflen);
+int listmeths(char *buf, int buflen);
 
 /*
  * Main function
@@ -83,17 +83,19 @@ int main(int argc, char *argv[]) {
 /* create usage text in a static string */
 char *mkusage() {
      static char usage[2000];
-     int i;
+     int i, j;
 
      strcpy(usage, "run a habitat method stand alone, where methods are:-\n");
      i=strlen(usage);
-     listmeths(usage+i, 2000-i);
+     i+=listmeths(usage+i, 2000-i);
+     strncpy(usage+i, "excludes probe method, see habprobe(1)\n", 2000-i);
+     usage[1999] = '\0';	/* ensure termination */
      return usage;
 }
 
 
-/* list methods to a string buffer */
-void listmeths(char *buf, int buflen) {
+/* list methods to a string buffer, returning the bytes used in the string */
+int listmeths(char *buf, int buflen) {
      int i, curlen=0;
 
      for (i=0; meth_builtins[i].name; i++)
@@ -101,5 +103,6 @@ void listmeths(char *buf, int buflen) {
 			     "      %-11.11s %s\n", 
 			     meth_builtins[i].name(), 
 			     meth_builtins[i].info());
+     return curlen;
 }
 

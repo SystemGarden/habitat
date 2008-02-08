@@ -29,6 +29,12 @@ void http_init()
      http_curlh = curl_easy_init();
      if (! http_curlh)
 	  elog_die(FATAL, "unable to initialise curl");
+
+     /* general curl configuration  - avoid signals, don't call DNS 
+      * excesively and dont wait too long to connect */
+     curl_easy_setopt(http_curlh, CURLOPT_NOSIGNAL, (long) 1);
+     curl_easy_setopt(http_curlh, CURLOPT_DNS_CACHE_TIMEOUT, (long) 3600);
+     curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 15);
 }
 
 /* shut down the curl class */
@@ -202,8 +208,8 @@ char *http_post(char   *url, 	/* standard url */
      char *host, *certpath, cookies_str[HTTP_COOKIESTRLEN], *proxy=NULL;
      char errbuf[CURL_ERROR_SIZE], summary[50];
      int hostlen, rowkey, i;
-     struct HttpPost *formpost=NULL;
-     struct HttpPost *lastptr=NULL;
+     struct curl_httppost *formpost=NULL;
+     struct curl_httppost *lastptr=NULL;
      TREE *cookie_list;
 
      /* Get host from url and look up in the auth table */

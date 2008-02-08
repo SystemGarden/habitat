@@ -2,7 +2,7 @@
  * Clockwork - a periodic execution utility for iiab
  *
  * Nigel Stuckey, December 1998
- * Copyright System Garden Limited 1998-2004. All rights reserved.
+ * Copyright System Garden Limited 1998-2008. All rights reserved.
  *
  * Think of clockwork as cron with `knobs on'.
  * Using functionality in libiiab, it has more timing control
@@ -36,8 +36,9 @@ int load_jobs(char *purl);
 void stopclock(int sig /* signal vector */);
 
 /* initialise globals */
-char usagetxt[] = "[-j <jobs>] [-s]\n" \
+char usagetxt[] = "[-j <jobs>] [-sf]\n" \
      "where -j <jobs>   use jobs from route <jobs>; don't daemonise (imply -s)\n"
+     "      -f          run in foreground, don't daemonise\n"
      "      -s          server off: do not listen for data requests from network";
 char helptxt[] = "no help for the weary";
 char *cfdefaults = 
@@ -45,10 +46,11 @@ char *cfdefaults =
      "job.debug  -1\n"
      "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
-     "jobs       rs:%s/%%h.rs,clockwork,0\n"	/*file:clockwork.jobs*/
+     /*"jobs       file:%l/clockwork.jobs\n"*/
+     "jobs       rs:%v/%h.rs,clockwork,0\n"
      "elog.all   none:\n"
-     "elog.above warning rs:%s/%%h.rs,log\n";
-char *cfdefaults2 = 
+     "elog.above warning rs:%v/%h.rs,log\n";
+char *cfdefaults_userjobs = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
      "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
@@ -64,20 +66,27 @@ int   clock_done_init=0;
 
 int main(int argc, char **argv) {
      int r, joblen, errorstatus=0;
-     char *jobpurl, jobpurl_t[1024], *jobtxt, *defjobs, buf[500];
+     char *jobpurl, jobpurl_t[1024], *jobtxt, *defjobs, buf[1024];
      time_t clock;
      ROUTE jobrt;
 
-     /* initialise, fetching the directory locations before hand and
-      * then ensure we are the only clockwork running on this box.
+     /* initialise, fetching the directory locations & expanding them before 
+      * hand, then ensure we are the only clockwork running on this box.
       * By default send errors to the default data store, unless 
       * errors are overridden or -j switch is given. */
+#if 0
      iiab_dir_locations(argv[0]);
      if (iiab_iscmdopt("j", argc, argv))
-          snprintf(buf, 500, cfdefaults2);
+          route_expand(buf, cfdefaults_userjobs, NULL, NULL);
      else
-          snprintf(buf, 500, cfdefaults, iiab_dir_var, iiab_dir_var);
+          route_expand(buf, cfdefaults, NULL, NULL);
      iiab_start("sj:", argc, argv, usagetxt, buf);
+#endif
+     if (iiab_iscmdopt("j", argc, argv))
+          iiab_start("sfj:", argc, argv, usagetxt, cfdefaults_userjobs);
+     else
+          iiab_start("sfj:", argc, argv, usagetxt, cfdefaults);
+
 
      /* process switches and arguments */
      /* debug flag */
@@ -97,8 +106,9 @@ int main(int argc, char **argv) {
           /* replacement jobs and private mode */
           cf_putstr(iiab_cf, "jobs", cf_getstr(iiab_cf, "j"));
      } else {
-	  /* default running: we want to be a daemon! */
-	  iiab_daemonise();
+          if ( ! cf_defined(iiab_cf, "f"))
+	       /* default running: we want to be a daemon! */
+	       iiab_daemonise();
 	  iiab_lockordie(CLOCKWORK_KEYNAME);
 
 	  /* only in daemon mode can we provide the server unless its 

@@ -23,7 +23,8 @@
 
 /* private functional prototypes */
 RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld);
-void rt_sqlrs_get_credentials(TABLE *auth, CF_VALS *cookies, char **cookiejar);
+void rt_sqlrs_get_credentials(char *purl, TABLE *auth, CF_VALS *cookies, 
+			      char **cookiejar);
 
 const struct route_lowlevel rt_sqlrs_method = {
      rt_sqlrs_magic,      rt_sqlrs_prefix,     rt_sqlrs_description,
@@ -145,7 +146,7 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
 	  elog_die(FATAL, "buffer untruncated");
 
      /* get authentication credentials */
-     rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+     rt_sqlrs_get_credentials(rt->url, &auth, &cookies, &cookiejar);
 
      /* compile the form - the route address (a) and host names are
       * provided in the url, but the description and ring length is not
@@ -292,7 +293,7 @@ ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
           /* normal connection */
 
           /* get authentication credentials */
-          rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+          rt_sqlrs_get_credentials(rt->url, &auth, &cookies, &cookiejar);
 
           text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
 
@@ -348,7 +349,7 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
           /* normal connection */
 
           /* get authentication credentials */
-          rt_sqlrs_get_credentials(&auth, &cookies, &cookiejar);
+          rt_sqlrs_get_credentials(rt->url, &auth, &cookies, &cookiejar);
 
 	  /* carry out the fetch */
           text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
@@ -418,7 +419,8 @@ RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld	/* typeless low level data */)
  * cf_destroy() if non-NULL and cookiejar with nfree() if non-NULL.
  * NEED TO REVIEW THE MEMORY ALLOCATIONS for TABLE an CF_VALS
 */
-void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
+void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
+			      TABLE *auth,	/* returned host configuration
 						 * & authorisation table*/
 			      CF_VALS *cookies,	/* returned cookies */
 			      char **cookiejar	/* returned cookiejar fname */)
@@ -435,8 +437,8 @@ void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
           auth_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_AUTH_URLKEY);
 	  if (auth_purl == NULL) {
 	       elog_printf(DIAG, "authorisation configuration not found: %s, "
-			   "proceeding without authorisation", 
-			   RT_SQLRS_AUTH_URLKEY);
+			   "proceeding without authorisation for %s", 
+			   RT_SQLRS_AUTH_URLKEY, purl);
 	       *auth = NULL;
 	  } else {
 	       /* prevent loops with ourself */
@@ -446,8 +448,8 @@ void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
 	            elog_printf(DIAG, "can't use HTTP based routes to find "
 				"authentication for HTTP methods (%s=%s); "
 				"loop avoided, proceeding without "
-				"authentication configuration", 
-				RT_SQLRS_AUTH_URLKEY, auth_purl);
+				"authentication configuration for %s", 
+				RT_SQLRS_AUTH_URLKEY, auth_purl, purl);
 		    *auth = NULL;
 	       } else {
 		    *auth = route_tread(auth_purl, NULL);
@@ -463,8 +465,8 @@ void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
           cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
 	  if (cookies_purl == NULL) {
 	       elog_printf(DIAG, "cookie configuration not found: %s, "
-			   "proceeding without configuration", 
-			   RT_SQLRS_COOKIES_URLKEY);
+			   "proceeding without configuration for %s", 
+			   RT_SQLRS_COOKIES_URLKEY, purl);
 		    *cookies = NULL;
 	  } else {
 	       /* prevent loops with ourself */
@@ -474,8 +476,8 @@ void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
 	            elog_printf(DIAG, "can't use HTTP based routes to find "
 				"authentication for HTTP methods (%s=%s); "
 				"loop avoided, proceeding without "
-				"authentication configuration", 
-				RT_SQLRS_COOKIES_URLKEY, cookies_purl);
+				"authentication configuration for %s", 
+				RT_SQLRS_COOKIES_URLKEY, cookies_purl, purl);
 		    *cookies = NULL;
 	       } else {
 		    /* parse the text as a key-value configuration file */
@@ -490,8 +492,8 @@ void rt_sqlrs_get_credentials(TABLE *auth,	/* returned host configuration
           *cookiejar = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIEJAR_FILEKEY);
 	  if (*cookiejar == NULL) {
 	       elog_printf(DIAG, "cookie jar configuration not found: %s, "
-			   "proceeding with out the jar",
-			   RT_SQLRS_COOKIEJAR_FILEKEY);
+			   "proceeding with out the jar for %s",
+			   RT_SQLRS_COOKIEJAR_FILEKEY, purl);
 	  }
 	  /* chop off any driver prefix given by mistake as CURL won't
 	   * understand it */

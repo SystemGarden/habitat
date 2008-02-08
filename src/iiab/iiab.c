@@ -79,7 +79,7 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 		char *appcf	/* Application configuration string */ )
 {
      int r;
-     char iiablaunchdir[PATH_MAX];
+     char iiablaunchdir[PATH_MAX], *appcf_expanded;
      int elogfmt;
 
      if ( !(opts && usage) )
@@ -123,10 +123,14 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 	  exit(1);
      }
 
-     /* load the configuration from the standard places, goverened by 
-      * the command line. Also load the app's dir locations */
-     iiab_cf_load(iiab_cf, iiab_cmdarg, iiab_cmdusage, appcf);
+     /* load app's dir locations into config, expand the application config
+      * string (which needs the dir locations in iiab_cf), then do the
+      * fullconfig load */
      iiab_dir_setcf(iiab_cf);
+     appcf_expanded = nmalloc(strlen(appcf) * 2);
+     route_expand(appcf_expanded, appcf, NULL, NULL);
+     iiab_cf_load(iiab_cf, iiab_cmdarg, iiab_cmdusage, appcf_expanded);
+     nfree(appcf_expanded);
 
      /***********************************************
       * (d) Carry out common configuration actions

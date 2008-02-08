@@ -835,7 +835,7 @@ RESDAT uidata_get_route_cons(TREE *nodeargs)
      snprintf(purl, 512, "%s,%s,cons,*,t=%ld-", basepurl, ring, tnow - *tsecs);
      tab = route_tread(purl, NULL);
      if (!tab) {
-          elog_printf(INFO, "No data available from '%s'", purl);
+          elog_printf(DIAG, "No data available from '%s'", purl);
 	  return resdat;	/* in error */
      }
 
@@ -1028,13 +1028,13 @@ RESDAT uidata_get_file(TREE *nodeargs)
 #endif
 
      /* attempt to read as a FHA with its standard formatting rules */
-     elog_printf(INFO, "File '%s' trying fha format...", fname);
+     elog_printf(DEBUG, "File '%s' trying fha format...", fname);
      tab = table_create();
      r = table_scan(tab, fbuf, "\t", TABLE_SINGLESEP, 
 		    TABLE_HASCOLNAMES, TABLE_HASRULER);
      if (r == -1) {
 	  /* now attempt to read as a csv */
-          elog_printf(INFO, "File '%s' is not in fha format, trying csv...", 
+          elog_printf(DIAG, "File '%s' is not in fha format, trying csv...", 
 		      fname);
 	  /*munmap(fbuf);*/
 	  table_destroy(tab);
@@ -1048,8 +1048,8 @@ RESDAT uidata_get_file(TREE *nodeargs)
      }
      if (r == -1) {
 	  /* now attempt to read as a less formal table */
-          elog_printf(INFO, "File '%s' not tabular as csv, trying informal "
-		      "format...", fname);
+          elog_printf(DIAG, "File '%s' not tabular as csv, trying informal "
+		      "tabular format...", fname);
 	  /*munmap(fbuf);*/
 	  table_destroy(tab);
 	  /*fbuf = mmap(0, 0, PROT_WRITE, MAP_PRIVATE, fd, 0);*/
@@ -1057,13 +1057,13 @@ RESDAT uidata_get_file(TREE *nodeargs)
 	  r = read(fd, fbuf, finfo.st_size);
 	  fbuf[finfo.st_size] = '\0';
 	  tab = table_create();
-	  r = table_scan(tab, fbuf, "\t ", TABLE_MULTISEP, 
+	  r = table_scan(tab, fbuf, "\t ,", TABLE_MULTISEP, 
 			 TABLE_HASCOLNAMES, TABLE_NORULER);
      }
      if (r == -1) {
 	  /* now attempt to read as a table with a single column, 
 	     simulating free text */
-          elog_printf(INFO, "File '%s' not informally tabular, "
+          elog_printf(DIAG, "File '%s' not informally tabular, "
 		      "treat as non-column...", fname);
 	  /*munmap(fbuf);*/
 	  table_destroy(tab);

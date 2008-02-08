@@ -1176,7 +1176,7 @@ void gtkaction_choice_update()
      GtkWidget *new_widget;
      char progress[64];
      TABLE tab;
-     time_t youngest_t=-1, oldest_t, tsecs, tsecs_orig, test_young_t;
+     time_t youngest_t, oldest_t, tsecs, tsecs_orig, test_young_t;
      char  *youngest_str, *oldest_str;
 
      /* The presentation of data in ghabitat is done by switching frames
@@ -1203,6 +1203,9 @@ void gtkaction_choice_update()
      case UI_EDTEXT:	/* editable text interface */
      case UI_EDTREE:	/* editable table using a tree interface */
 	  /* do nothing but exit for all these: none are dynamic */
+          elog_printf(DIAG, "Can't update node %s, as it is not dynamic "
+		      "(presentation type %d0", datapres_node->label, 
+		      datapres_node->presentation);
 	  return;
      }
 
@@ -1216,8 +1219,8 @@ void gtkaction_choice_update()
       * trawl through the choice tree arguments to only take the most recent.
       */
 
-     /* find most recent time in the tres structure using the convention
-      * of the _time column.
+     /* find most recent time of the current displayed data
+      * (taken from table in TRES structure, _time column).
       * Customise the duration of the node to pick up the new data */
      switch (datapres_data.t) {
      case TRES_NONE:
@@ -1236,11 +1239,13 @@ void gtkaction_choice_update()
      table_last(tab);
      youngest_str = table_getcurrentcell(tab, "_time");
      if (youngest_str) {
-       youngest_t = strtol(youngest_str, (char**)NULL, 10);
-	  tsecs = time(NULL) - (youngest_t+1);
+          youngest_t = strtol(youngest_str, (char**)NULL, 10);
+	  tsecs = time(NULL) - (youngest_t+1);	/* extend node duration to
+						 * pick up new data */
      } else {
 	  elog_printf(DIAG, "no _time column, can't update with recent "
 		      "data so completely redisplaying");
+	  youngest_t = oldest_t = -1;
      }
 
      /* clear up argument nodes in order to fetch again.
@@ -1251,7 +1256,8 @@ void gtkaction_choice_update()
      tree_clearout(datapres_nodeargs, NULL, NULL);
 
      /* get new node arguments and override the tsecs value with the
-      * new one prepared above, which will request for updates */
+      * new one prepared above, which will request for updates.
+      * when we have got the new data, we will replace tsecs */
      gtkaction_setprogress("preparing", 0.2, 0);
      uichoice_getinheritedargs(datapres_node, datapres_nodeargs);
      gtkaction_setprogress("collecting latest", 0.4, 0);
@@ -1268,15 +1274,15 @@ void gtkaction_choice_update()
      dres = datapres_node->getdata(datapres_nodeargs);
      datapres_node->datatime = time(NULL);
 #if 0
-     elog_printf(DIAG, "current last data %d %s, tsecs=%d",
+     elog_printf(DEBUG, "current last data %d %s, tsecs=%d",
 		 youngest_t, util_decdatetime(youngest_t), tsecs);
      if (dres.t == TRES_NONE)
 	  printf("no new contents\n");
      else
-	  printf("appended contents=%s\n", table_print(dres.d.tab));
+	  printf("appending contents=%s\n", table_print(dres.d.tab));
 #endif
 
-     /* Store value back of tsecs back in choice tree */
+     /* Restore the value of tsecs back in choice tree */
      if (tree_find(datapres_nodeargs, "tsecs") != TREE_NOVAL) {
 	  tsecs = *((time_t *) tree_get(datapres_nodeargs));
 	  *((time_t *) tree_get(datapres_nodeargs)) = tsecs_orig;
@@ -1285,22 +1291,19 @@ void gtkaction_choice_update()
      }
 
      if (dres.t == TRES_NONE) {
+          elog_printf(DIAG, "No new data available to %s current view", 
+		      youngest_t == -1 ? "replace" : "append");
 	  gtkaction_setprogress("no update", 0, 0);
 	  return;
      }
 
-     /* converting existing TRES TABLE types to TABLELIST types;
-      * We use TABLELIST as it will be much faster to add on data,
-      * although slower to clear down */
-     if (datapres_data.t == TRES_TABLE) {
-	  datapres_data.t = TRES_TABLELIST;
-	  datapres_data.d.tablst = itree_create();
-	  itree_append(datapres_data.d.tablst, tab);
-     }
 
-     /* append new table to existing, adapting to TRES structure */
+     /* Treat time based data differently from non-time.
+      * Non-time data removes old data and replace it with the new.
+      * Conversely, time-based data is appended to the existing data */
      if (youngest_t == -1) {
-	  /* data is a complete refresh */
+          /* -- data is a complete refresh and will replace the current set */
+
 	  uidata_freeresdat(datapres_data);
 	  datapres_data.t = dres.t;
 	  if (dres.t == TRES_TABLELIST) {
@@ -1314,69 +1317,81 @@ void gtkaction_choice_update()
 	       datapres_data.d.tab = dres.d.tab;
 	  }
      } else {
-	  /* new data is an update */
+          /* -- time based data is prepended to the current set*/
+
+          /* converting existing TRES TABLE types to TABLELIST types;
+	   * We use TABLELIST as it will be much faster to add on data,
+	   * although slower to clear down */
+          if (datapres_data.t == TRES_TABLE) {
+	       datapres_data.t = TRES_TABLELIST;
+	       datapres_data.d.tablst = itree_create();
+	       itree_append(datapres_data.d.tablst, tab);
+	  }
+
+	  /* new data is an update, append depending on its type */
 	  if (dres.t == TRES_TABLELIST) {
-	       /* new data is a list of tables, append to the collected */
+	       /* new data is a list of tables */
 	       itree_traverse(dres.d.tablst)
 		    itree_append(datapres_data.d.tablst, 
 				 itree_get(dres.d.tablst));
 	  } else {
-	       /* new data is a single table, append to the collected */
+	       /* new data is a single table */
 	       itree_append(datapres_data.d.tablst, dres.d.tab);
 	  }
-     }
 
-     /* extract a new youngest time from the updated compsite of data */
-     if (youngest_t != -1) {
-	  /* find youngest time in new data */
+	  /* find youngest time in new data, as it will have changed */
 	  itree_last(datapres_data.d.tablst);
 	  table_last(itree_get(datapres_data.d.tablst));
 	  youngest_str = table_getcurrentcell(
 	       itree_get(datapres_data.d.tablst), "_time");
 	  if (youngest_str)
-	    youngest_t = strtol(youngest_str, (char**)NULL, 10);
+	       youngest_t = strtol(youngest_str, (char**)NULL, 10);
      }
 
+
      /* Expire old data
-      * Used to prevent excessive data build up.
+      * Used to prevent excessive data build up in time based data.
       * To save time at the expense of space, only remove whole tables
-      * (rather than expiring within a table).
+      * out of our table list in TABLST, rather than removing lines 
+      * in big tables.
       * Remove tables whose youngest data have been expired */
+     if (youngest_t != -1) {
 
-     /* Calculate the oldest time */
-     oldest_t = time(NULL) - tsecs_orig;
+          /* Calculate the oldest time */
+          oldest_t = time(NULL) - tsecs_orig;
 
-     /* Walk the table list */
-     itree_first(datapres_data.d.tablst);
-     while ( ! itree_isbeyondend(datapres_data.d.tablst) ) {
-	  /* For each table, find the youngest time */
-	  table_last(itree_get(datapres_data.d.tablst));
-	  youngest_str = table_getcurrentcell(
-	       itree_get(datapres_data.d.tablst), "_time");
-	  if (youngest_str) {
-	    test_young_t = strtol(youngest_str, (char**)NULL, 10);
-	       if (test_young_t < oldest_t) {
-		    /* Remove table from list if old */
-		    elog_printf(DEBUG, "removing old data: youngest_t=%d",
-			 test_young_t);
-		    table_destroy(itree_get(datapres_data.d.tablst));
-		    itree_rm(datapres_data.d.tablst);
-		    continue;
-	       } else {
-		    /* The list is in order, so this is the first table
-		     * we want to keep. Find the oldest time in the table, 
-		     * save it and break out for reporting */
-		    table_first(itree_get(datapres_data.d.tablst));
-		    oldest_str = table_getcurrentcell(
-			 itree_get(datapres_data.d.tablst), "_time");
-		    if (oldest_str)
-		      oldest_t = strtol(oldest_str, (char**)NULL, 10);
-		    else
-			 oldest_t = -1;
-		    break;
+	  /* Walk the table list */
+	  itree_first(datapres_data.d.tablst);
+	  while ( ! itree_isbeyondend(datapres_data.d.tablst) ) {
+	       /* For each table, find the youngest time */
+	       table_last(itree_get(datapres_data.d.tablst));
+	       youngest_str = table_getcurrentcell(
+	             itree_get(datapres_data.d.tablst), "_time");
+	       if (youngest_str) {
+		    test_young_t = strtol(youngest_str, (char**)NULL, 10);
+		    if (test_young_t < oldest_t) {
+		         /* Remove table from list if old */
+		         elog_printf(DEBUG, "removing old data: youngest_t=%d",
+				     test_young_t);
+			 table_destroy(itree_get(datapres_data.d.tablst));
+			 itree_rm(datapres_data.d.tablst);
+			 continue;
+		    } else {
+		         /* The list is in order, so this is the first table
+			  * we want to keep. Find the oldest time in the 
+			  * table, save it and break out for reporting */
+		         table_first(itree_get(datapres_data.d.tablst));
+			 oldest_str = table_getcurrentcell(
+			       itree_get(datapres_data.d.tablst), "_time");
+			 if (oldest_str)
+			      oldest_t = strtol(oldest_str, (char**)NULL, 10);
+			 else
+			      oldest_t = -1;
+			 break;
+		    }
 	       }
+	       itree_next(datapres_data.d.tablst);	/* next entry if no _time */
 	  }
-	  itree_next(datapres_data.d.tablst);	/* next entry if no _time */
      }
 
      /* draw specific widget types */

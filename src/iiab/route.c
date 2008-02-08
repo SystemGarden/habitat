@@ -240,10 +240,12 @@ ROUTE route_open_t(char *p_url,		/* Pseduo-url */
  * All tokens are of the form  %<x>, expansion is as follows:-
  *	%j - Current job name
  *      %h - Host name
- *      %m - domain name
+ *      %m - Domain name
  *      %f - Fully qualified hostname
  *      %d - Duration
  *      %v - iiab_dir_var directory (typically ../var)
+ *      %l - iiab_dir_lib directory (typically ../lib)
+ *      %e - iiab_dir_etc directory (typically ../etc)
  * Returns the number of tokens expanded or -1 for error
  */
 int route_expand(char *dst,	/* Destination (expanded) string */
@@ -304,9 +306,24 @@ int route_expand(char *dst,	/* Destination (expanded) string */
 	       strncpy(bpt, name, l);
 	       bpt += l;
 	       break;
+	  case 'l':	/* %l - Insert /lib directory */
+	       name = cf_getstr(route_cf, "iiab.dir.lib");
+	       l = strlen(name);
+	       strncpy(bpt, name, l);
+	       bpt += l;
+	       break;
+	  case 'e':	/* %e - Insert /etc directory */
+	       name = cf_getstr(route_cf, "iiab.dir.etc");
+	       l = strlen(name);
+	       strncpy(bpt, name, l);
+	       bpt += l;
+	       break;
 	  default:	/* Unknown switch */
-	       elog_printf(ERROR, "unknown switch `%c'", *pt);
-	       return -1;
+	       *bpt++ = '%';
+	       *bpt++ = *pt;
+	       /*elog_printf(DEBUG, "unknown switch `%%%c', leaving it for "
+		 "later processing", *pt);*/
+	       break;
 	  }
 	  upt = ++pt;	/* Continue at character following %<x> */
 	  ntok++;

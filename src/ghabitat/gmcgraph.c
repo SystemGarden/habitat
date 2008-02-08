@@ -361,7 +361,7 @@ GdkColor *gmcgraph_draw(GMCGRAPH *g, char *graph_name, char *curve_name,
 
      /* assert!! */
      if (nvals < 2) {
-	  elog_printf(ERROR, "Can't draw curve %s %s: only has %d values",
+	  elog_printf(ERROR, "Can't draw curve %s %s: only has %d value",
 		      graph_name ? graph_name : "(default)", curve_name,
 		      nvals);
      }

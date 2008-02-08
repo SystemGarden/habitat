@@ -20,8 +20,8 @@ char usagetxt[]= "run the data collection probe stand alone\n"
 
 char *cfdefaults = 
 "nmalloc            0\n"	/* don't check mem leaks (-1 turns on) */
-"elog.all           stderr\n"	/* log text output to stderr */
-"elog.below warning none\n"	/* turn off warnings and below */
+"elog.all           stderr:\n"	/* log text output to stderr */
+"elog.below warning none:\n"	/* turn off warnings and below */
 "elog.allformat     %17$s\n"	/* just want text of log */
 ;
 
@@ -48,8 +48,8 @@ int main(int argc, char *argv[]) {
      }
 
      /* run */
-     out = route_open("stdout", NULL, NULL, 0);
-     err = route_open("stderr", NULL, NULL, 0);
+     out = route_open("stdout:", NULL, NULL, 0);
+     err = route_open("stderr:", NULL, NULL, 0);
      if (probe_init(command, out, err, NULL) == -1) {
 	  elog_printf(FATAL, "%s\nPlease specify a valid probe name",
 		      usagetxt);
