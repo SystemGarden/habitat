@@ -128,7 +128,7 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
       * fullconfig load */
      iiab_dir_setcf(iiab_cf);
      appcf_expanded = nmalloc(strlen(appcf) * 2);
-     route_expand(appcf_expanded, appcf, NULL, NULL);
+     route_expand(appcf_expanded, appcf, NULL, 0);
      iiab_cf_load(iiab_cf, iiab_cmdarg, iiab_cmdusage, appcf_expanded);
      nfree(appcf_expanded);
 

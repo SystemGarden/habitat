@@ -19,6 +19,7 @@ This release includes the following changes over the 0.99.x series:-
 
 
 	VERSION 1.1
+	- added home directory expansion (%u) for some route names
 	- fixed several small problems with habmeth and habprobe
 	- More tuning off log messages
 	- Changed all apps to route_expand() entire config on initialisation
@@ -27,8 +28,9 @@ This release includes the following changes over the 0.99.x series:-
 	- Non-time data (like job table) redraw bug fixed and update
 	  routine refactored
 	- Sanitised a number log messages to make more clear to user
-	- Added cookiejar for session token
-	- Added cookies for account security
+	- Added authurl for proxy and site credentials (default ~/.habauth)
+	- Added cookiejar for session token (default ~/.habjar)
+	- Added cookies for account security (default ~/.habcookies) 
 	- Added basic authentication for site security
 	- Established communication with Harvest 2.0
 	- Fixed a class of atoi() bug

@@ -153,25 +153,9 @@ dep_libname = $(patsubst lib%,-l%,$(basename $(notdir $(call dep_onlylib,$(1))))
 	$(LINK.o) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
 		$(call dep_libdir,$^) $(call dep_libname,$^)
 
-#	$(LINK.o) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
-#		$(LOADLIBES) $(LDLIBS) \
-#		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
-#		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
-
-#	$(LINK.o) -o $@ $^ $(LOADLIBES) $(LDLIBS)
-
-
 %: %.c
 	$(LINK.c) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
 		$(call dep_libdir,$^) $(call dep_libname,$^)
-
-#	$(LINK.c) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
-#		$(LOADLIBES) $(LDLIBS) \
-#		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
-#		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
-
-#	$(LINK.c) -o $@ $^ $(LOADLIBES) $(LDLIBS)
-
 
 # Manual page rules
 HTMLMAN1 :=	$(patsubst %.1, %.1.html, $(MAN1))
@@ -254,8 +238,9 @@ srctar:	cleanall
 	if [ -L $(SRCTOP) ]; then rm $(SRCTOP); fi; \
 	ln -s .. $(SRCTOP); \
 	tar cvhzf $(SRCTOP).tar.gz \
-		--exclude=CVS --exclude='gnu/[a-z]*' --exclude=test \
-		--exclude='*.bak' --exclude='*~' --exclude='.*' \
+		--exclude=CVS --exclude=.svn --exclude='gnu/[a-z]*' \
+		--exclude=test --exclude='*.bak' --exclude='*~' \
+		--exclude='.*' \
 		$(SRCTOP)/README $(SRCTOP)/LICENSE $(SRCTOP)/src; \
 	rm $(SRCTOP);
 
@@ -263,7 +248,7 @@ gnubintar:
 	$(MKDIR) $(DSTDIST); cd $(DSTDIST); \
 	if [ -L $(GNUBINTOP) ]; then rm $(GNUBINTOP); fi; \
 	ln -s .. $(GNUBINTOP); \
-	tar cvhzf $(GNUBINTOP).tar.gz --exclude=CVS \
+	tar cvhzf $(GNUBINTOP).tar.gz --exclude=CVS --exclude=.svn \
 		$(GNUBINTOP)/src/gnu/bin  $(GNUBINTOP)/src/gnu/include \
 		$(GNUBINTOP)/src/gnu/info $(GNUBINTOP)/src/gnu/lib \
 		$(GNUBINTOP)/src/gnu/man; \
@@ -273,7 +258,7 @@ gnusrctar:
 	$(MKDIR) $(DSTDIST); cd $(DSTDIST); \
 	if [ -L $(GNUSRCTOP) ]; then rm $(GNUSRCTOP); fi; \
 	ln -s .. $(GNUSRCTOP); \
-	tar cvhzf $(GNUSRCTOP).tar.gz --exclude=CVS \
+	tar cvhzf $(GNUSRCTOP).tar.gz --exclude=CVS --exclude=.svn \
 		$(GNUSRCTOP)/src/gnu/gdbm  $(GNUSRCTOP)/src/gnu/readline \
 		$(GNUSRCTOP)/src/gnu/curl; \
 	rm $(GNUSRCTOP);
@@ -301,8 +286,9 @@ rpm:	srctar
 # (4) cleaninstonly: remove all products from the install locations only
 clean_files =	$(wildcard $d/*[~%]) $(wildcard $d/*.bak) \
 		$(wildcard $d/*.out) $(wildcard $d/*.dat) \
-		$(wildcard $d/t.*) \
-		$(wildcard $d/.[A-Za-z0-9]*) $d/core
+		$(wildcard $d/t.*) $d/core \
+		$(wildcard $d/.[A-Za-rt-z0-9]*) \
+		$(wildcard $d/.[^s.][^v][^n]*) 
 cleanall_files= $(wildcard $d/*.so) $(wildcard $d/*.a) \
 		$(wildcard $d/*.lib) $(wildcard $d/*.dll)
 cleaninst_files=$(DSTBIN)/wrapper.bin \
@@ -314,6 +300,9 @@ cleaninst_files=$(DSTBIN)/wrapper.bin \
 		$(addprefix $(DSTETC)/,$(notdir $(ETC))) \
 		$(addprefix $(DSTINIT)/,$(notdir $(INITBIN))) \
 		$(addprefix $(DSTHELP)/,$(notdir $(HELPFILES)))
+ctest:
+	echo $(foreach d,$(MODULES) .,$(wildcard $d/.[A-Za-rt-z0-9]*) $d/core)
+
 clean:
 	$(RM) $(OBJ) $(DEPFILES) $(foreach d,$(MODULES) .,$(clean_files)) \
 		$(HTMLMAN1) $(HTMLMAN5) $(TAGFILE)

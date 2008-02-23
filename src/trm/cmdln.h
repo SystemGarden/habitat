@@ -38,7 +38,7 @@ int   cmdln_parse(char *cmdline);
 void  cmdln_run(int argc, char **argv);
 void  cmdln_initialize_readline ();
 char **cmdln_completion (char *text, int start, int end);
-char *cmdln_cmdgenerator (char *text, int state);
+char *cmdln_cmdgenerator (const char *text, int state);
 int   cmdln_do_help(int argc, char **argv);
 int   cmdln_do_helpcmd(int argc, char **argv);
 int   cmdln_do_shell(int argc, char **argv);

@@ -8,6 +8,8 @@
  * Copyright System Garden 1999-2004. All rights reserved.
  */
 
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -670,7 +672,6 @@ int ghchoice_unloadfile(char *fname)
      /* remove the node representing the file and its children */
      uichoice_rmchild(node);
      uichoice_rmnode(node);
-     nfree(node);
      tree_rm(ghchoice_fnames);
 
      /* remove from file lists */
@@ -832,7 +833,7 @@ ghchoice_loadrepository(char *purl,			/* route spec p-url */
           return NULL;
      }
 
-     elog_printf(INFO, "repository enabled");
+     elog_printf(INFO, "repository enabled (%s)", purl);
 
      /* we do not check to see if the address if valid, this is
       * left to ghchoice_tree_group_tab(). All we do is to enable it

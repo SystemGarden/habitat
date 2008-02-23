@@ -425,7 +425,8 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 			      CF_VALS *cookies,	/* returned cookies */
 			      char **cookiejar	/* returned cookiejar fname */)
 {
-  char *auth_purl, *cookies_purl;
+     char *auth_purl,    auth_expanded_purl[1024];
+     char *cookies_purl, cookies_expanded_purl[1024];
 
      /* get the configuration details */
      if (rt_sqlrs_cf == NULL) {
@@ -452,14 +453,23 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 				RT_SQLRS_AUTH_URLKEY, auth_purl, purl);
 		    *auth = NULL;
 	       } else {
-		    *auth = route_tread(auth_purl, NULL);
-		    if (table_ncols(*auth) == 1) {
-		         /* its not a table, so attempt to parse it */
+		    route_expand(auth_expanded_purl, auth_purl, NULL, 0);
+		    *auth = route_tread(auth_expanded_purl, NULL);
+		    if (!*auth) {
+		         elog_printf(DIAG, "Unable to read authorisation "
+				     "route %s. Is it there? Is it readable?",
+				     auth_expanded_purl);
+		    } else {
+		         if (table_ncols(*auth) == 1) {
+			      /* its not a table, so attempt to parse it */
+			 }
+
+			 /* COULD BE TABULAR OR COULD BE A FLAT FILE (IN 
+			  * WHICH CASE THERE WILL ON BE 'DATA' AS A COLUMN. 
+			  * SO, IF ONLY DATA, ATTEMPT TO PARSE IT IN TO A 
+			  * TABLE. IF THAT FAILS THEN AUTH MUST BE MARKED 
+			  * AS NULL */
 		    }
-		    /* COULD BE TABULAR OR COULD BE A FLAT FILE (IN WHICH CASE
-		     * THERE WILL ON BE 'DATA' AS A COLUMN. SO, IF ONLY
-		     * DATA, ATTEMPT TO PARSE IT IN TO A TABLE. IF THAT FAILS
-		     * THEN AUTH MUST BE MARKED AS NULL */
 	       }
 	  }
           cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
@@ -482,7 +492,9 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 	       } else {
 		    /* parse the text as a key-value configuration file */
 		    *cookies = cf_create();
-		    if ( ! cf_scanroute(*cookies, NULL, cookies_purl, 1)) {
+		    route_expand(cookies_expanded_purl, cookies_purl, NULL, 0);
+		    if ( ! cf_scanroute(*cookies, NULL, 
+					cookies_expanded_purl, 1)) {
 		         /* unsuccessful parse */
 			 cf_destroy(*cookies);
 			 *cookies = NULL;
@@ -494,15 +506,16 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 	       elog_printf(DIAG, "cookie jar configuration not found: %s, "
 			   "proceeding with out the jar for %s",
 			   RT_SQLRS_COOKIEJAR_FILEKEY, purl);
+	  } else {
+	       /* chop off any driver prefix given by mistake as CURL won't
+	        * understand it */
+	       if (strncmp(*cookiejar, "file:", 5) == 0)
+	            *cookiejar += 5;
+	       else if (strncmp(*cookiejar, "filea:", 6) == 0)
+	            *cookiejar += 6;
+	       else if (strncmp(*cookiejar, "fileov:", 7) == 0)
+	            *cookiejar += 7;
 	  }
-	  /* chop off any driver prefix given by mistake as CURL won't
-	   * understand it */
-	  if (strncmp(*cookiejar, "file:", 5) == 0)
-	       *cookiejar += 5;
-	  else if (strncmp(*cookiejar, "filea:", 6) == 0)
-	       *cookiejar += 6;
-	  else if (strncmp(*cookiejar, "fileov:", 7) == 0)
-	       *cookiejar += 7;
      }
 }
 

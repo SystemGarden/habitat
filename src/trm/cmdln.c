@@ -6,6 +6,9 @@
  *
  * Copyright System Garden Ltd 1996-2001. All rights reserved.
  */
+
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <malloc.h>
 #include <readline/readline.h>
@@ -361,7 +364,7 @@ char **cmdln_completion (char *text, int start, int end)
         to complete.  Otherwise it is the name of a file in the current
         directory. */
      if (start == 0)
-          matches = completion_matches (text, cmdln_cmdgenerator);
+          matches = rl_completion_matches (text, cmdln_cmdgenerator);
 
      return (matches);
 }
@@ -369,7 +372,7 @@ char **cmdln_completion (char *text, int start, int end)
 /* Generator function for command completion.  STATE lets us know whether
    to start from scratch; without any state (i.e. STATE == 0), then we
    start at the top of the list. */
-char *cmdln_cmdgenerator (char *text, int state)
+char *cmdln_cmdgenerator (const char *text, int state)
 {
      static int len;
      struct cmdln_def *cmd;

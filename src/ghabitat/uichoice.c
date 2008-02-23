@@ -9,6 +9,8 @@
  * Copyright System Garden 1999-2002. All rights reserved.
  */
 
+#define _GNU_SOURCE
+
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -79,7 +81,8 @@ void   uichoice_addtopnodes_list(ITREE *nodelist) {
  * Create a choice_node with no children and return its address
  * The choice tree will not be affected and you need to use 
  * uichoice_addchild() in order to attach it to a parent. 
- * Free with uichoice_rmnode() once detached from the tree.
+ * Free with uichoice_rmnode() once detached from the tree 
+ * using uichoice_rmchild().
  */
 struct uichoice_node *uichoice_mknode(char *label, 
 				      char *info,
@@ -141,8 +144,9 @@ struct uichoice_node *uichoice_mknode(char *label,
 
 /* 
  * Free the node and all its children recursively (both dynamic and static).
- * The node should be removed from its parent before caling as further 
+ * The node should be removed from its parent before calling as further 
  * referencies to the node will result in error.
+ * Following this call, nothing is left to free including the node itself.
  */
 void uichoice_rmnode(struct uichoice_node *n)
 {
@@ -219,8 +223,7 @@ void uichoice_addchildren(struct uichoice_node *parent,
 
 /*
  * Remove child from parent; if parent has no more children, it will be 
- * disbled. After this call, the child will have no parent to which to 
- * refer upwards
+ * disbled. After this call, the child will be parentless but will still exist
  */
 void   uichoice_rmchild(struct uichoice_node *child)
 {

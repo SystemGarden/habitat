@@ -23,7 +23,7 @@
 #define RT_SQLRS_WRITE_RETURN      "sqlrs:_WRITE_RETURN_"
 
 typedef struct rt_sqlrs_desc {
-     int magic;
+     int   magic;
      char *prefix;
      char *description;
      char *url;

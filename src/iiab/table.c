@@ -550,8 +550,10 @@ int    table_search(TABLE t, char *haystack, char *needle)
      int rowidx;
      ITREE *c;
 
-     /* get column's tree (which haystack!) and search for needle */
+     /* get column's ITREE (the selected haystack) and search for needle */
      c = tree_find(t->data, haystack);
+     if (c == TREE_NOVAL)
+	  return -1;
      rowidx = itree_search(c, needle, strlen(needle));
      if (rowidx == -1)
 	  return -1;

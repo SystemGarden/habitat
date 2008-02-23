@@ -124,6 +124,7 @@ char *http_get(char   *url, 	/* standard url */
 
      /* load request with cookies, which expects the format 
       * cookie=value; [c=v; ...] */
+     cookies_str[0] = '\0';
      if (cookies) {
           cookie_list = cf_gettree(cookies);
 	  i=0;
@@ -154,7 +155,7 @@ char *http_get(char   *url, 	/* standard url */
 		 proxyuserpwd ? proxyuserpwd : "(none)",
 		 sslkeypwd    ? sslkeypwd    : "(none)",
                  cert         ? certpath     : "(none)",
-		 cookies      ? cookies_str  : "(none)",
+		 *cookies_str ? cookies_str  : "(none)",
 		 cookiejar    ? cookiejar    : "(none)");
 
      /* action the GET */

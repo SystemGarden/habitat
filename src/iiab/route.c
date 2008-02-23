@@ -243,6 +243,7 @@ ROUTE route_open_t(char *p_url,		/* Pseduo-url */
  *      %m - Domain name
  *      %f - Fully qualified hostname
  *      %d - Duration
+ *      %u - Home directory of running user
  *      %v - iiab_dir_var directory (typically ../var)
  *      %l - iiab_dir_lib directory (typically ../lib)
  *      %e - iiab_dir_etc directory (typically ../etc)
@@ -299,6 +300,14 @@ int route_expand(char *dst,	/* Destination (expanded) string */
 	       break;
 	  case 'd':	/* %d - Insert duration */
 	       bpt += sprintf(bpt, "%d", duration);
+	       break;
+	  case 'u':	/* %u - Insert home directory of user */
+	       name = getenv("HOME");
+	       if (!name)
+		    name = "HOME_DIR_ERROR";
+	       l = strlen(name);
+	       strncpy(bpt, name, l);
+	       bpt += l;
 	       break;
 	  case 'v':	/* %v - Insert /var directory */
 	       name = cf_getstr(route_cf, "iiab.dir.var");
