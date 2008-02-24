@@ -1611,7 +1611,7 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
      snprintf(purl, 256, "sqlrs:g=");
      groups = route_tread(purl, NULL);
      if ( ! groups ) {
-          elog_printf(ERROR, "Unable to read choices from the repository. "
+          elog_printf(ERROR, "Unable to read repository groups. "
 		      "Check diagnostic logs with your administrator", purl);
 	  return NULL;
      }

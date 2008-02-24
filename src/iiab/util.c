@@ -41,7 +41,7 @@ int util_parseroute(char *route,	/* pseudo-url of input route */
      /* Read the configuration */
      text = route_read(route, NULL, &buflen);
      if (text == NULL || buflen == 0 ) {
-          elog_printf(INFO, "no data in %s", route);
+          elog_printf(DIAG, "no data in %s", route);
 	  return 0;
      }
 

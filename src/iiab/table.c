@@ -1649,7 +1649,7 @@ int table_scan(TABLE t, char *buffer, char *sepstr, int mode,
      if (hasruler)
 	  i++;
      if (nlines < i) {
-	  elog_printf(ERROR, "need %d lines in buffer, only have %d",
+       elog_printf(DIAG, "need %d lines in buffer, only have %d",
 		      i, nlines);
 	  util_scanfree(parselist);
 	  return -1;
@@ -1666,7 +1666,7 @@ int table_scan(TABLE t, char *buffer, char *sepstr, int mode,
 	  ncols = itree_n(itree_get(parselist));
 	  if (t->ncols && ncols != t->ncols) {
 	       util_scanfree(parselist);
-	       elog_printf(ERROR, "header cols (%d) and table cols "
+	       elog_printf(DIAG, "header cols (%d) and table cols "
 			   "(%d) do not match", ncols, t->ncols);
 	       return -1;
 	  }
@@ -1691,7 +1691,7 @@ int table_scan(TABLE t, char *buffer, char *sepstr, int mode,
 		    ncols = row_ncols-1;
 	       if (ncols && row_ncols != ncols+1) {
 		    util_scanfree(parselist);
-		    elog_printf(ERROR, "info cols (%d+1) and header "
+		    elog_printf(DIAG, "info cols (%d+1) and header "
 				"(%d) do not match", row_ncols, ncols);
 		    return -1;
 	       }
@@ -1703,7 +1703,7 @@ int table_scan(TABLE t, char *buffer, char *sepstr, int mode,
 	  row = itree_get(parselist);
 	  row_ncols = itree_n(row);
 	  if (t->ncols && row_ncols != t->ncols) {
-	       elog_printf(ERROR, "scanned text at data line %d has %d "
+	       elog_printf(DIAG, "scanned text at data line %d has %d "
 			   "cols not %d cols expected by table",
 			   line, row_ncols, t->ncols);
 	       util_scanfree(parselist);
@@ -1712,7 +1712,7 @@ int table_scan(TABLE t, char *buffer, char *sepstr, int mode,
 	  if (ncols == 0)
 	       ncols = row_ncols;
 	  if (ncols && row_ncols != ncols) {
-	       elog_printf(ERROR, "scanned text at data line %d has %d "
+	       elog_printf(DIAG, "scanned text at data line %d has %d "
 			   "cols not %d cols expected by header",
 			   line, row_ncols, ncols);
 	       util_scanfree(parselist);

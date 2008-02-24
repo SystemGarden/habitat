@@ -1181,7 +1181,7 @@
 	      <class>GtkLabel</class>
 	      <name>splash_address</name>
 	      <label>www.systemgarden.com
-habitat@systemgarden.com</label>
+welcome@systemgarden.com</label>
 	      <justify>GTK_JUSTIFY_CENTER</justify>
 	      <wrap>False</wrap>
 	      <xalign>0.5</xalign>
