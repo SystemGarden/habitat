@@ -554,14 +554,14 @@ void   ghchoice_configure(CF_VALS cf)
 	       }
 	  }
      } else {
-          elog_printf(INFO, "repository not configured");
+          elog_printf(INFO, "static repository not configured");
      }
 }
 
 
 
 /*
- * Open a file and load it into the choice tree.
+ * Open a file containing performance data and load it into the choice tree.
  * Work out the file type and make an appropreate description for the 
  * tooltip and the child choice tree.
  * If it is valid and readable, make a node in the uichoice tree as a child
@@ -655,9 +655,9 @@ ghchoice_loadfile(char *fname,			/* holstore filename */
 
 
 /*
- * Unload the holstore with fname.
- * Discover the possible filenames from the list returned by 
- * ghchoice_getloadedfiles().
+ * Unload a file (fname) from the choice tree and remove it from the 
+ * loaded file list
+ * NB. You can get the loaded files from ghchoice_getloadedfiles().
  * Return 1 for success or 0 for failure due to the file not existing in
  * the tree
  */
@@ -681,7 +681,7 @@ int ghchoice_unloadfile(char *fname)
 
 
 /*
- * Return a list of currently loaded holstores.
+ * Return a list of currently loaded performance data files.
  * The keys are the filenames, values are the uichoice nodes.
  */
 TREE *ghchoice_getloadedfiles()
@@ -974,7 +974,8 @@ ITREE *ghchoice_edpatactionchild(TREE *nodeargs)
 
 
 /*
- * Supply the argument begin->log for a choice node
+ * Create a TREE with a single node. key=begin val=log
+ * Used as an argument for a choice node (begin->log)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_log(struct uichoice_node *node)
@@ -988,7 +989,8 @@ TREE *ghchoice_arg_begin_log(struct uichoice_node *node)
 
 
 /*
- * Supply the argument begin->rep for a choice node
+ * Create a TREE with a single node. key=begin val=rep
+ * Used as an argument for a choice node (begin->rep)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_rep(struct uichoice_node *node)
@@ -1002,7 +1004,8 @@ TREE *ghchoice_arg_begin_rep(struct uichoice_node *node)
 
 
 /*
- * Supply the argument begin->patact for a choice node
+ * Create a TREE with a single node. key=begin val=patact
+ * Used as an argument for a choice node (begin->patact)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_patact(struct uichoice_node *node)
@@ -1016,7 +1019,8 @@ TREE *ghchoice_arg_begin_patact(struct uichoice_node *node)
 
 
 /*
- * Supply the argument begin->patact for a choice node
+ * Create a TREE with a single node. key=begin val=event
+ * Used as an argument for a choice node (begin->event)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_event(struct uichoice_node *node)
@@ -1030,7 +1034,8 @@ TREE *ghchoice_arg_begin_event(struct uichoice_node *node)
 
 
 /*
- * Supply the argument begin->watched for a choice node
+ * Create a TREE with a single node. key=begin val=watched
+ * Used as an argument for a choice node (begin->watched)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_watched(struct uichoice_node *node)
@@ -1044,7 +1049,8 @@ TREE *ghchoice_arg_begin_watched(struct uichoice_node *node)
 
 
 /*
- * Supply the argument begin->up for a choice node
+ * Create a TREE with a single node. key=begin val=up
+ * Used as an argument for a choice node (begin->up)
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_arg_begin_up(struct uichoice_node *node)
@@ -1058,7 +1064,8 @@ TREE *ghchoice_arg_begin_up(struct uichoice_node *node)
 
 
 /*
- * Supply several arguments to display errors
+ * Create a TREE with two nodes: (begin->up, duration->0)
+ * Used as several arguments for a choice node to display errors
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_args_err(struct uichoice_node *node)
@@ -1073,7 +1080,9 @@ TREE *ghchoice_args_err(struct uichoice_node *node)
 
 
 /*
- * Supply several arguments to display replication state
+ * Create a TREE with four nodes: 
+ * (ring->rstate, duration->0, tsecs->0, lastonly->1)
+ * Used as several arguments for a choice node to display replication state
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_args_rstate(struct uichoice_node *node)
@@ -1091,7 +1100,8 @@ TREE *ghchoice_args_rstate(struct uichoice_node *node)
 
 
 /*
- * Supply several arguments to customise the display of performance data.
+ * Create a TREE containing several nodes that customise the display of 
+ * performance data in a choice node.
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_args_perf(struct uichoice_node *node)
@@ -1115,7 +1125,9 @@ TREE *ghchoice_args_perf(struct uichoice_node *node)
 
 
 /*
- * Supply several arguments to adapt a ringstore to be used for this host
+ * Create a TREE containing several nodes that customise the display of 
+ * a ringstore in a choice node, to get performance data from an HTTP 
+ * server on the localhost.
  * Returns a TREE which should be removed with tree_clearoutandfree().
  */
 TREE *ghchoice_args_thishost(struct uichoice_node *node)
@@ -1660,8 +1672,10 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
 	  }
 	  *(--pt) = '\0';		/* overwrite the final stop */
 
-	  /* add group name and route address to node */
-	  sprintf(purl2, "sqlrs:g=%s", purl);
+	  /* add group name and route address (escaped with HTTP rules as it
+	   * can contain spaces) to node */
+	  strcpy(purl2, "sqlrs:g=");
+	  util_strencode(purl2+8, 255-8, purl);
 	  uichoice_putnodearg_str(node, "group", purl);
 	  uichoice_putnodearg_str(node, "grouppurl", purl2);
      }

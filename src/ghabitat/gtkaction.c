@@ -1204,7 +1204,7 @@ void gtkaction_choice_update()
      case UI_EDTREE:	/* editable table using a tree interface */
 	  /* do nothing but exit for all these: none are dynamic */
           elog_printf(DIAG, "Can't update node %s, as it is not dynamic "
-		      "(presentation type %d0", datapres_node->label, 
+		      "(presentation type %d)", datapres_node->label, 
 		      datapres_node->presentation);
 	  return;
      }

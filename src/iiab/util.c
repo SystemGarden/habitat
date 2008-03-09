@@ -1635,7 +1635,7 @@ int util_b64_decode( const char* str, unsigned char* space, int size )
 }
 
 
-
+/* encode a string using HTTP escaping of non-ascii characters */
 void util_strencode( char* to, int tosize, char* from )
 {
      int tolen;
