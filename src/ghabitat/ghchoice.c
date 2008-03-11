@@ -125,7 +125,7 @@ struct uichoice_feature rsfeatures[] = {
    {"recording jobs",       "job","rec", NULL,                "No help", 1, UI_TABLE,  UI_ICON_JOB,     NULL, NULL,   0, uidata_getrecjobs, 0, NULL},
    {"recorded sources",     "sor","rec", NULL,                "No help", 1, UI_SPLASH, UI_ICON_LOG,     NULL, ghchoice_recsrcchild, 0, NULL, 0, NULL},
 #endif
-  {"logs",                  "log", NULL, "Logs & errors",     "No help", 1, UI_SPLASH, UI_ICON_ERROR,   NULL, NULL,   0, NULL, 0, NULL},
+  {"logs",                  "log", NULL, "Logs & errors",     "No help", 1, UI_SPLASH, UI_ICON_LOG,   NULL, NULL,   0, NULL, 0, NULL},
    {"logs",                 "llg","log", "Logs",              "No help", 1, UI_SPLASH, UI_ICON_LOG,     NULL, ghchoice_tree_ring_tab, 0, uidata_get_route, 0, ghchoice_arg_begin_log},
    {"errors",               "ler","log", "Error logs",        "No help", 1, UI_SPLASH, UI_ICON_ERROR,   NULL, ghchoice_tree_ringdur_tab, 0, uidata_get_route, 0, ghchoice_args_err},
   {"replication",           "rep", NULL, "Replication",       "No help", 1, UI_SPLASH, UI_ICON_REP,     NULL, NULL,   0, NULL, 0, NULL},
@@ -180,7 +180,7 @@ struct uichoice_feature topfeatures[] = {
   {"this client",     "clnt", NULL, NULL,              "No help", 1, UI_SPLASH, UI_ICON_HOME,  NULL, NULL, 0, NULL, 0, NULL},
    {"configuration",  "cfg", "clnt","View configuration","No help",1,UI_TABLE,  UI_ICON_NONE,  NULL, NULL, 0, uidata_getlocalcf, 0, NULL},
    {"log routes",     "lgrt","clnt","View log routes", "No help", 1, UI_TABLE,  UI_ICON_ROUTE, NULL, NULL, 0, uidata_getlocalelogrt, 0, NULL},
-   {"logs",           "log", "clnt","View log messages","No help",1, UI_TABLE,  UI_ICON_ERROR, NULL, NULL, 0, uidata_getlocallogs, 15, NULL},
+   {"logs",           "log", "clnt","View log messages","No help",1, UI_TABLE,  UI_ICON_LOG, NULL, NULL, 0, uidata_getlocallogs, 15, NULL},
   {NULL,            NULL,  NULL, NULL,                 NULL,      0, UI_SPLASH, UI_ICON_NONE,  NULL, NULL, 0, NULL, 0, NULL},
 };
 

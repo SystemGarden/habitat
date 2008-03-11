@@ -699,3 +699,31 @@ void
 on_choice_prop_args_inherit_check_toggled
                                         (GtkToggleButton *togglebutton,
                                         gpointer         user_data);
+
+void
+on_repos_save_action_clicked           (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_repos_save_reset_clicked            (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_repos_cancel_finished_clicked       (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_repos_enable_button_toggled         (GtkToggleButton *togglebutton,
+                                        gpointer         user_data);
+
+void
+on_repos_save_action_clicked           (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_repos_save_reset_clicked            (GtkButton       *button,
+                                        gpointer         user_data);
+
+void
+on_repos_cancel_finished_clicked       (GtkButton       *button,
+                                        gpointer         user_data);

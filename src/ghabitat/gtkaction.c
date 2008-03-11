@@ -78,6 +78,7 @@ GtkWidget *        logpopup_table=NULL;
 #include "../pixmaps/filedata2.xpm"
 #include "../pixmaps/homedata3.xpm"
 #include "../pixmaps/netdata4.xpm"
+#include "../pixmaps/habitat_flower_16.xpm"
 #include "../pixmaps/sysgarlogo4_t.xpm"
 #include "../pixmaps/sysgarlogo4_xt.xpm"
 #include "../pixmaps/uptime1.xpm"
@@ -283,9 +284,9 @@ void gtkaction_createicons()
      icon_netdata = gdk_pixmap_create_from_xpm_d(baseWindow->window,
 		&mask_netdata,&style->bg[GTK_STATE_NORMAL],netdata4);
      icon_sysgarlogo = gdk_pixmap_create_from_xpm_d(baseWindow->window,
-		&mask_sysgarlogo,&style->bg[GTK_STATE_NORMAL],sysgarlogo4_xt);
+		&mask_sysgarlogo,&style->bg[GTK_STATE_NORMAL],habitat_flower_16);
      icon_sysgarwm = gdk_pixmap_create_from_xpm_d(baseWindow->window,
-		&mask_sysgarwm,&style->bg[GTK_STATE_NORMAL],sysgarlogo4_t);
+		&mask_sysgarwm,&style->bg[GTK_STATE_NORMAL],habitat_flower_16);
      icon_uptime = gdk_pixmap_create_from_xpm_d(baseWindow->window,
 		&mask_uptime,&style->bg[GTK_STATE_NORMAL],uptime1);
      icon_bottleneck = gdk_pixmap_create_from_xpm_d(baseWindow->window,

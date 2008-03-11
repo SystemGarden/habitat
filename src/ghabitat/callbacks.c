@@ -1934,7 +1934,10 @@ void
 on_repository_activate                 (GtkMenuItem     *menuitem,
                                         gpointer         user_data)
 {
+     GtkWidget *repos_prop_window;
 
+     repos_prop_window = create_repos_prop_window();
+     gtk_widget_show(repos_prop_window);
 }
 
 
@@ -3111,5 +3114,37 @@ on_choice_prop_args_inherit_check_toggled
      }
      if (inherit)
 	  tree_destroy(nodeargs);
+}
+
+
+void
+on_repos_save_action_clicked           (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_repos_save_reset_clicked            (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_repos_cancel_finished_clicked       (GtkButton       *button,
+                                        gpointer         user_data)
+{
+
+}
+
+
+void
+on_repos_enable_button_toggled         (GtkToggleButton *togglebutton,
+                                        gpointer         user_data)
+{
+
 }
 

@@ -23,3 +23,4 @@ GtkWidget* create_alert_window (void);
 GtkWidget* create_log_popup_window (void);
 GtkWidget* create_choice_popup_menu (void);
 GtkWidget* create_choice_prop_window (void);
+GtkWidget* create_repos_prop_window (void);

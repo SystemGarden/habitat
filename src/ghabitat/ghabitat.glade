@@ -1163,7 +1163,7 @@
 	      <widget>
 		<class>GtkPixmap</class>
 		<name>splash_logo</name>
-		<filename>sysgarhab4_m.xpm</filename>
+		<filename>habitat_139.xpm</filename>
 		<xalign>0.5</xalign>
 		<yalign>1</yalign>
 		<xpad>0</xpad>
@@ -6626,9 +6626,9 @@ Diagnostic +
   <widget>
     <class>GtkVBox</class>
     <name>choice_prop_vbox</name>
-    <border_width>5</border_width>
+    <border_width>8</border_width>
     <homogeneous>False</homogeneous>
-    <spacing>5</spacing>
+    <spacing>7</spacing>
 
     <widget>
       <class>GtkTable</class>
@@ -6636,8 +6636,8 @@ Diagnostic +
       <rows>3</rows>
       <columns>2</columns>
       <homogeneous>False</homogeneous>
-      <row_spacing>0</row_spacing>
-      <column_spacing>0</column_spacing>
+      <row_spacing>2</row_spacing>
+      <column_spacing>2</column_spacing>
       <child>
 	<padding>0</padding>
 	<expand>True</expand>
@@ -6652,7 +6652,7 @@ Diagnostic +
 	<wrap>False</wrap>
 	<xalign>0</xalign>
 	<yalign>0</yalign>
-	<xpad>0</xpad>
+	<xpad>6</xpad>
 	<ypad>0</ypad>
 	<child>
 	  <left_attach>0</left_attach>
@@ -6678,7 +6678,7 @@ Diagnostic +
 	<wrap>False</wrap>
 	<xalign>0</xalign>
 	<yalign>0</yalign>
-	<xpad>0</xpad>
+	<xpad>6</xpad>
 	<ypad>0</ypad>
 	<child>
 	  <left_attach>0</left_attach>
@@ -6704,7 +6704,7 @@ Diagnostic +
 	<wrap>False</wrap>
 	<xalign>0</xalign>
 	<yalign>0</yalign>
-	<xpad>0</xpad>
+	<xpad>6</xpad>
 	<ypad>0</ypad>
 	<child>
 	  <left_attach>0</left_attach>
@@ -6819,7 +6819,7 @@ Diagnostic +
 	<rows>3</rows>
 	<columns>2</columns>
 	<homogeneous>False</homogeneous>
-	<row_spacing>0</row_spacing>
+	<row_spacing>2</row_spacing>
 	<column_spacing>0</column_spacing>
 
 	<widget>
@@ -6830,7 +6830,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -6883,7 +6883,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -6937,7 +6937,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -7002,7 +7002,7 @@ Diagnostic +
 	<rows>3</rows>
 	<columns>2</columns>
 	<homogeneous>False</homogeneous>
-	<row_spacing>0</row_spacing>
+	<row_spacing>2</row_spacing>
 	<column_spacing>0</column_spacing>
 
 	<widget>
@@ -7013,7 +7013,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -7066,7 +7066,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -7120,7 +7120,7 @@ Diagnostic +
 	  <wrap>False</wrap>
 	  <xalign>0</xalign>
 	  <yalign>0.5</yalign>
-	  <xpad>3</xpad>
+	  <xpad>10</xpad>
 	  <ypad>0</ypad>
 	  <child>
 	    <left_attach>0</left_attach>
@@ -7185,7 +7185,7 @@ Diagnostic +
 	<class>GtkVBox</class>
 	<name>choice_prop_args_vbox</name>
 	<homogeneous>False</homogeneous>
-	<spacing>0</spacing>
+	<spacing>2</spacing>
 
 	<widget>
 	  <class>GtkCheckButton</class>
@@ -7210,9 +7210,9 @@ Diagnostic +
 	<widget>
 	  <class>GtkScrolledWindow</class>
 	  <name>choice_prop_args_scrollwin</name>
-	  <height>100</height>
+	  <height>150</height>
 	  <hscrollbar_policy>GTK_POLICY_AUTOMATIC</hscrollbar_policy>
-	  <vscrollbar_policy>GTK_POLICY_ALWAYS</vscrollbar_policy>
+	  <vscrollbar_policy>GTK_POLICY_AUTOMATIC</vscrollbar_policy>
 	  <hupdate_policy>GTK_UPDATE_CONTINUOUS</hupdate_policy>
 	  <vupdate_policy>GTK_UPDATE_CONTINUOUS</vupdate_policy>
 	  <child>
@@ -7281,6 +7281,7 @@ Diagnostic +
 	<class>GtkButton</class>
 	<child_name>Toolbar:button</child_name>
 	<name>choice_prop_expert_button</name>
+	<width>65</width>
 	<tooltip>Add expert properties to the window</tooltip>
 	<accelerator>
 	  <modifiers>GDK_MOD1_MASK</modifiers>
@@ -7299,6 +7300,7 @@ Diagnostic +
 	<class>GtkButton</class>
 	<child_name>Toolbar:button</child_name>
 	<name>choice_prop_simple_button</name>
+	<width>65</width>
 	<visible>False</visible>
 	<tooltip>Remove expert properties from the window</tooltip>
 	<accelerator>
@@ -7318,6 +7320,7 @@ Diagnostic +
 	<class>GtkButton</class>
 	<child_name>Toolbar:button</child_name>
 	<name>choice_prop_close_button</name>
+	<width>65</width>
 	<accelerator>
 	  <modifiers>GDK_MOD1_MASK</modifiers>
 	  <key>GDK_C</key>
@@ -7334,6 +7337,796 @@ Diagnostic +
 	  <last_modification_time>Mon, 28 Nov 2005 19:13:45 GMT</last_modification_time>
 	</signal>
 	<label> Close </label>
+      </widget>
+    </widget>
+  </widget>
+</widget>
+
+<widget>
+  <class>GtkWindow</class>
+  <name>repos_prop_window</name>
+  <tooltip>Change the repository property settings</tooltip>
+  <title>Repository Properties</title>
+  <type>GTK_WINDOW_TOPLEVEL</type>
+  <position>GTK_WIN_POS_MOUSE</position>
+  <modal>False</modal>
+  <allow_shrink>False</allow_shrink>
+  <allow_grow>False</allow_grow>
+  <auto_shrink>False</auto_shrink>
+
+  <widget>
+    <class>GtkVBox</class>
+    <name>repos_vbox</name>
+    <border_width>8</border_width>
+    <homogeneous>False</homogeneous>
+    <spacing>6</spacing>
+
+    <widget>
+      <class>GtkCheckButton</class>
+      <name>repos_enable_button</name>
+      <can_focus>True</can_focus>
+      <signal>
+	<name>toggled</name>
+	<handler>on_repos_enable_button_toggled</handler>
+	<last_modification_time>Mon, 10 Mar 2008 23:41:34 GMT</last_modification_time>
+      </signal>
+      <label>Enable repository</label>
+      <active>True</active>
+      <draw_indicator>True</draw_indicator>
+      <child>
+	<padding>0</padding>
+	<expand>False</expand>
+	<fill>False</fill>
+      </child>
+    </widget>
+
+    <widget>
+      <class>GtkFrame</class>
+      <name>repos_addr_frame</name>
+      <label>Address</label>
+      <label_xalign>0</label_xalign>
+      <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+      <child>
+	<padding>0</padding>
+	<expand>False</expand>
+	<fill>True</fill>
+      </child>
+
+      <widget>
+	<class>GtkTable</class>
+	<name>repos_addr_gui_table</name>
+	<rows>2</rows>
+	<columns>2</columns>
+	<homogeneous>False</homogeneous>
+	<row_spacing>2</row_spacing>
+	<column_spacing>0</column_spacing>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_geturl_entry</name>
+	  <tooltip>URL for repository GET requests</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>255</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_geturl_prompt</name>
+	  <label>Get URL</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_puturl_prompt</name>
+	  <label>Put URL</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>report_puturl_entry</name>
+	  <tooltip>URL of repository PUT requests</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>255</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+      </widget>
+    </widget>
+
+    <widget>
+      <class>GtkFrame</class>
+      <name>repos_account_frame</name>
+      <label>Account</label>
+      <label_xalign>0</label_xalign>
+      <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+      <child>
+	<padding>0</padding>
+	<expand>False</expand>
+	<fill>True</fill>
+      </child>
+
+      <widget>
+	<class>GtkTable</class>
+	<name>repos_account_gui_table</name>
+	<rows>4</rows>
+	<columns>2</columns>
+	<homogeneous>False</homogeneous>
+	<row_spacing>2</row_spacing>
+	<column_spacing>0</column_spacing>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_harv_user_prompt</name>
+	  <label>Username</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>report_harv_user_entry</name>
+	  <tooltip>Repository username</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>report_harv_pw_prompt</name>
+	  <label>Password</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>report_harv_org_prompt</name>
+	  <label>Organisation</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>2</top_attach>
+	    <bottom_attach>3</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>report_harv_pw_entry</name>
+	  <tooltip>Repository password</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>False</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_harv_org_entry</name>
+	  <tooltip>Repository organisation name, where provided by administrators</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>2</top_attach>
+	    <bottom_attach>3</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkText</class>
+	  <name>repos_key_entry2</name>
+	  <height>100</height>
+	  <tooltip>Security key, used to identify this client as authentic.</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>3</top_attach>
+	    <bottom_attach>4</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>True</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>True</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>label21</name>
+	  <label>Security key</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>3</top_attach>
+	    <bottom_attach>4</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>True</yfill>
+	  </child>
+	</widget>
+      </widget>
+    </widget>
+
+    <widget>
+      <class>GtkFrame</class>
+      <name>repos_auth_frame</name>
+      <label>Authorisation</label>
+      <label_xalign>0</label_xalign>
+      <shadow_type>GTK_SHADOW_ETCHED_IN</shadow_type>
+      <child>
+	<padding>0</padding>
+	<expand>False</expand>
+	<fill>True</fill>
+      </child>
+
+      <widget>
+	<class>GtkTable</class>
+	<name>repos_auth_gui_table</name>
+	<rows>6</rows>
+	<columns>2</columns>
+	<homogeneous>False</homogeneous>
+	<row_spacing>2</row_spacing>
+	<column_spacing>0</column_spacing>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>report_realm_user_prompt</name>
+	  <label>Realm username</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_realm_pw_prompt</name>
+	  <label>Realm password</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_realm_proxy_host_prompt</name>
+	  <label>Proxy host</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>2</top_attach>
+	    <bottom_attach>3</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_proxy_port_prompt</name>
+	  <label>Proxy port</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>3</top_attach>
+	    <bottom_attach>4</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_proxy_user_prompt</name>
+	  <label>Proxy username</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>4</top_attach>
+	    <bottom_attach>5</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkLabel</class>
+	  <name>repos_proxy_pw_prompt</name>
+	  <label>Proxy password</label>
+	  <justify>GTK_JUSTIFY_LEFT</justify>
+	  <wrap>False</wrap>
+	  <xalign>0</xalign>
+	  <yalign>0.5</yalign>
+	  <xpad>10</xpad>
+	  <ypad>0</ypad>
+	  <child>
+	    <left_attach>0</left_attach>
+	    <right_attach>1</right_attach>
+	    <top_attach>5</top_attach>
+	    <bottom_attach>6</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>False</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_realm_user_entry</name>
+	  <tooltip>Optional realm username, where provided by administrators. This is an additional level of access security and should be left blank if you do not have one</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>0</top_attach>
+	    <bottom_attach>1</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_realm_pw_entry</name>
+	  <tooltip>Optional realm password, where provided by administrators. This is an additional level of access security and should be left blank if you do not have one</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>False</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>1</top_attach>
+	    <bottom_attach>2</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_proxy_pw_entry</name>
+	  <tooltip>Password of proxy account</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>False</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>5</top_attach>
+	    <bottom_attach>6</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_proxy_user_entry</name>
+	  <tooltip>Username of proxy account</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>16</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>4</top_attach>
+	    <bottom_attach>5</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_proxy_host_entry</name>
+	  <tooltip>Name of proxy host needed to reach the repository if it resides on the Internet or behind and internal firewall. Leave blank if you connect directly</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>255</text_max_length>
+	  <text></text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>2</top_attach>
+	    <bottom_attach>3</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+
+	<widget>
+	  <class>GtkEntry</class>
+	  <name>repos_proxy_port_entry</name>
+	  <tooltip>Port number of proxy service</tooltip>
+	  <can_focus>True</can_focus>
+	  <editable>True</editable>
+	  <text_visible>True</text_visible>
+	  <text_max_length>6</text_max_length>
+	  <text>8080</text>
+	  <child>
+	    <left_attach>1</left_attach>
+	    <right_attach>2</right_attach>
+	    <top_attach>3</top_attach>
+	    <bottom_attach>4</bottom_attach>
+	    <xpad>0</xpad>
+	    <ypad>0</ypad>
+	    <xexpand>True</xexpand>
+	    <yexpand>False</yexpand>
+	    <xshrink>False</xshrink>
+	    <yshrink>False</yshrink>
+	    <xfill>True</xfill>
+	    <yfill>False</yfill>
+	  </child>
+	</widget>
+      </widget>
+    </widget>
+
+    <widget>
+      <class>GtkHBox</class>
+      <name>repos_buttons</name>
+      <border_width>10</border_width>
+      <homogeneous>True</homogeneous>
+      <spacing>5</spacing>
+      <child>
+	<padding>0</padding>
+	<expand>True</expand>
+	<fill>True</fill>
+      </child>
+
+      <widget>
+	<class>GtkButton</class>
+	<name>repos_save_action</name>
+	<width>60</width>
+	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_repos_save_action_clicked</handler>
+	  <last_modification_time>Mon, 10 Mar 2008 23:38:38 GMT</last_modification_time>
+	</signal>
+	<label>Save</label>
+	<relief>GTK_RELIEF_NORMAL</relief>
+	<child>
+	  <padding>0</padding>
+	  <expand>False</expand>
+	  <fill>False</fill>
+	</child>
+      </widget>
+
+      <widget>
+	<class>GtkButton</class>
+	<name>repos_save_reset</name>
+	<width>60</width>
+	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_repos_save_reset_clicked</handler>
+	  <last_modification_time>Mon, 10 Mar 2008 23:38:51 GMT</last_modification_time>
+	</signal>
+	<label>Reset</label>
+	<relief>GTK_RELIEF_NORMAL</relief>
+	<child>
+	  <padding>0</padding>
+	  <expand>False</expand>
+	  <fill>False</fill>
+	</child>
+      </widget>
+
+      <widget>
+	<class>GtkButton</class>
+	<name>repos_cancel_finished</name>
+	<width>60</width>
+	<can_focus>True</can_focus>
+	<signal>
+	  <name>clicked</name>
+	  <handler>on_repos_cancel_finished_clicked</handler>
+	  <last_modification_time>Mon, 10 Mar 2008 23:39:02 GMT</last_modification_time>
+	</signal>
+	<label>_Finished</label>
+	<relief>GTK_RELIEF_NORMAL</relief>
+	<child>
+	  <padding>0</padding>
+	  <expand>False</expand>
+	  <fill>False</fill>
+	</child>
       </widget>
     </widget>
   </widget>

@@ -19,6 +19,11 @@ This release includes the following changes over the 0.99.x series:-
 
 
 	VERSION 1.1
+	- Tweeked the spaces in the choice node property window
+	- Created repository parameter window
+	- Window manager icon replace with new 'floppy' flower logo
+	- Replaced spash logo with new harvest logo
+	- Some icons in choice tree changes
 	- added home directory expansion (%u) for some route names
 	- fixed several small problems with habmeth and habprobe
 	- More tuning off log messages
