@@ -5671,26 +5671,26 @@ create_repos_prop_window (void)
 {
   GtkWidget *repos_prop_window;
   GtkWidget *repos_vbox;
-  GtkWidget *repos_enable_button;
+  GtkWidget *repos_enable_check;
   GtkWidget *repos_addr_frame;
   GtkWidget *repos_addr_gui_table;
   GtkWidget *repos_geturl_entry;
   GtkWidget *repos_geturl_prompt;
   GtkWidget *repos_puturl_prompt;
-  GtkWidget *report_puturl_entry;
+  GtkWidget *repos_puturl_entry;
   GtkWidget *repos_account_frame;
   GtkWidget *repos_account_gui_table;
   GtkWidget *repos_harv_user_prompt;
-  GtkWidget *report_harv_user_entry;
-  GtkWidget *report_harv_pw_prompt;
-  GtkWidget *report_harv_org_prompt;
-  GtkWidget *report_harv_pw_entry;
+  GtkWidget *repos_harv_user_entry;
+  GtkWidget *repos_harv_pw_prompt;
+  GtkWidget *repos_harv_org_prompt;
+  GtkWidget *repos_harv_pw_entry;
   GtkWidget *repos_harv_org_entry;
-  GtkWidget *repos_key_entry2;
-  GtkWidget *label21;
+  GtkWidget *repos_key_entry;
+  GtkWidget *repos_key_prompt;
   GtkWidget *repos_auth_frame;
   GtkWidget *repos_auth_gui_table;
-  GtkWidget *report_realm_user_prompt;
+  GtkWidget *repos_realm_user_prompt;
   GtkWidget *repos_realm_pw_prompt;
   GtkWidget *repos_realm_proxy_host_prompt;
   GtkWidget *repos_proxy_port_prompt;
@@ -5731,14 +5731,14 @@ create_repos_prop_window (void)
   gtk_container_add (GTK_CONTAINER (repos_prop_window), repos_vbox);
   gtk_container_set_border_width (GTK_CONTAINER (repos_vbox), 8);
 
-  repos_enable_button = gtk_check_button_new_with_label ("Enable repository");
-  gtk_widget_set_name (repos_enable_button, "repos_enable_button");
-  gtk_widget_ref (repos_enable_button);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_enable_button", repos_enable_button,
+  repos_enable_check = gtk_check_button_new_with_label ("Enable repository");
+  gtk_widget_set_name (repos_enable_check, "repos_enable_check");
+  gtk_widget_ref (repos_enable_check);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_enable_check", repos_enable_check,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (repos_enable_button);
-  gtk_box_pack_start (GTK_BOX (repos_vbox), repos_enable_button, FALSE, FALSE, 0);
-  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (repos_enable_button), TRUE);
+  gtk_widget_show (repos_enable_check);
+  gtk_box_pack_start (GTK_BOX (repos_vbox), repos_enable_check, FALSE, FALSE, 0);
+  gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (repos_enable_check), TRUE);
 
   repos_addr_frame = gtk_frame_new ("Address");
   gtk_widget_set_name (repos_addr_frame, "repos_addr_frame");
@@ -5794,16 +5794,16 @@ create_repos_prop_window (void)
   gtk_misc_set_alignment (GTK_MISC (repos_puturl_prompt), 0, 0.5);
   gtk_misc_set_padding (GTK_MISC (repos_puturl_prompt), 10, 0);
 
-  report_puturl_entry = gtk_entry_new_with_max_length (255);
-  gtk_widget_set_name (report_puturl_entry, "report_puturl_entry");
-  gtk_widget_ref (report_puturl_entry);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_puturl_entry", report_puturl_entry,
+  repos_puturl_entry = gtk_entry_new_with_max_length (255);
+  gtk_widget_set_name (repos_puturl_entry, "repos_puturl_entry");
+  gtk_widget_ref (repos_puturl_entry);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_puturl_entry", repos_puturl_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_puturl_entry);
-  gtk_table_attach (GTK_TABLE (repos_addr_gui_table), report_puturl_entry, 1, 2, 1, 2,
+  gtk_widget_show (repos_puturl_entry);
+  gtk_table_attach (GTK_TABLE (repos_addr_gui_table), repos_puturl_entry, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_tooltips_set_tip (tooltips, report_puturl_entry, "URL of repository PUT requests", NULL);
+  gtk_tooltips_set_tip (tooltips, repos_puturl_entry, "URL of repository PUT requests", NULL);
 
   repos_account_frame = gtk_frame_new ("Account");
   gtk_widget_set_name (repos_account_frame, "repos_account_frame");
@@ -5835,54 +5835,54 @@ create_repos_prop_window (void)
   gtk_misc_set_alignment (GTK_MISC (repos_harv_user_prompt), 0, 0.5);
   gtk_misc_set_padding (GTK_MISC (repos_harv_user_prompt), 10, 0);
 
-  report_harv_user_entry = gtk_entry_new_with_max_length (16);
-  gtk_widget_set_name (report_harv_user_entry, "report_harv_user_entry");
-  gtk_widget_ref (report_harv_user_entry);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_harv_user_entry", report_harv_user_entry,
+  repos_harv_user_entry = gtk_entry_new_with_max_length (16);
+  gtk_widget_set_name (repos_harv_user_entry, "repos_harv_user_entry");
+  gtk_widget_ref (repos_harv_user_entry);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_harv_user_entry", repos_harv_user_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_harv_user_entry);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), report_harv_user_entry, 1, 2, 0, 1,
+  gtk_widget_show (repos_harv_user_entry);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_harv_user_entry, 1, 2, 0, 1,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_tooltips_set_tip (tooltips, report_harv_user_entry, "Repository username", NULL);
+  gtk_tooltips_set_tip (tooltips, repos_harv_user_entry, "Repository username", NULL);
 
-  report_harv_pw_prompt = gtk_label_new ("Password");
-  gtk_widget_set_name (report_harv_pw_prompt, "report_harv_pw_prompt");
-  gtk_widget_ref (report_harv_pw_prompt);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_harv_pw_prompt", report_harv_pw_prompt,
+  repos_harv_pw_prompt = gtk_label_new ("Password");
+  gtk_widget_set_name (repos_harv_pw_prompt, "repos_harv_pw_prompt");
+  gtk_widget_ref (repos_harv_pw_prompt);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_harv_pw_prompt", repos_harv_pw_prompt,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_harv_pw_prompt);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), report_harv_pw_prompt, 0, 1, 1, 2,
+  gtk_widget_show (repos_harv_pw_prompt);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_harv_pw_prompt, 0, 1, 1, 2,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (report_harv_pw_prompt), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (report_harv_pw_prompt), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (report_harv_pw_prompt), 10, 0);
+  gtk_label_set_justify (GTK_LABEL (repos_harv_pw_prompt), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (repos_harv_pw_prompt), 0, 0.5);
+  gtk_misc_set_padding (GTK_MISC (repos_harv_pw_prompt), 10, 0);
 
-  report_harv_org_prompt = gtk_label_new ("Organisation");
-  gtk_widget_set_name (report_harv_org_prompt, "report_harv_org_prompt");
-  gtk_widget_ref (report_harv_org_prompt);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_harv_org_prompt", report_harv_org_prompt,
+  repos_harv_org_prompt = gtk_label_new ("Organisation");
+  gtk_widget_set_name (repos_harv_org_prompt, "repos_harv_org_prompt");
+  gtk_widget_ref (repos_harv_org_prompt);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_harv_org_prompt", repos_harv_org_prompt,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_harv_org_prompt);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), report_harv_org_prompt, 0, 1, 2, 3,
+  gtk_widget_show (repos_harv_org_prompt);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_harv_org_prompt, 0, 1, 2, 3,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (report_harv_org_prompt), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (report_harv_org_prompt), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (report_harv_org_prompt), 10, 0);
+  gtk_label_set_justify (GTK_LABEL (repos_harv_org_prompt), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (repos_harv_org_prompt), 0, 0.5);
+  gtk_misc_set_padding (GTK_MISC (repos_harv_org_prompt), 10, 0);
 
-  report_harv_pw_entry = gtk_entry_new_with_max_length (16);
-  gtk_widget_set_name (report_harv_pw_entry, "report_harv_pw_entry");
-  gtk_widget_ref (report_harv_pw_entry);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_harv_pw_entry", report_harv_pw_entry,
+  repos_harv_pw_entry = gtk_entry_new_with_max_length (16);
+  gtk_widget_set_name (repos_harv_pw_entry, "repos_harv_pw_entry");
+  gtk_widget_ref (repos_harv_pw_entry);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_harv_pw_entry", repos_harv_pw_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_harv_pw_entry);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), report_harv_pw_entry, 1, 2, 1, 2,
+  gtk_widget_show (repos_harv_pw_entry);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_harv_pw_entry, 1, 2, 1, 2,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_tooltips_set_tip (tooltips, report_harv_pw_entry, "Repository password", NULL);
-  gtk_entry_set_visibility (GTK_ENTRY (report_harv_pw_entry), FALSE);
+  gtk_tooltips_set_tip (tooltips, repos_harv_pw_entry, "Repository password", NULL);
+  gtk_entry_set_visibility (GTK_ENTRY (repos_harv_pw_entry), FALSE);
 
   repos_harv_org_entry = gtk_entry_new_with_max_length (16);
   gtk_widget_set_name (repos_harv_org_entry, "repos_harv_org_entry");
@@ -5895,31 +5895,31 @@ create_repos_prop_window (void)
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, repos_harv_org_entry, "Repository organisation name, where provided by administrators", NULL);
 
-  repos_key_entry2 = gtk_text_new (NULL, NULL);
-  gtk_widget_set_name (repos_key_entry2, "repos_key_entry2");
-  gtk_widget_ref (repos_key_entry2);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_key_entry2", repos_key_entry2,
+  repos_key_entry = gtk_text_new (NULL, NULL);
+  gtk_widget_set_name (repos_key_entry, "repos_key_entry");
+  gtk_widget_ref (repos_key_entry);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_key_entry", repos_key_entry,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (repos_key_entry2);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_key_entry2, 1, 2, 3, 4,
+  gtk_widget_show (repos_key_entry);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_key_entry, 1, 2, 3, 4,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL), 0, 0);
-  gtk_widget_set_usize (repos_key_entry2, -2, 100);
-  gtk_tooltips_set_tip (tooltips, repos_key_entry2, "Security key, used to identify this client as authentic.", NULL);
-  gtk_text_set_editable (GTK_TEXT (repos_key_entry2), TRUE);
+  gtk_widget_set_usize (repos_key_entry, -2, 100);
+  gtk_tooltips_set_tip (tooltips, repos_key_entry, "Security key, used to identify this client as authentic.", NULL);
+  gtk_text_set_editable (GTK_TEXT (repos_key_entry), TRUE);
 
-  label21 = gtk_label_new ("Security key");
-  gtk_widget_set_name (label21, "label21");
-  gtk_widget_ref (label21);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "label21", label21,
+  repos_key_prompt = gtk_label_new ("Security key");
+  gtk_widget_set_name (repos_key_prompt, "repos_key_prompt");
+  gtk_widget_ref (repos_key_prompt);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_key_prompt", repos_key_prompt,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (label21);
-  gtk_table_attach (GTK_TABLE (repos_account_gui_table), label21, 0, 1, 3, 4,
+  gtk_widget_show (repos_key_prompt);
+  gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_key_prompt, 0, 1, 3, 4,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (GTK_FILL), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (label21), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (label21), 0, 0);
-  gtk_misc_set_padding (GTK_MISC (label21), 10, 0);
+  gtk_label_set_justify (GTK_LABEL (repos_key_prompt), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (repos_key_prompt), 0, 0);
+  gtk_misc_set_padding (GTK_MISC (repos_key_prompt), 10, 0);
 
   repos_auth_frame = gtk_frame_new ("Authorisation");
   gtk_widget_set_name (repos_auth_frame, "repos_auth_frame");
@@ -5938,18 +5938,18 @@ create_repos_prop_window (void)
   gtk_container_add (GTK_CONTAINER (repos_auth_frame), repos_auth_gui_table);
   gtk_table_set_row_spacings (GTK_TABLE (repos_auth_gui_table), 2);
 
-  report_realm_user_prompt = gtk_label_new ("Realm username");
-  gtk_widget_set_name (report_realm_user_prompt, "report_realm_user_prompt");
-  gtk_widget_ref (report_realm_user_prompt);
-  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "report_realm_user_prompt", report_realm_user_prompt,
+  repos_realm_user_prompt = gtk_label_new ("Realm username");
+  gtk_widget_set_name (repos_realm_user_prompt, "repos_realm_user_prompt");
+  gtk_widget_ref (repos_realm_user_prompt);
+  gtk_object_set_data_full (GTK_OBJECT (repos_prop_window), "repos_realm_user_prompt", repos_realm_user_prompt,
                             (GtkDestroyNotify) gtk_widget_unref);
-  gtk_widget_show (report_realm_user_prompt);
-  gtk_table_attach (GTK_TABLE (repos_auth_gui_table), report_realm_user_prompt, 0, 1, 0, 1,
+  gtk_widget_show (repos_realm_user_prompt);
+  gtk_table_attach (GTK_TABLE (repos_auth_gui_table), repos_realm_user_prompt, 0, 1, 0, 1,
                     (GtkAttachOptions) (GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_label_set_justify (GTK_LABEL (report_realm_user_prompt), GTK_JUSTIFY_LEFT);
-  gtk_misc_set_alignment (GTK_MISC (report_realm_user_prompt), 0, 0.5);
-  gtk_misc_set_padding (GTK_MISC (report_realm_user_prompt), 10, 0);
+  gtk_label_set_justify (GTK_LABEL (repos_realm_user_prompt), GTK_JUSTIFY_LEFT);
+  gtk_misc_set_alignment (GTK_MISC (repos_realm_user_prompt), 0, 0.5);
+  gtk_misc_set_padding (GTK_MISC (repos_realm_user_prompt), 10, 0);
 
   repos_realm_pw_prompt = gtk_label_new ("Realm password");
   gtk_widget_set_name (repos_realm_pw_prompt, "repos_realm_pw_prompt");
@@ -6125,8 +6125,8 @@ create_repos_prop_window (void)
   gtk_box_pack_start (GTK_BOX (repos_buttons), repos_cancel_finished, FALSE, FALSE, 0);
   gtk_widget_set_usize (repos_cancel_finished, 60, -2);
 
-  gtk_signal_connect (GTK_OBJECT (repos_enable_button), "toggled",
-                      GTK_SIGNAL_FUNC (on_repos_enable_button_toggled),
+  gtk_signal_connect (GTK_OBJECT (repos_enable_check), "toggled",
+                      GTK_SIGNAL_FUNC (on_repos_enable_check_toggled),
                       NULL);
   gtk_signal_connect (GTK_OBJECT (repos_save_action), "clicked",
                       GTK_SIGNAL_FUNC (on_repos_save_action_clicked),
