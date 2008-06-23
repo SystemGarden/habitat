@@ -2026,18 +2026,21 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      /* authentication section */
 
      /* Get host from url and look up in the auth table */
-     host = strstr(geturl, "://");
-     if (!host) {
-          elog_printf(ERROR, "url '%s' in unrecognisable format", geturl);
-	  return;
+     if (geturl && *geturl) {
+         host = strstr(geturl, "://");
+	 if (!host) {
+	     elog_printf(ERROR, "url '%s' in unrecognisable format", geturl);
+	     return;
+	 }
+	 host += 3;
+	 len = strcspn(host, ":/");
+	 if (len) {
+	     host = xnmemdup(host, len+1);
+	     host[len] = '\0';
+	 } else {
+	     host = xnstrdup("localhost");
+	 }
      }
-     host += 3;
-     len = strcspn(host, ":/");
-     if (len) {
-          host = xnmemdup(host, len+1);
-	  host[len] = '\0';
-     } else
-          host = xnstrdup("localhost");
 
      /* lookup auth and proxy config */
      if (auth) {
