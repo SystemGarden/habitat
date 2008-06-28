@@ -174,7 +174,7 @@ htmlman: $(HTMLMAN1) $(HTMLMAN5)
 tags: $(TAGFILE)
 tag:  $(TAGFILE)
 $(TAGFILE): $(SRC) $(OBJ)
-	if [ -f $(MKTAGS) ]; then $(MKTAGS) $(SRC) $(OBJ); fi
+	if [ -f $(MKTAGS) ]; then $(MKTAGS) $(SRC); fi
 
 install: all
 	$(MKDIR) $(DSTALL); \
