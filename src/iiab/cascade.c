@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <values.h>
+#include <float.h>
 #include "cascade.h"
 #include "elog.h"
 #include "tableset.h"
@@ -292,7 +292,7 @@ TABLE cascade_aggregate(enum cascade_fn func, 	/* aggregation function */
 			 break;
 		    case CASCADE_MIN:
 		         /* minimum of column's values */
-		         val = MAXDOUBLE;
+		         val = DBL_MAX;
 			 itree_traverse(col) {
 			      tmpval1 = atof( itree_get(col) );
 			      if (tmpval1 < val)
@@ -301,7 +301,7 @@ TABLE cascade_aggregate(enum cascade_fn func, 	/* aggregation function */
 			 break;
 		    case CASCADE_MAX:
 		         /* maximum of column's values */
-		         val = MINDOUBLE;
+		         val = DBL_MIN;
 			 itree_traverse(col) {
 			      tmpval1 = atof( itree_get(col) );
 			      if (tmpval1 > val)
