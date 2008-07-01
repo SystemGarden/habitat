@@ -1961,7 +1961,9 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      gtk_widget_show(repos_prop_window);
      gtkaction_anypopup_setwmicon(repos_prop_window);
 
-     /* get widgets */
+     /* get the fields from the form as widgets */
+     repos_enable_check = lookup_widget(repos_prop_window, 
+					"repos_enable_check");
      repos_geturl_entry = lookup_widget(repos_prop_window, 
 					"repos_geturl_entry");
      repos_puturl_entry = lookup_widget(repos_prop_window, 
@@ -1988,29 +1990,34 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 
      /* populate the form with the current repository settings */
 
-     /* is the repository active ? */
+     /* is the repository active ? see if there is a repository read 
+      * location set (RT_SQLRS_GET_URLKEY) */
      geturl = cf_getstr(iiab_cf, RT_SQLRS_GET_URLKEY);
      if (geturl == NULL || *geturl == '\0') {
           /* toggle set to off */
           gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(repos_enable_check),
 					FALSE);
      } else {
-          /* populate */
+          /* toggle set to on and populate */
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(repos_enable_check),
+					TRUE);
           gtk_entry_set_text(GTK_ENTRY(repos_geturl_entry), geturl);
      }
 
      /* even if the repository is off and the fields greyed out, 
-      * still populate the remainder of the form */
+      * still populate the remainder of the form, starting with the 
+      * repository write URL */
      puturl = cf_getstr(iiab_cf, RT_SQLRS_PUT_URLKEY);
      if (puturl && *puturl)
           gtk_entry_set_text(GTK_ENTRY(repos_puturl_entry), puturl);
+
+     /* --- authorisation section --- */
 
      /* grab the repository user's username, password and organisation 
       * from the cookies */
      rt_sqlrs_get_credentials("ghabitat configuration", &auth, &cookies, 
 			      &cookiejar);
 
-     /* authorisation section */
      str = cf_getstr(cookies, "__username");
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_user_entry), str);
@@ -2023,9 +2030,9 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
 
-     /* authentication section */
+     /* --- authentication section --- */
 
-     /* Get host from url and look up in the auth table */
+     /* Get host from the get url and look up in the auth table */
      if (geturl && *geturl) {
          host = strstr(geturl, "://");
 	 if (!host) {
