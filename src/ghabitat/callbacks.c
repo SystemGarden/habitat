@@ -2111,7 +2111,8 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 	       gtk_entry_set_text(GTK_ENTRY(repos_key_entry), cert);
      }
 
-     nfree(host);
+     if (geturl && *geturl)
+          nfree(host);
 }
 
 
