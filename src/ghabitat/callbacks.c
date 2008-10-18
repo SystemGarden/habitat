@@ -3312,7 +3312,14 @@ void
 on_repos_cancel_finished_clicked       (GtkButton       *button,
                                         gpointer         user_data)
 {
+     GtkWidget *prop_window;
 
+     /* get widgets */
+     prop_window  = lookup_widget(GTK_WIDGET(button), 
+				  "repos_prop_window");
+
+     gtk_widget_hide (prop_window);
+     gtk_widget_destroy (prop_window);
 }
 
 
