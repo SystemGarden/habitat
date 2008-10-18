@@ -2026,7 +2026,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_pw_entry), str);
 
-     str = cf_getstr(cookies, "__organisation");
+     str = cf_getstr(cookies, "__repository");
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
 
