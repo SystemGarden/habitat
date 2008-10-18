@@ -2029,6 +2029,8 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      str = cf_getstr(cookies, "__repository");
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
+     /* ro be completed, the insertion of the SSL key */
+     /*gtk_text_insert(GTK_TEXT(repos_key_entry), NULL, NULL, NULL, sslkey, length(sslkey));*/
 
      /* --- authentication section --- */
 
@@ -3300,11 +3302,196 @@ on_repos_save_action_clicked           (GtkButton       *button,
 }
 
 
+/* go back to the repository and proxy source and refill the 
+ * repository form */
 void
 on_repos_save_reset_clicked            (GtkButton       *button,
                                         gpointer         user_data)
 {
+     GtkWidget *b;
+     GtkWidget *repos_enable_check;
+     GtkWidget *repos_geturl_entry;
+     GtkWidget *repos_puturl_entry;
+     GtkWidget *repos_harv_user_entry;
+     GtkWidget *repos_harv_pw_entry;
+     GtkWidget *repos_harv_org_entry;
+     GtkWidget *repos_key_entry;
+     GtkWidget *repos_realm_user_entry;
+     GtkWidget *repos_realm_pw_entry;
+     GtkWidget *repos_proxy_pw_entry;
+     GtkWidget *repos_proxy_user_entry;
+     GtkWidget *repos_proxy_host_entry;
+     GtkWidget *repos_proxy_port_entry;
+     TABLE auth;
+     CF_VALS cookies;
+     char *geturl, *puturl, *host, *str;
+     char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL, *sslkeypwd=NULL;
+     char *cert=NULL, *cookiejar, *realm_user, *proxy_host, *proxy_user;
+     int len, rowkey;
 
+     /* get the fields from the form as widgets */
+     b = GTK_WIDGET(button);
+     repos_enable_check = lookup_widget(b, "repos_enable_check");
+     repos_geturl_entry = lookup_widget(b, "repos_geturl_entry");
+     repos_puturl_entry = lookup_widget(b, "repos_puturl_entry");
+     repos_harv_user_entry = lookup_widget(b, "repos_harv_user_entry");
+     repos_harv_pw_entry = lookup_widget(b, "repos_harv_pw_entry");
+     repos_harv_org_entry = lookup_widget(b, "repos_harv_org_entry");
+     repos_key_entry = lookup_widget(b, "repos_key_entry");
+     repos_realm_user_entry = lookup_widget(b, "repos_realm_user_entry");
+     repos_realm_pw_entry = lookup_widget(b, "repos_realm_pw_entry");
+     repos_proxy_user_entry = lookup_widget(b, "repos_proxy_user_entry");
+     repos_proxy_pw_entry = lookup_widget(b, "repos_proxy_pw_entry");
+     repos_proxy_host_entry = lookup_widget(b, "repos_proxy_host_entry");
+     repos_proxy_port_entry = lookup_widget(b, "repos_proxy_port_entry");
+
+     /* populate the form with the current repository settings */
+
+     /* is the repository active ? see if there is a repository read 
+      * location set (RT_SQLRS_GET_URLKEY) */
+     geturl = cf_getstr(iiab_cf, RT_SQLRS_GET_URLKEY);
+     if (geturl == NULL || *geturl == '\0') {
+          /* toggle set to off */
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(repos_enable_check),
+					FALSE);
+          gtk_entry_set_text(GTK_ENTRY(repos_geturl_entry), "");
+     } else {
+          /* toggle set to on and populate */
+          gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON(repos_enable_check),
+					TRUE);
+          gtk_entry_set_text(GTK_ENTRY(repos_geturl_entry), geturl);
+     }
+
+     /* even if the repository is off and the fields greyed out, 
+      * still populate the remainder of the form, starting with the 
+      * repository write URL */
+     puturl = cf_getstr(iiab_cf, RT_SQLRS_PUT_URLKEY);
+     if (puturl && *puturl)
+          gtk_entry_set_text(GTK_ENTRY(repos_puturl_entry), puturl);
+     else
+          gtk_entry_set_text(GTK_ENTRY(repos_puturl_entry), "");
+
+     /* --- authorisation section --- */
+
+     /* grab the repository user's username, password and organisation 
+      * from the cookies */
+     rt_sqlrs_get_credentials("ghabitat configuration", &auth, &cookies, 
+			      &cookiejar);
+
+     str = cf_getstr(cookies, "__username");
+     if (str)
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_user_entry), str);
+     else
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_user_entry), "");
+
+     str = cf_getstr(cookies, "__password");
+     if (str)
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_pw_entry), str);
+     else
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_pw_entry), "");
+
+     str = cf_getstr(cookies, "__repository");
+     if (str)
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
+     else
+          gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), "");
+     /* to be done -- find the SSL key */
+     gtk_text_set_point(GTK_TEXT(repos_key_entry), 0);
+     gtk_text_forward_delete(GTK_TEXT(repos_key_entry), 
+			     gtk_text_get_length(GTK_TEXT(repos_key_entry)));
+
+     /* --- authentication section --- */
+
+     /* Get host from the get url and look up in the auth table */
+     if (geturl && *geturl) {
+         host = strstr(geturl, "://");
+	 if (!host) {
+	     elog_printf(ERROR, "url '%s' in unrecognisable format", geturl);
+	     return;
+	 }
+	 host += 3;
+	 len = strcspn(host, ":/");
+	 if (len) {
+	     host = xnmemdup(host, len+1);
+	     host[len] = '\0';
+	 } else {
+	     host = xnstrdup("localhost");
+	 }
+     }
+
+     /* lookup auth and proxy config */
+     if (auth) {
+	  rowkey = table_search(auth, "host", host);
+	  if (rowkey != -1) {
+	       userpwd      = table_getcurrentcell(auth, "userpwd");
+	       proxy        = table_getcurrentcell(auth, "proxy");
+	       proxyuserpwd = table_getcurrentcell(auth, "proxyuserpwd");
+	       sslkeypwd    = table_getcurrentcell(auth, "sslkeypwd");
+	       cert         = table_getcurrentcell(auth, "cert");
+	  }
+	  if (userpwd) {
+	       /* user[:pwd] is the format */
+	       len = strcspn(userpwd, ":");
+	       realm_user = xnmemdup(userpwd, len+1);
+	       realm_user[len] = '\0';
+	       gtk_entry_set_text(GTK_ENTRY(repos_realm_user_entry), 
+				  realm_user);
+	       if (userpwd[len])
+		    gtk_entry_set_text(GTK_ENTRY(repos_realm_pw_entry), 
+				       userpwd+len);
+	       nfree(realm_user);
+	  }
+	  if (proxy) {
+	       /* [driver://]host[:port] is the format */
+	       proxy_host = strstr(proxy, "://");
+	       if (proxy_host)
+		    proxy_host += 3;
+	       else
+		    proxy_host = proxy;
+	       len = strcspn(proxy_host, ":");
+	       proxy_host = xnmemdup(proxy_host, len+1);
+	       proxy_host[len] = '\0';
+	       gtk_entry_set_text(GTK_ENTRY(repos_proxy_host_entry), 
+				  proxy_host);
+
+	       if (proxy[len])
+		    gtk_entry_set_text(GTK_ENTRY(repos_proxy_port_entry), 
+				       proxy+len);
+	       nfree(proxy_host);
+	  }
+	  if (proxyuserpwd) {
+	       /* user[:pwd] is the format */
+	       len = strcspn(proxy, ":");
+	       proxy_user = xnmemdup(proxyuserpwd, len+1);
+	       proxy_user[len] = '\0';
+	       gtk_entry_set_text(GTK_ENTRY(repos_proxy_user_entry), 
+				  proxy_user);
+
+	       if (proxyuserpwd[len])
+		    gtk_entry_set_text(GTK_ENTRY(repos_proxy_pw_entry), 
+				       proxyuserpwd+len);
+	       nfree(proxy_user);
+	  }
+
+          /* the following not currently used in form */
+	  /* if (sslkeypwd)
+	       gtk_entry_set_text(GTK_ENTRY(repos_puturl_entry), puturl);
+	  */
+	  if (cert)
+	       gtk_entry_set_text(GTK_ENTRY(repos_key_entry), cert);
+	  else
+	       gtk_entry_set_text(GTK_ENTRY(repos_key_entry), "");
+     } else {
+	    gtk_entry_set_text(GTK_ENTRY(repos_realm_user_entry), "");
+	    gtk_entry_set_text(GTK_ENTRY(repos_realm_pw_entry), "");
+	    gtk_entry_set_text(GTK_ENTRY(repos_proxy_host_entry), "");
+	    gtk_entry_set_text(GTK_ENTRY(repos_proxy_port_entry), "");
+	    gtk_entry_set_text(GTK_ENTRY(repos_proxy_user_entry), "");
+	    gtk_entry_set_text(GTK_ENTRY(repos_proxy_pw_entry), "");
+      }
+
+     if (geturl && *geturl)
+          nfree(host);
 }
 
 
