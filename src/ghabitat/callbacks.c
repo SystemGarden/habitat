@@ -3298,7 +3298,75 @@ void
 on_repos_save_action_clicked           (GtkButton       *button,
                                         gpointer         user_data)
 {
+     GtkWidget *b;
+     GtkWidget *repos_enable_check;
+     GtkWidget *repos_geturl_entry;
+     GtkWidget *repos_puturl_entry;
+     GtkWidget *repos_harv_user_entry;
+     GtkWidget *repos_harv_pw_entry;
+     GtkWidget *repos_harv_org_entry;
+     GtkWidget *repos_key_entry;
+     GtkWidget *repos_realm_user_entry;
+     GtkWidget *repos_realm_pw_entry;
+     GtkWidget *repos_proxy_pw_entry;
+     GtkWidget *repos_proxy_user_entry;
+     GtkWidget *repos_proxy_host_entry;
+     GtkWidget *repos_proxy_port_entry;
+     TABLE auth;
+     CF_VALS cookies;
+     char *geturl, *puturl, *harv_user, *harv_pw, *harv_repos, *harv_sslkey;
+     char *realm_user, *realm_pw;
+     char *proxy_user, *proxy_pw, *proxy_host, *proxy_port;
+     char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL, *sslkeypwd=NULL;
+     char *cert=NULL, *cookiejar;
+     int enabled, len, rowkey;
 
+     /* get the fields from the form as widgets */
+     b = GTK_WIDGET(button);
+     repos_enable_check = lookup_widget(b, "repos_enable_check");
+     repos_geturl_entry = lookup_widget(b, "repos_geturl_entry");
+     repos_puturl_entry = lookup_widget(b, "repos_puturl_entry");
+     repos_harv_user_entry = lookup_widget(b, "repos_harv_user_entry");
+     repos_harv_pw_entry = lookup_widget(b, "repos_harv_pw_entry");
+     repos_harv_org_entry = lookup_widget(b, "repos_harv_org_entry");
+     repos_key_entry = lookup_widget(b, "repos_key_entry");
+     repos_realm_user_entry = lookup_widget(b, "repos_realm_user_entry");
+     repos_realm_pw_entry = lookup_widget(b, "repos_realm_pw_entry");
+     repos_proxy_user_entry = lookup_widget(b, "repos_proxy_user_entry");
+     repos_proxy_pw_entry = lookup_widget(b, "repos_proxy_pw_entry");
+     repos_proxy_host_entry = lookup_widget(b, "repos_proxy_host_entry");
+     repos_proxy_port_entry = lookup_widget(b, "repos_proxy_port_entry");
+
+     /* grab the datum from each widget */
+     enabled = GTK_TOGGLE_BUTTON(repos_enable_check)->active;
+     geturl  = gtk_entry_get_text( GTK_ENTRY(repos_geturl_entry) );
+     puturl  = gtk_entry_get_text( GTK_ENTRY(repos_puturl_entry) );
+
+     harv_user  = gtk_entry_get_text( GTK_ENTRY(repos_harv_user_entry) );
+     harv_pw    = gtk_entry_get_text( GTK_ENTRY(repos_harv_pw_entry) );
+     harv_repos = gtk_entry_get_text( GTK_ENTRY(repos_harv_org_entry) );
+     harv_sslkey= gtk_editable_get_chars( GTK_EDITABLE(repos_key_entry),
+					  0, -1); 
+
+     realm_user = gtk_entry_get_text( GTK_ENTRY(repos_realm_user_entry) );
+     realm_pw   = gtk_entry_get_text( GTK_ENTRY(repos_realm_pw_entry) );
+
+     proxy_user = gtk_entry_get_text( GTK_ENTRY(repos_proxy_user_entry) );
+     proxy_pw   = gtk_entry_get_text( GTK_ENTRY(repos_proxy_pw_entry) );
+     proxy_host = gtk_entry_get_text( GTK_ENTRY(repos_proxy_host_entry) );
+     proxy_port = gtk_entry_get_text( GTK_ENTRY(repos_proxy_port_entry) );
+
+     /* save the data in Habitat's internal state and in curl */
+     cf_putstr(iiab_cf, RT_SQLRS_GET_URLKEY, geturl);
+     cf_putstr(iiab_cf, RT_SQLRS_PUT_URLKEY, puturl);
+     /*     rt_sqlrs_put_credentials("ghabitat configuration")*/
+     /* TO BE DONE */
+
+     /* restart curl, if needed */
+
+     /* free the data from gtk_text only (gtk_entry does not return a 
+      * malloc'ed string, only the internal char array) */
+     g_free(harv_sslkey);
 }
 
 
