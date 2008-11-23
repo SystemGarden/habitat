@@ -12,6 +12,7 @@
 
 #include <gtk/gtk.h>
 #include <string.h>
+#include <regex.h>
 
 #include "callbacks.h"
 #include "interface.h"
@@ -3320,6 +3321,10 @@ on_repos_save_action_clicked           (GtkButton       *button,
      char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL, *sslkeypwd=NULL;
      char *cert=NULL, *cookiejar;
      int enabled, len, rowkey;
+     /* regular expression variables */
+     regex_t url_re_pattern;
+     char errbuf[LINELEN];
+     int r;
 
      /* get the fields from the form as widgets */
      b = GTK_WIDGET(button);
@@ -3356,17 +3361,67 @@ on_repos_save_action_clicked           (GtkButton       *button,
      proxy_host = gtk_entry_get_text( GTK_ENTRY(repos_proxy_host_entry) );
      proxy_port = gtk_entry_get_text( GTK_ENTRY(repos_proxy_port_entry) );
 
-     /* save the data in Habitat's internal state and in curl */
+     /* check the data - geturl and puturl must exist, everything else 
+      * is more or less optional */
+
+     /* compile a simple check for URL */
+     if ((r = regcomp(&url_re_pattern, "^http[^:]*://[^/]+.*", 
+		      (REG_NOSUB | REG_EXTENDED) ))) {
+          regerror(r, &url_re_pattern, errbuf, LINELEN);
+	  elog_printf(ERROR, "problem with URL pattern: %s, error is %s", 
+		      url_re_pattern, errbuf);
+	  if (harv_sslkey)
+	       g_free(harv_sslkey);
+	  return;
+     }
+     
+     if (geturl && *geturl) {
+       /* check geturl is valid for an HTML */
+       if ((r = regexec(&url_re_pattern, geturl, 0, NULL, 0)) != 0) {
+          regerror(r, &url_re_pattern, errbuf, LINELEN);
+	  elog_printf(ERROR, "Repository Get URL does not contain a valid "
+		      "URL: %s, error is %s. Unable to save any properties",
+		      geturl, errbuf);
+	  if (harv_sslkey)
+	       g_free(harv_sslkey);
+	  return;	 
+       }
+     }
+
+     if (puturl && *puturl) {
+       /* check puturl is valid for an HTML */
+       if ((r = regexec(&url_re_pattern, puturl, 0, NULL, 0)) != 0) {
+          regerror(r, &url_re_pattern, errbuf, LINELEN);
+	  elog_printf(ERROR, "Repository Put URL does not contain a valid "
+		      "URL: %s, error is %s. Unable to save any properties",
+		      puturl, errbuf);
+	  if (harv_sslkey)
+	       g_free(harv_sslkey);
+	  return;	 
+       }
+     }
+
+     /* save the repository URLs in iiab's config and write out */
      cf_putstr(iiab_cf, RT_SQLRS_GET_URLKEY, geturl);
      cf_putstr(iiab_cf, RT_SQLRS_PUT_URLKEY, puturl);
-     /*     rt_sqlrs_put_credentials("ghabitat configuration")*/
+     iiab_usercfsave(iiab_cf, RT_SQLRS_GET_URLKEY);
+     iiab_usercfsave(iiab_cf, RT_SQLRS_PUT_URLKEY);
+
+     /* save repository account and proxy details in the config structure */
      /* TO BE DONE */
 
-     /* restart curl, if needed */
+     /* save the authorisation in a table */
+     /*     rt_sqlrs_put_credentials("ghabitat configuration")*/
+
+     /* restart curl with new credentials. if there are failings, give
+      * a mesage */
+
+     /* enable/disable repository depending on 'enabled' datum */
 
      /* free the data from gtk_text only (gtk_entry does not return a 
       * malloc'ed string, only the internal char array) */
-     g_free(harv_sslkey);
+     if (harv_sslkey)
+          g_free(harv_sslkey);
 }
 
 
