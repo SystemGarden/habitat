@@ -179,6 +179,8 @@ int gmcgraph_resdat2arrays(GMCGRAPH *g,	  /* graph structure */
      itree_traverse(dlst)
 	  if (itree_get(dlst))
 	       nvals += table_nrows( itree_get(dlst) );
+     if ( ! nvals )
+          return 0;	/* no valid data to plot (it probably shrank) */
      vals   = xnmalloc(nvals * sizeof(gfloat));
      *xvals = xnmalloc(nvals * sizeof(gfloat));
      *yvals = xnmalloc(nvals * sizeof(gfloat));
@@ -361,9 +363,10 @@ GdkColor *gmcgraph_draw(GMCGRAPH *g, char *graph_name, char *curve_name,
 
      /* assert!! */
      if (nvals < 2) {
-	  elog_printf(ERROR, "Can't draw curve %s %s: only has %d value",
+	  elog_printf(DIAG, "Can't draw curve %s %s: only has %d value",
 		      graph_name ? graph_name : "(default)", curve_name,
 		      nvals);
+	  return NULL;
      }
 
      /* choose the graph name, defaulting if one is not given */
