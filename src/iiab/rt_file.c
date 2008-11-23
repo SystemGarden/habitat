@@ -101,16 +101,18 @@ RT_LLD rt_filea_open (char *p_url, char *comment, char *password, int keep,
 	       fd = open(basename, O_RDONLY);
 	       if (fd == -1) {
 		    elog_printf(DEBUG, "should be able to open "
-				"file %s for reading but can't", basename);
+				"file %s for reading but can't (reading in "
+				"append method as keep <= 0)", basename);
 		    return NULL;
 	       }
 	  } else if (access(basename, F_OK) == 0) {
-	       elog_printf(DEBUG, "file % accessable but no read "
-			   "permission ", basename);
+	       elog_printf(DEBUG, "file % exists but no read permission "
+			   "(reading in append method as keep <= 0)",basename);
 	       return NULL;
 	  } else {
-	       elog_printf(DEBUG, "file %s inaccessable; check permission "
-			   "of the leading path", basename);
+	       elog_printf(DEBUG, "file %s does not exist for reading; "
+			   "check permission of the leading path "
+			   "(reading in append method as keep <= 0)",basename);
 	       return NULL;
 	  }
      }
