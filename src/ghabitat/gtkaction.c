@@ -2373,6 +2373,8 @@ GdkColor *gtkaction_drawcurve(RESDAT dres,	/* result structure */
 					      gtkaction_keycol, 
 					      tree_getkey(gtkaction_inst), 
 					      &xvals, &yvals);
+	       if (nvals <= 1)
+		    return NULL;
 	       if (scale != 1.0 || offset > 0.0)
 		    for (i=0; i < nvals; i++)
 			 yvals[i] = scale * yvals[i] + offset;
@@ -2386,6 +2388,8 @@ GdkColor *gtkaction_drawcurve(RESDAT dres,	/* result structure */
 	  nvals = gmcgraph_resdat2arrays(graph, dres, curve,
 					 NULL, NULL,
 					 &xvals, &yvals);
+	  if (nvals <= 1)
+	       return NULL;
 	  for (i=0; i < nvals; i++)
 	       yvals[i] = scale * yvals[i] + offset;
 	  colour = gmcgraph_draw(graph, NULL, curve, nvals,
@@ -2452,6 +2456,8 @@ void gtkaction_drawgraph(RESDAT dres,	/* result structure */
 	       nvals = gmcgraph_resdat2arrays(graph, dres, curve, 
 					      gtkaction_keycol, instance,
 					      &xvals, &yvals);
+	       if (nvals <= 1)
+		    return;
 
 	       /* scale if needed */
 	       if (scale != 1.0 || offset > 0.0)
