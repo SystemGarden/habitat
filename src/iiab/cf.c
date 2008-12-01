@@ -382,7 +382,7 @@ void cf_putint(CF_VALS cf, char *key, int newval)
 
 
 /*
- * Add or replace the value with an string of newval. 
+ * Add or replace the value with string newval. 
  * The whole list is removed with cf_freeparse().
  */
 void cf_putstr(CF_VALS cf, char *key, char *newval)
@@ -475,24 +475,59 @@ int cf_defaultcf(CF_VALS cf,		/* Parsed configuration values */
 
      insert = 0;
      tree_traverse(defaults) {
-       if (tree_find(cf, tree_getkey(defaults)) == TREE_NOVAL) {
-	    origentry = tree_get(defaults);
-	    entry = xnmalloc(sizeof(struct cf_entval));
-	    entry->vector = origentry->vector;
-	    if (entry->vector) {
-		 /* vector */
-		 entry->data.vec = itree_create();
-		 itree_traverse(origentry->data.vec)
-		      itree_append(entry->data.vec,
+          if (tree_find(cf, tree_getkey(defaults)) == TREE_NOVAL) {
+	       origentry = tree_get(defaults);
+	       entry = xnmalloc(sizeof(struct cf_entval));
+	       entry->vector = origentry->vector;
+	       if (entry->vector) {
+		    /* vector */
+		    entry->data.vec = itree_create();
+		    itree_traverse(origentry->data.vec)
+		         itree_append(entry->data.vec,
 				   xnstrdup(itree_get(origentry->data.vec)));
-	    } else {
+	       } else {
 		 /* scaler */
 		 entry->data.arg = xnstrdup(origentry->data.arg);
-	    }
+	       }
 	    
-	    tree_add(cf, xnstrdup(tree_getkey(defaults)), entry);
-	    insert++;
+	       tree_add(cf, xnstrdup(tree_getkey(defaults)), entry);
+	       insert++;
 	  }
+     }
+
+     return insert;
+}
+
+/*
+ * Copy the configuration from one CF_VALS to another, overwriting/clobbering
+ * existing entries.
+ * Returns the number of entries copied
+ */
+int cf_copycf(CF_VALS dst,	/* Destination list */
+	      CF_VALS src	/* Source list */ )
+{
+     int insert;
+     struct cf_entval *entry, *origentry;
+
+     insert = 0;
+     tree_traverse(src) {
+          /* deep copy of entry */
+          origentry = tree_get(src);
+	  entry = xnmalloc(sizeof(struct cf_entval));
+	  entry->vector = origentry->vector;
+	  if (entry->vector) {
+	       /* vector */
+	       entry->data.vec = itree_create();
+	       itree_traverse(origentry->data.vec)
+		 itree_append(entry->data.vec,
+			      xnstrdup(itree_get(origentry->data.vec)));
+	  } else {
+	       /* scaler */
+	       entry->data.arg = xnstrdup(origentry->data.arg);
+	  }
+
+	  cf_entreplace(dst, xnstrdup(tree_getkey(src)), entry);
+	  insert++;
      }
 
      return insert;
@@ -651,25 +686,24 @@ void cf_addstr(CF_VALS cf, char *name, char *value)
 }
 
 
-
 /*
  * Add the key data pair to the tree, overwriting existing data
- * if it was there. If it displaces data from the tree or does not
- * use supplied data, they will be freed with tree_infreemem().
+ * if it was there. If it displaces data from the tree, the displaced
+ * will be freed with tree_infreemem().
  * Both key and data are reparented by the cf tree, the caller should
  * not free the arguments individually.
  */
-void cf_entreplace(TREE *t, char *key, struct cf_entval *data) {
+void cf_entreplace(CF_VALS cf, char *key, struct cf_entval *data) {
      struct cf_entval *entry;
 
-     if ( ! t )
-	  elog_die(FATAL, "cf_entreplace()", 0, "t == NULL");
+     if ( ! cf )
+	  elog_die(FATAL, "cf_entreplace()", 0, "cf == NULL");
 
-     if ( (entry = tree_find(t, key)) == TREE_NOVAL) {
-	  tree_add(t, key, data);
+     if ( (entry = tree_find(cf, key)) == TREE_NOVAL) {
+	  tree_add(cf, key, data);
      } else {
 	  nfree(key);
-	  tree_put(t, data);
+	  tree_put(cf, data);
 	  cf_entfree(entry);
      }
 }
@@ -921,6 +955,159 @@ int     cf_updateline(CF_VALS cf, char *key, char *cfroute, char *magic)
 
      /* clean up */
      nfree(newbuf);
+
+     return r;
+}
+
+
+
+/*
+ * Save selected keys from a config list (CF_VALS) to an existing config 
+ * file by careful statement replacement. This preserves comments and 
+ * other formatting that may exist, good for hand edited files.
+ * Similar to cf_updateline() but works more efficently on many values.
+ * Only the keys are used in the savekeys list.
+ * 
+ * The config data is read from its route and the lines containing keys 
+ * in savekeys are replaced with the current values using regular expressions.
+ * The result is saved back to the route.
+ *
+ * Will create a new config file if one does not exist and uses magic for 
+ * the header line string. If magic is NULL, no magic string is provided 
+ * in the saved route file.
+ * If a key from savekeys does not exist in cf but does in the file, then 
+ * the matching line will be removed from the file.
+ * Returns the number of characters if successful or -1 for failure.
+ */
+int     cf_updatelines(CF_VALS cf, TREE *savekeys, char *cfroute, char *magic)
+{
+     char directive[LINELEN], key_text[TOKLEN], errbuf[LINELEN];
+     regex_t key_pattern;
+     regmatch_t substr[1];
+     char *buf, *newbuf, *npt;
+     ROUTE rt;
+     CF_VALS new_cf;
+     int len, newbuflen, dirlen, nchanges=0, r=0;
+
+     if (tree_n(savekeys) == 0)
+          return 0; /* empty list, not an error */
+
+     /* read the file into memory or create a new one */
+     buf = route_read(cfroute, NULL, &len);
+     if (buf == NULL) {
+
+          /* no existing file -- create a new one */
+	  rt = route_open(cfroute, "user configuration", NULL, 10);
+	  if (rt == NULL) {
+	       elog_printf(ERROR, "unable to open %s to save configuration",
+			   cfroute);
+	       return -1;
+	  }
+
+	  /* if cf and savekeys are the same, then we can save time by
+	   * writing it all. Also, you can't have both the same as they
+	   * are stateful!! */
+	  if (cf == savekeys) {
+	       r = cf_writeroute(cf, magic, rt);
+	  } else {
+	       /* create a new config structure to feed cf_writeroute() */
+	       new_cf = tree_create();
+	       tree_traverse(savekeys) {
+		    if (cf_defined(cf, tree_getkey(savekeys))) {
+		         /* treat CF_VALS as a TREE* for simplicity, just copy
+			  * the refs to key and value -- a shallow copy */
+		         tree_find(cf, tree_getkey(savekeys));
+			 tree_add(new_cf, tree_getkey(cf), tree_get(cf));
+		    }
+	       }
+
+	       /* now save the new config structure */
+	       r = cf_writeroute(new_cf, magic, rt);
+
+	       /* clear up using a challow tree destructor as we dont want
+		* a deep destroy to affect cf */
+	       tree_destroy(new_cf);
+	  }
+
+	  /* close and return */
+	  route_close(rt);
+	  return r;
+     }
+
+     /* iterate over the savekeys list */
+     tree_traverse(savekeys) {
+
+          /* find entry from cf */
+          if (cf != savekeys &&
+	      tree_find(cf, tree_getkey(savekeys)) == TREE_NOVAL) {
+	       /* no entry - remove line */
+	       dirlen = 0;
+	  } else {
+	       /* found entry: make the directive line to be inserted */
+	       dirlen = cf_directive(tree_getkey(cf), tree_get(cf), 
+				     directive, LINELEN);
+	  }
+
+	  /* compile regular expression to search for the existing key */
+	  snprintf(key_text, TOKLEN, "^[ \t-]*%s[ \t]*[ \t=]*.*\n", 
+		   tree_getkey(savekeys));
+	  if ((r = regcomp(&key_pattern, key_text, REG_NEWLINE))) {
+	       regerror(r, &key_pattern, errbuf, LINELEN);
+	       elog_printf(ERROR, "problem with key pattern: %s, error is %s", 
+			   key_pattern, errbuf);
+	       nfree(buf);
+	       return -1;
+	  }
+
+	  /* find key pattern in the existing config buffer */
+	  if (regexec(&key_pattern, buf, 1, substr, 0) == 0) {
+	       /* found the key!! */
+	       if (substr[0].rm_so == -1) {
+		    /* error */
+		    nfree(buf);
+		    regfree(&key_pattern);
+		    return -1;
+	       } else {
+		    /* patch line if changed */
+		    newbuflen =   len 
+			        - (substr[0].rm_eo - substr[0].rm_so) 
+			        + dirlen;
+		    npt = newbuf = nmalloc(newbuflen+1);
+		    strncpy(npt, buf, substr[0].rm_so+1);
+		    npt += substr[0].rm_so;
+		    strncpy(npt, directive, dirlen+1);
+		    npt += dirlen;
+		    strncpy(npt, buf + substr[0].rm_eo, 
+			    len - substr[0].rm_eo + 1);
+
+		    nfree(buf);	/* remove old buffer */
+		    nchanges++;
+	       }
+	  } else {
+	       /* key is not present in the file to overwrite, so append 
+		* directive to buffer */
+	       newbuflen = len + dirlen;
+	       newbuf = xnrealloc(buf, newbuflen+1);
+	       strncpy(newbuf + len, directive, dirlen+1);
+	       nchanges++;
+	  }
+
+	  /* clean up regexp & arrage buffers for next iteration */
+	  regfree(&key_pattern);
+	  buf = newbuf;
+	  len = newbuflen;
+     }
+
+     /* save data back to route */
+     if (nchanges) {
+	  rt = route_open(cfroute, "user configuration", NULL, 10);
+	  r = route_write(rt, buf, len);
+	  route_close(rt);
+     } else
+          r = 0;
+
+     /* clean up */
+     nfree(buf);
 
      return r;
 }

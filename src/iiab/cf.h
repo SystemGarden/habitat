@@ -48,13 +48,14 @@ void    cf_putvec(CF_VALS cf, char *key, ITREE *newval);
 int     cf_check(CF_VALS cf, char **key);
 int     cf_default(CF_VALS cf, char **defaults);
 int     cf_defaultcf(CF_VALS cf, CF_VALS defaults);
+int     cf_copycf(CF_VALS dst, CF_VALS src);
 int     cf_defined(CF_VALS cf, char *key);
 int     cf_isvector(TREE *cf, char *key);
 void    cf_dump(CF_VALS cf);
 TABLE   cf_getstatus(CF_VALS cf);
 TREE *  cf_gettree(CF_VALS cf);
 void    cf_addstr(CF_VALS cf, char *name, char *value);
-void    cf_entreplace(TREE *t, char *key, struct cf_entval *);
+void    cf_entreplace(CF_VALS cf, char *key, struct cf_entval *);
 void    cf_entfree(struct cf_entval *entry);
 int     cf_directive(char *key, struct cf_entval *entry, char *buffer, 
 		     int buflen);
@@ -65,5 +66,6 @@ int     cf_writeroute();
 #endif
 char *  cf_writetext(CF_VALS cf, char *magic);
 int     cf_updateline(CF_VALS cf, char *key, char *cfroute, char *magic);
+int     cf_updatelines(CF_VALS cf, TREE *savekeys, char *cfroute, char *magic);
 
 #endif /* _CF_H_ */
