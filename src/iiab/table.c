@@ -90,7 +90,7 @@ TABLE table_create_a(char **colnames)
 
 /*
  * Create a table with column names specified in the string `colnamestr'.
- * If `colnamestr' includes a new line, then the second and secessive lines
+ * If `colnamestr' includes a new line, then the second and successive lines
  * are scanned for info lines.
  * Each column name and token is seperated by a tab, which should 
  * never be part of a column name
