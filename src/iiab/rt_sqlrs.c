@@ -18,13 +18,12 @@
 #include "cf.h"
 #include "elog.h"
 #include "util.h"
+#include "route.h"
 #include "http.h"
 #include "rt_sqlrs.h"
 
 /* private functional prototypes */
 RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld);
-void rt_sqlrs_get_credentials(char *purl, TABLE *auth, CF_VALS *cookies, 
-			      char **cookiejar);
 
 const struct route_lowlevel rt_sqlrs_method = {
      rt_sqlrs_magic,      rt_sqlrs_prefix,     rt_sqlrs_description,
@@ -433,20 +432,21 @@ RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld	/* typeless low level data */)
  * Auth should be freed with table_destroy() if non-NULL, cookies with 
  * cf_destroy() if non-NULL and cookiejar with nfree() if non-NULL.
  *
- * NEED TO REVIEW THE MEMORY ALLOCATIONS for TABLE an CF_VALS
-*/
+ * REFACTOR -- SHOULDN'T REALLY BE HERE, SHOULD BE IN A PROPERTIES FILE
+ */
 void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 			      TABLE *auth,	/* returned host configuration
 						 * & authorisation table*/
 			      CF_VALS *cookies,	/* returned cookies */
 			      char **cookiejar	/* returned cookiejar fname */)
 {
-     char *auth_purl,    auth_expanded_purl[1024];
+     char *auth_purl,    auth_expanded_purl[1024], *authtxt;
      char *cookies_purl, cookies_expanded_purl[1024];
+     int len, r;
 
      /* get the configuration details */
      if (rt_sqlrs_cf == NULL) {
-          elog_printf(DIAG, "no configuration, can't get credentials");
+          elog_printf(DIAG, "no SQLRS configuration, can't get credentials");
 	  *auth = NULL;
 	  *cookies = NULL;
 	  *cookiejar = NULL;
@@ -469,23 +469,19 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 				RT_SQLRS_AUTH_URLKEY, auth_purl, purl);
 		    *auth = NULL;
 	       } else {
+		    /* grab the data as text, then parse it as a table */
 		    route_expand(auth_expanded_purl, auth_purl, NULL, 0);
-		    *auth = route_tread(auth_expanded_purl, NULL);
+		    authtxt = route_read(auth_expanded_purl, NULL, &len);
 		    if (!*auth) {
 		         elog_printf(DIAG, "Unable to read authorisation "
 				     "route %s. Is it there? Is it readable?",
 				     auth_expanded_purl);
 		    } else {
-		         if (table_ncols(*auth) == 1) {
-			      /* its not a table, so attempt to parse it */
-			 }
-
-			 /* COULD BE TABULAR OR COULD BE A FLAT FILE (IN 
-			  * WHICH CASE THERE WILL ON BE 'DATA' AS A COLUMN. 
-			  * SO, IF ONLY DATA, ATTEMPT TO PARSE IT IN TO A 
-			  * TABLE. IF THAT FAILS THEN AUTH MUST BE MARKED 
-			  * AS NULL */
-		    }
+		         *auth = table_create();
+			 r = table_scan(*auth, authtxt, "\t", TABLE_SINGLESEP,
+					TABLE_HASCOLNAMES, TABLE_HASRULER);
+			 table_freeondestroy(*auth, authtxt);
+ 		    }
 	       }
 	  }
           cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
@@ -541,150 +537,128 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
  * Save cookies for use with the repository
  *
  * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY.
- * It will be saved in the habitata configuration text format.
+ * It will be saved in the habitat configuration text format.
  * It must not be sqlrs: or http:
+ *
+ * Returns 1 for success, 0 for failure
+ *
+ * REFACTOR -- SHOULDN'T REALLY BE HERE, SHOULD BE IN A PROPERTIES FILE
  */
-
-
-/*
- * Save host specific proxy configuration
- *
- * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY.
- * It will be saved in the habitata configuration text format.
- * It must not be sqlrs: or http:
- */
-
-
-/* Save all the details you need to speak to a repository with sqlrs
- *
- * This routine finds the data locations from the main config (iiab_cf), 
- * opens each for writing and stores the supplied data if it can.
- *
- * Three data structures are returned:-
- * 1. Table of connection details and credentials (TABLE)
- * 2. Config of repository account details (CF_VALS)
- * 3. Cookiejar filename, used to store repository session key (char *)
- * Each is explained below
- *
- * Authorisation is held in a route pointed to by the config value
- * RT_SQLES_AUTH_URLKEY (the auth data is held away from the main config so 
- * its file permissions can be made read-only for user like ssh (mode 400) ).
- * It must be a table or be text that is parsable into a table. 
- * The route may NOT be sqlrs:, http: or https: to avoid infinite reursion.
- * Just in case, this routine will spot those driver prefixes and refuse the
- * call to route_tread(), thereby avoiding the loop and will return auth 
- * set to NULL.
- *
- * Cookie jar is a simple filename referring to local storage, not a purl route
- *
- * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY.
- * This should be free text in a configuration format, parasable by the
- * cf class. This config structure is then returned.
- * Again, it must not be sqlrs: or http:
- *
- * Auth should be freed with table_destroy() if non-NULL, cookies with 
- * cf_destroy() if non-NULL and cookiejar with nfree() if non-NULL.
- *
- * NEED TO REVIEW THE MEMORY ALLOCATIONS for TABLE an CF_VALS
-*/
-void rt_sqlrs_put_credentials(char *purl,	/* route name for diag msg */
-			      TABLE *auth,	/* returned host configuration
-						 * & authorisation table*/
-			      CF_VALS *cookies,	/* returned cookies */
-			      char **cookiejar	/* returned cookiejar fname */)
+int rt_sqlrs_put_cookies_cred(char *purl,	/* route name for diag msg */
+			     CF_VALS cookies	/* cookies */ )
 {
-     char *auth_purl,    auth_expanded_purl[1024];
      char *cookies_purl, cookies_expanded_purl[1024];
+     int r;
+
+     /* check we have data to save */
+     if (tree_n(cookies) <= 0) {
+          elog_printf(DEBUG, "no cookies to save");
+	  return 1;	/* a success, but nothing saved */
+     }
 
      /* get the configuration details */
      if (rt_sqlrs_cf == NULL) {
           elog_printf(DIAG, "no configuration, can't get credentials");
-	  *auth = NULL;
-	  *cookies = NULL;
-	  *cookiejar = NULL;
-     } else {
-          auth_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_AUTH_URLKEY);
-	  if (auth_purl == NULL) {
-	       elog_printf(DIAG, "authorisation configuration not found: %s, "
-			   "proceeding without authorisation for %s", 
-			   RT_SQLRS_AUTH_URLKEY, purl);
-	       *auth = NULL;
-	  } else {
-	       /* prevent loops with ourself */
-	       if (strncmp(auth_purl, "http:",  5) == 0 ||
-		   strncmp(auth_purl, "https:", 6) == 0 ||
-		   strncmp(auth_purl, "sqlrs:", 6) == 0) {
-	            elog_printf(DIAG, "can't use HTTP based routes to find "
-				"authentication for HTTP methods (%s=%s); "
-				"loop avoided, proceeding without "
-				"authentication configuration for %s", 
-				RT_SQLRS_AUTH_URLKEY, auth_purl, purl);
-		    *auth = NULL;
-	       } else {
-		    route_expand(auth_expanded_purl, auth_purl, NULL, 0);
-		    *auth = route_tread(auth_expanded_purl, NULL);
-		    if (!*auth) {
-		         elog_printf(DIAG, "Unable to read authorisation "
-				     "route %s. Is it there? Is it readable?",
-				     auth_expanded_purl);
-		    } else {
-		         if (table_ncols(*auth) == 1) {
-			      /* its not a table, so attempt to parse it */
-			 }
-
-			 /* COULD BE TABULAR OR COULD BE A FLAT FILE (IN 
-			  * WHICH CASE THERE WILL ON BE 'DATA' AS A COLUMN. 
-			  * SO, IF ONLY DATA, ATTEMPT TO PARSE IT IN TO A 
-			  * TABLE. IF THAT FAILS THEN AUTH MUST BE MARKED 
-			  * AS NULL */
-		    }
-	       }
-	  }
-          cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
-	  if (cookies_purl == NULL) {
-	       elog_printf(DIAG, "cookie configuration not found: %s, "
-			   "proceeding without configuration for %s", 
-			   RT_SQLRS_COOKIES_URLKEY, purl);
-		    *cookies = NULL;
-	  } else {
-	       /* prevent loops with ourself */
-	       if (strncmp(cookies_purl, "http:",  5) == 0 ||
-		   strncmp(cookies_purl, "https:", 6) == 0 ||
-		   strncmp(cookies_purl, "sqlrs:", 6) == 0) {
-	            elog_printf(DIAG, "can't use HTTP based routes to find "
-				"authentication for HTTP methods (%s=%s); "
-				"loop avoided, proceeding without "
-				"authentication configuration for %s", 
-				RT_SQLRS_COOKIES_URLKEY, cookies_purl, purl);
-		    *cookies = NULL;
-	       } else {
-		    /* parse the text as a key-value configuration file */
-		    *cookies = cf_create();
-		    route_expand(cookies_expanded_purl, cookies_purl, NULL, 0);
-		    if ( ! cf_scanroute(*cookies, NULL, 
-					cookies_expanded_purl, 1)) {
-		         /* unsuccessful parse */
-			 cf_destroy(*cookies);
-			 *cookies = NULL;
-		    }
-	       }
-	  }
-          *cookiejar = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIEJAR_FILEKEY);
-	  if (*cookiejar == NULL) {
-	       elog_printf(DIAG, "cookie jar configuration not found: %s, "
-			   "proceeding with out the jar for %s",
-			   RT_SQLRS_COOKIEJAR_FILEKEY, purl);
-	  } else {
-	       /* chop off any driver prefix given by mistake as CURL won't
-	        * understand it */
-	       if (strncmp(*cookiejar, "file:", 5) == 0)
-	            *cookiejar += 5;
-	       else if (strncmp(*cookiejar, "filea:", 6) == 0)
-	            *cookiejar += 6;
-	       else if (strncmp(*cookiejar, "fileov:", 7) == 0)
-	            *cookiejar += 7;
-	  }
+	  return 0;	/* failure */
      }
+
+     cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
+     if (cookies_purl == NULL) {
+          elog_printf(DIAG, "cookie configuration not found: %s, "
+		      "unable to continue without configuration for %s", 
+		      RT_SQLRS_COOKIES_URLKEY, purl);
+	  return 0;	/* failure */
+     }
+
+     /* prevent loops with ourself and bail out */
+     if (strncmp(cookies_purl, "http:",  5) == 0 ||
+	 strncmp(cookies_purl, "https:", 6) == 0 ||
+	 strncmp(cookies_purl, "sqlrs:", 6) == 0) {
+          elog_printf(DIAG, "can't use HTTP based routes to find "
+		      "authentication for HTTP methods (%s=%s); "
+		      "loop avoided, proceeding without "
+		      "authentication configuration for %s", 
+		      RT_SQLRS_COOKIES_URLKEY, cookies_purl, purl);
+	  return 0;	/* failure */
+     }
+
+     /* personalise the cookie url by expansion to get 
+      * the user's homedir */
+     route_expand(cookies_expanded_purl, cookies_purl, NULL, 0);
+     cf_updatelines(cookies, cookies, cookies_expanded_purl, NULL);
+
+     return 1;
+}
+
+
+/*
+ * Save host specific proxy configuration and authentication
+ *
+ * The data will be saved in a text representation of a table.
+ * 
+ * Authorisation is held in a route pointed to by the config value
+ * RT_SQLRS_AUTH_URLKEY (the auth data is held away from the main config so 
+ * its file permissions can be made read-only for user like ssh (mode 400) ).
+ * The route may NOT be sqlrs:, http: or https: to avoid infinite reursion.
+ * Just in case, this routine will spot those driver prefixes and refuse the
+ * call to route_twrite(), thereby avoiding the loop.
+ *
+ * Returns 1 for success, 0 for failure
+ *
+ * REFACTOR -- SHOULDN'T REALLY BE HERE, SHOULD BE IN A PROPERTIES FILE
+ */
+int rt_sqlrs_put_proxy_cred(char *purl,		/* route name for diag msg */
+			    TABLE proxy		/* proxy table */ )
+{
+     char *proxy_purl, proxy_expanded_purl[1024];
+     ROUTE rt;
+     int r;
+
+     /* check we have data to save */
+     if (table_nrows(proxy) <= 0) {
+          elog_printf(DEBUG, "no proxy details to save");
+	  return 1;	/* a success, but nothing saved */
+     }
+
+     /* get the configuration details */
+     if (rt_sqlrs_cf == NULL) {
+          elog_printf(DIAG, "no SQLRS configuration, can't get credentials");
+	  return 0;	/* failure */
+     }
+
+     proxy_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_AUTH_URLKEY);
+     if (proxy_purl == NULL) {
+          elog_printf(DIAG, "authorisation configuration not found: %s, "
+		      "unable to continue saving proxy details for %s", 
+		      RT_SQLRS_AUTH_URLKEY, purl);
+	  return 0;	/* failure */
+     }
+
+     /* prevent loops with ourself */
+     if (strncmp(proxy_purl, "http:",  5) == 0 ||
+	 strncmp(proxy_purl, "https:", 6) == 0 ||
+	 strncmp(proxy_purl, "sqlrs:", 6) == 0) {
+          elog_printf(DIAG, "can't use HTTP based routes to find "
+		      "authentication for HTTP methods (%s=%s); "
+		      "loop avoided, proceeding without "
+		      "authentication configuration for %s", 
+		      RT_SQLRS_AUTH_URLKEY, proxy_purl, purl);
+	  return 0;	/* failure */
+     }
+
+     /* personalise the proxy url by expansion to get 
+      * the user's homedir */
+     route_expand(proxy_expanded_purl, proxy_purl, NULL, 0);
+     rt = route_open(proxy_expanded_purl, "Proxy config information", NULL, 
+		     10);
+     if (rt == NULL) {
+          elog_printf(ERROR, "unable to open proxy configuration file for "
+		      "writing: %s", proxy_expanded_purl);
+	  return 0;	/* failure */
+     }
+     r = route_twrite(rt, proxy);
+
+     return r;
 }
 
 

@@ -13,7 +13,7 @@
 #include "route.h"
 
 /* General definitions */
-#define RT_SQLRS_LLD_MAGIC        503765
+#define RT_SQLRS_LLD_MAGIC         503765
 #define RT_SQLRS_GET_URLKEY        "route.sqlrs.geturl"
 #define RT_SQLRS_PUT_URLKEY        "route.sqlrs.puturl"
 #define RT_SQLRS_AUTH_URLKEY       "route.sqlrs.authurl"
@@ -55,6 +55,10 @@ int    rt_sqlrs_twrite(RT_LLD lld, TABLE tab);
 int    rt_sqlrs_tell  (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_sqlrs_read  (RT_LLD lld, int seq, int offset);
 TABLE  rt_sqlrs_tread (RT_LLD lld, int seq, int offset);
+void   rt_sqlrs_get_credentials (char *purl, TABLE *auth, CF_VALS *cookies, 
+				 char **cookiejar);
+int    rt_sqlrs_put_cookies_cred(char *purl, CF_VALS cookies);
+int    rt_sqlrs_put_proxy_cred  (char *purl, TABLE proxy);
 
 
 #endif /* _RT_SQLRS_H_ */
