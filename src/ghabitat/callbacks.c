@@ -2030,7 +2030,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      str = cf_getstr(cookies, "__repository");
      if (str)
           gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
-     /* ro be completed, the insertion of the SSL key */
+     /* to be completed, the insertion of the SSL key */
      /*gtk_text_insert(GTK_TEXT(repos_key_entry), NULL, NULL, NULL, sslkey, length(sslkey));*/
 
      /* --- authentication section --- */
@@ -3314,17 +3314,21 @@ on_repos_save_action_clicked           (GtkButton       *button,
      GtkWidget *repos_proxy_host_entry;
      GtkWidget *repos_proxy_port_entry;
      TABLE auth;
+     TREE *authrow;
      CF_VALS cookies;
      char *geturl, *puturl, *harv_user, *harv_pw, *harv_repos, *harv_sslkey;
      char *realm_user, *realm_pw;
      char *proxy_user, *proxy_pw, *proxy_host, *proxy_port;
-     char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL, *sslkeypwd=NULL;
-     char *cert=NULL, *cookiejar;
+     char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL;
+     char *cert=NULL, *host=NULL, *cookiejar;
      int enabled, len, rowkey;
      /* regular expression variables */
      regex_t url_re_pattern;
      char errbuf[LINELEN];
      int r;
+     char *proxy_cfg_nameval[] = {"host", "userpwd", "proxy", "proxyuserpwd",
+				  "sslkeypwd", "cert", NULL};
+
 
      /* get the fields from the form as widgets */
      b = GTK_WIDGET(button);
@@ -3382,6 +3386,7 @@ on_repos_save_action_clicked           (GtkButton       *button,
 	  elog_printf(ERROR, "Repository Get URL does not contain a valid "
 		      "URL: %s, error is %s. Unable to save any properties",
 		      geturl, errbuf);
+	  regfree(&url_re_pattern);
 	  if (harv_sslkey)
 	       g_free(harv_sslkey);
 	  return;	 
@@ -3395,11 +3400,13 @@ on_repos_save_action_clicked           (GtkButton       *button,
 	  elog_printf(ERROR, "Repository Put URL does not contain a valid "
 		      "URL: %s, error is %s. Unable to save any properties",
 		      puturl, errbuf);
+	  regfree(&url_re_pattern);
 	  if (harv_sslkey)
 	       g_free(harv_sslkey);
 	  return;	 
        }
      }
+     regfree(&url_re_pattern);
 
      /* save the repository URLs in iiab's config and write out */
      cf_putstr(iiab_cf, RT_SQLRS_GET_URLKEY, geturl);
@@ -3407,11 +3414,81 @@ on_repos_save_action_clicked           (GtkButton       *button,
      iiab_usercfsave(iiab_cf, RT_SQLRS_GET_URLKEY);
      iiab_usercfsave(iiab_cf, RT_SQLRS_PUT_URLKEY);
 
-     /* save repository account and proxy details in the config structure */
-     /* TO BE DONE */
+     /* save repository account details */
+     cookies = cf_create();
+     cf_putstr(cookies, "__username",   harv_user);
+     cf_putstr(cookies, "__password",   harv_pw);
+     cf_putstr(cookies, "__repository", harv_repos);
+     if (!rt_sqlrs_put_cookies_cred("ghabitat cookie configuration", cookies))
+          elog_printf(ERROR, "Unable to save repository account details");
+     cf_destroy(cookies);
 
-     /* save the authorisation in a table */
-     /*     rt_sqlrs_put_credentials("ghabitat configuration")*/
+     /* -- save the authorisation in a table -- */
+     /* Get host from the get url and look up in the auth table */
+     if (geturl && *geturl) {
+         host = strstr(geturl, "://");
+	 if (!host) {
+	     elog_printf(ERROR, "url '%s' in unrecognisable format", geturl);
+	     return;
+	 }
+	 host += 3;
+	 len = strcspn(host, ":/");
+	 if (len) {
+	     host = xnmemdup(host, len+1);
+	     host[len] = '\0';
+	 } else {
+	     host = xnstrdup("localhost");
+	 }
+     }
+
+     /* realm/remote webserver account (in addition to harvest account) 
+      *   -- user[:pwd] is the format */
+     if (realm_user && *realm_user) {
+          if (realm_pw && *realm_pw)
+	       userpwd = util_strjoin(realm_user, ":", realm_pw, NULL);
+	  else
+	       userpwd = xnstrdup(realm_user);
+     }
+
+     /* proxy host and port -- [driver://]host[:port] is the format */
+     if (proxy_host && *proxy_host) {
+          if (proxy_port && *proxy_port)
+	       proxy = util_strjoin("http://", proxy_host, ":", proxy_port, 
+				    NULL);
+	  else
+	       proxy = util_strjoin("http://", proxy_host, NULL);
+     }
+
+     /* proxy host account -- user[:pwd] is the format */
+     if (proxy_user && *proxy_user) {
+          if (proxy_pw && *proxy_pw)
+	       proxyuserpwd = util_strjoin(proxy_user, ":", proxy_pw, NULL);
+	  else
+	       proxyuserpwd = xnstrdup(proxy_user);
+     }
+     cert = "";
+
+     /* create the structure (TREE* into TABLE) and save it (RT_SQLRS) */
+     authrow = tree_create();
+     tree_add(authrow, "host",         host);
+     tree_add(authrow, "userpwd",      userpwd);
+     tree_add(authrow, "proxy",        proxy);
+     tree_add(authrow, "proxyuserpwd", proxyuserpwd);
+     tree_add(authrow, "sslkeypwd",    harv_sslkey);
+     tree_add(authrow, "cert",         cert);
+
+     auth = table_create_a(proxy_cfg_nameval);
+     table_addrow_noalloc(auth, authrow);
+     if (!rt_sqlrs_put_proxy_cred("ghabitat configuration", auth))
+          elog_printf(ERROR, "Unable to save proxy details");
+
+     /* clear everything up */
+     table_destroy(auth);
+     tree_destroy(authrow);
+     nfree(host);
+     nfree(userpwd);
+     nfree(proxy);
+     nfree(proxyuserpwd);
 
      /* restart curl with new credentials. if there are failings, give
       * a mesage */
