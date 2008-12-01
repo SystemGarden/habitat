@@ -165,11 +165,11 @@ RT_LLD rt_fileov_open (char *p_url, char *comment, char *password, int keep,
 		    return NULL;
 	       }
 	  } else if (access(basename, F_OK) == 0) {
-	       elog_printf(DEBUG, "file % accessable but no read "
+	       elog_printf(DEBUG, "file %s accessable but no read "
 			   "permission ", basename);
 	       return NULL;
 	  } else {
-	       elog_printf(DEBUG, "file % inaccessable; check permission"
+	       elog_printf(DEBUG, "file %s inaccessable; check permission "
 			   "of the leading path", basename);
 	       return NULL;
 	  }
