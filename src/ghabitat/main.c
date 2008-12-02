@@ -34,7 +34,7 @@ char *cfdefaults = "elog.all			none:\n"
 		   AUTOCLOCKWORK_CFNAME "	0\n"
 		   GTKACTION_CF_CURVES "        pc_idle pc_nice pc_system "
                                               " pc_user pc_wait pc_work "
-                                              " pc_used "
+                                              " pc_used cpu cpupeak "
                                               " rx_pkts tx_pkts ";
 
 char *cfdefaults2i = 
