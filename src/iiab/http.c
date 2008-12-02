@@ -106,7 +106,7 @@ char *http_get(char   *url, 	/* standard url */
      /* prime curl with the auth information */
      curl_easy_setopt(http_curlh, CURLOPT_URL, url);
      curl_easy_setopt(http_curlh, CURLOPT_WRITEFUNCTION, http_receive);
-     curl_easy_setopt(http_curlh, CURLOPT_FAILONERROR);
+     curl_easy_setopt(http_curlh, CURLOPT_FAILONERROR, NULL);
      curl_easy_setopt(http_curlh, CURLOPT_FILE, (void *) &buf);
      curl_easy_setopt(http_curlh, CURLOPT_ERRORBUFFER, errbuf);
      if (userpwd)
@@ -240,7 +240,7 @@ char *http_post(char   *url, 	/* standard url */
      /* prime curl with the auth information */
      curl_easy_setopt(http_curlh, CURLOPT_URL, url);
      curl_easy_setopt(http_curlh, CURLOPT_WRITEFUNCTION, http_receive);
-     curl_easy_setopt(http_curlh, CURLOPT_FAILONERROR);
+     curl_easy_setopt(http_curlh, CURLOPT_FAILONERROR, NULL);
      curl_easy_setopt(http_curlh, CURLOPT_FILE, (void *) &buf);
      if (userpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_USERPWD, userpwd);
