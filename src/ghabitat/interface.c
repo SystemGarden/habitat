@@ -6083,7 +6083,7 @@ create_repos_prop_window (void)
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
   gtk_tooltips_set_tip (tooltips, repos_proxy_port_entry, "Port number of proxy service", NULL);
-  gtk_entry_set_text (GTK_ENTRY (repos_proxy_port_entry), "8080");
+  gtk_entry_set_text (GTK_ENTRY (repos_proxy_port_entry), "");
 
   repos_buttons = gtk_hbox_new (TRUE, 5);
   gtk_widget_set_name (repos_buttons, "repos_buttons");
