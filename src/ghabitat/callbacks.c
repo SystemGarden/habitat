@@ -3491,10 +3491,8 @@ on_repos_save_action_clicked           (GtkButton       *button,
      nfree(proxy);
      nfree(proxyuserpwd);
 
-     /* restart curl with new credentials. if there are failings, give
-      * a mesage */
-
      /* enable/disable repository depending on 'enabled' datum */
+     /* TO BE DONE */
 
      /* free the data from gtk_text only (gtk_entry does not return a 
       * malloc'ed string, only the internal char array) */
