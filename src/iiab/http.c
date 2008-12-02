@@ -5,6 +5,7 @@
  */
 
 #include <string.h>
+#include <stdlib.h>
 #include <curl/curl.h>
 #include <curl/types.h>
 #include <curl/easy.h>
@@ -26,6 +27,8 @@ size_t http_send(void *ptr, size_t size, size_t nmemb, void *userp);
 /* initialise the curl class */
 void http_init()
 {
+     unsetenv("HTTP_PROXY");	/* stop libcurl being affected by the 
+				 * environment */
      http_curlh = curl_easy_init();
      if (! http_curlh)
 	  elog_die(FATAL, "unable to initialise curl");
