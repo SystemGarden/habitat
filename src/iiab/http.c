@@ -112,15 +112,15 @@ char *http_get(char   *url, 	/* standard url */
      curl_easy_setopt(http_curlh, CURLOPT_FAILONERROR, NULL);
      curl_easy_setopt(http_curlh, CURLOPT_FILE, (void *) &buf);
      curl_easy_setopt(http_curlh, CURLOPT_ERRORBUFFER, errbuf);
-     if (userpwd)
+     if (userpwd && *userpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_USERPWD, userpwd);
-     if (proxy)
+     if (proxy && *proxy)
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXY, proxy);
-     if (proxyuserpwd)
+     if (proxyuserpwd && *proxyuserpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXYUSERPWD, proxyuserpwd);
-     if (sslkeypwd)
+     if (sslkeypwd && *sslkeypwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLKEYPASSWD, sslkeypwd);
-     if (cert) {
+     if (cert && *cert) {
 	  certpath = util_strjoin(iiab_dir_etc, "/", cert, NULL);
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLCERT, certpath);
      }
@@ -145,7 +145,7 @@ char *http_get(char   *url, 	/* standard url */
 	  tree_clearoutandfree(cookie_list);
 	  tree_destroy(cookie_list);
      }
-     if (cookiejar)
+     if (cookiejar && *cookiejar)
 	  curl_easy_setopt(http_curlh, CURLOPT_COOKIEJAR, cookiejar);
 
      /* Diagnostic dump */
@@ -153,13 +153,13 @@ char *http_get(char   *url, 	/* standard url */
 		 "proxyuserpwd=%s, sslkeypwd=%s, certpath=%s, cookies=<<%s>>"
 		 "cookiejar=%s", 
 		 url,
-		 userpwd      ? userpwd      : "(none)",
-		 proxy        ? proxy        : "(none)",
-		 proxyuserpwd ? proxyuserpwd : "(none)",
-		 sslkeypwd    ? sslkeypwd    : "(none)",
-                 cert         ? certpath     : "(none)",
-		 *cookies_str ? cookies_str  : "(none)",
-		 cookiejar    ? cookiejar    : "(none)");
+		 userpwd      && *userpwd      ? userpwd      : "(none)",
+		 proxy        && *proxy        ? proxy        : "(none)",
+		 proxyuserpwd && *proxyuserpwd ? proxyuserpwd : "(none)",
+		 sslkeypwd    && *sslkeypwd    ? sslkeypwd    : "(none)",
+                 cert         && *cert         ? certpath     : "(none)",
+		 *cookies_str                  ? cookies_str  : "(none)",
+		 cookiejar    && *cookiejar    ? cookiejar    : "(none)");
 
      /* action the GET */
      r = curl_easy_perform(http_curlh);
@@ -169,7 +169,7 @@ char *http_get(char   *url, 	/* standard url */
 	  elog_printf(DIAG, "HTTP GET success");
 
      /* free and return */
-     if (cert)
+     if (cert && *cert)
 	  nfree(certpath);
      if (host)
 	  nfree(host);
