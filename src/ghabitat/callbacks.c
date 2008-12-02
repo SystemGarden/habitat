@@ -2062,7 +2062,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 	       sslkeypwd    = table_getcurrentcell(auth, "sslkeypwd");
 	       cert         = table_getcurrentcell(auth, "cert");
 	  }
-	  if (userpwd) {
+	  if (userpwd && *userpwd) {
 	       /* user[:pwd] is the format */
 	       len = strcspn(userpwd, ":");
 	       realm_user = xnmemdup(userpwd, len+1);
@@ -2074,7 +2074,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 				       userpwd+len);
 	       nfree(realm_user);
 	  }
-	  if (proxy) {
+	  if (proxy && *proxy) {
 	       /* [driver://]host[:port] is the format */
 	       proxy_host = strstr(proxy, "://");
 	       if (proxy_host)
@@ -2092,7 +2092,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 				       proxy+len);
 	       nfree(proxy_host);
 	  }
-	  if (proxyuserpwd) {
+	  if (proxyuserpwd && *proxyuserpwd) {
 	       /* user[:pwd] is the format */
 	       len = strcspn(proxy, ":");
 	       proxy_user = xnmemdup(proxyuserpwd, len+1);
@@ -2110,8 +2110,9 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 	  /* if (sslkeypwd)
 	       gtk_entry_set_text(GTK_ENTRY(repos_puturl_entry), puturl);
 	  */
-	  if (cert)
-	       gtk_entry_set_text(GTK_ENTRY(repos_key_entry), cert);
+	  if (cert && *cert)
+	       gtk_text_insert(GTK_TEXT(repos_key_entry), NULL, NULL, NULL, 
+			       cert, strlen(cert));
      }
 
      if (geturl && *geturl)
