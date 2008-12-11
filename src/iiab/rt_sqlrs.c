@@ -300,6 +300,13 @@ ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
      if (!text)
 	  return NULL;
 
+     /* check for error: the convention is that errors start with 'ERROR\n' */
+     if (strncmp(text, "ERROR\n", 6) == 0) {
+          elog_printf(ERROR, "repository error: %s", text+6);
+	  nfree(text);
+          return NULL;	/* return NULL as not valid data... its an error */
+     }
+
      /* create the list */
      buflist = itree_create();
      storebuf = xnmalloc(sizeof(ROUTE_BUF));
@@ -328,7 +335,7 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
 					 * returning data */)
 {
      RT_SQLRSD rt;
-     char *text, errtext[50];
+     char *text, *copytext, errtext[150], *pt;
      TABLE tab;
      int r, len;
      CF_VALS cookies;
@@ -338,10 +345,12 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
      rt = rt_sqlrs_from_lld(lld);
 
      if (strcmp(RT_SQLRS_WRITE_STATUS, rt->url) == 0) {
+          /* special token for the previous write status in a table */
 	  len = strcspn(rt->posttext, "\n");
 	  text = util_strjoin("status\n--\n", rt->posttext, NULL);
 	  text[len+10] = '\0';
      } else if (strcmp(RT_SQLRS_WRITE_RETURN, rt->url) == 0) {
+          /* special token for the previous whole write return */
 	  len = strcspn(rt->posttext, "\n");
 	  text = xnstrdup(rt->posttext+len+1);
      } else {
@@ -360,22 +369,43 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
      if (!text)
 	  return NULL;
 
-     /* create the table, assuming headers exist */
+     /* check for error: the convention is that errors start with 'ERROR\n' */
+     if (strncmp(text, "ERROR\n", 6) == 0) {
+          elog_printf(ERROR, "repository error: %s", text+6);
+	  nfree(text);
+          return NULL;
+     }
+
+     /* create the table, assuming headers exist and duplicate the first few
+      * bytes in case we have to print an error (500 bytes) */
+     copytext = xnstrndup(text, 500);
      tab = table_create();
      table_freeondestroy(tab, text);
      r = table_scan(tab, text, ",", TABLE_SINGLESEP, TABLE_HASCOLNAMES, 
 		    TABLE_HASRULER);
      if (r < 1) {
-	  /* empty table, no data or error */
-          len = strlen(text);
-	  if (len > 0) {
-	       strncpy(errtext, text, 50);
-	       errtext[49] = '\0';
-	       elog_printf(DIAG, "unable to parse table from text: %s%s "
-			   "(length %d)",
-			   errtext, len > 49 ? "...(truncated)" : "", len);
+	  /* table scanning error, so not valid data. 
+	   * Text has been altered by table_scan(), so we look at copytext
+	   * which contains a small copy of the data to extract an error.
+	   * The error message is probably HTML (due to HTTP transport) and 
+	   * is best viewed by an HTML browser.
+	   * Possible this should be another elog use case?
+	   * For text log, we rely on a 'large enough' sample of it */
+
+          if (*copytext) {
+	       /* there is text, delete HTML formatting and remove \n */
+	       util_html2text(copytext);
+	       util_strtrim(copytext);
+	       for (pt=copytext; *pt; pt++) {
+		    if (*pt == '\n')
+		         *pt = '-';
+	       }
+	       elog_printf(ERROR, "Repository error: %s", copytext);
+	  } else {
+	       elog_printf(ERROR, "Empty data from repository");
 	  }
 
+	  nfree(copytext);
 	  table_destroy(tab);
 	  tab = NULL;
      }
@@ -472,7 +502,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 		    /* grab the data as text, then parse it as a table */
 		    route_expand(auth_expanded_purl, auth_purl, NULL, 0);
 		    authtxt = route_read(auth_expanded_purl, NULL, &len);
-		    if (!*auth) {
+		    if (!authtxt) {
 		         elog_printf(DIAG, "Unable to read authorisation "
 				     "route %s. Is it there? Is it readable?",
 				     auth_expanded_purl);
