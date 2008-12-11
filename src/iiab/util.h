@@ -98,5 +98,6 @@ char * util_strtok_sc(char *str, char *s);
 char * util_hostname();
 char * util_domainname();
 char * util_fqhostname();
+void   util_html2text(char *);
 
 #endif /* _UTIL_H_ */
