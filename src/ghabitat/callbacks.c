@@ -1954,7 +1954,8 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      CF_VALS cookies;
      char *geturl, *puturl, *host, *str;
      char *userpwd=NULL, *proxy=NULL, *proxyuserpwd=NULL, *sslkeypwd=NULL;
-     char *cert=NULL, *cookiejar, *realm_user, *proxy_host, *proxy_user;
+     char *realm_user, *proxy_host, *mproxy_host, *proxy_user;
+     char *cookiejar, *cert=NULL;
      int len, rowkey;
 
      /* create window */
@@ -2082,15 +2083,16 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 	       else
 		    proxy_host = proxy;
 	       len = strcspn(proxy_host, ":");
-	       proxy_host = xnmemdup(proxy_host, len+1);
-	       proxy_host[len] = '\0';
+	       mproxy_host = xnmemdup(proxy_host, len+1);
+	       mproxy_host[len] = '\0';
 	       gtk_entry_set_text(GTK_ENTRY(repos_proxy_host_entry), 
-				  proxy_host);
+				  mproxy_host);
 
-	       if (proxy[len])
+	       /* match [:port] */
+	       if (proxy_host[len] && proxy_host[len+1])
 		    gtk_entry_set_text(GTK_ENTRY(repos_proxy_port_entry), 
-				       proxy+len);
-	       nfree(proxy_host);
+				       proxy_host+len+1);
+	       nfree(mproxy_host);
 	  }
 	  if (proxyuserpwd && *proxyuserpwd) {
 	       /* user[:pwd] is the format */
