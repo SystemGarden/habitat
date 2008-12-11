@@ -65,6 +65,10 @@ void  nm_nfree(void *, char *rfile, int rline, const char *rfunc);
 void  nm_xnfree(void *, char *rfile, int rline, const char *rfunc);
 char *nm_nstrdup(const char *, char *rfile, int rline, const char *rfunc);
 char *nm_xnstrdup(const char *, char *rfile, int rline, const char *rfunc);
+char *nm_nstrndup(const char *s, size_t max, char *rfile, int rline, 
+		  const char *rfunc);
+char *nm_xnstrndup(const char *s, size_t max, char *rfile, int rline, 
+		   const char *rfunc);
 void *nm_nmemdup(const void *, size_t, char *rfile, int rline, 
 		 const char *rfunc);
 void *nm_xnmemdup(const void *, size_t, char *rfile, int rline, 
@@ -85,6 +89,8 @@ void  nfree(void *);
 void  xnfree(void *);
 char *nstrdup(const char *);
 char *xnstrdup(const char *);
+char *nstrndup(const char *, size_t);
+char *xnstrndup(const char *, size_t);
 void *nmemdup(const void *, size_t);
 void *xnmemdup(const void *, size_t);
 void *memdup(const void *, size_t);
@@ -101,6 +107,8 @@ void  nadopt(void *);
 #define xnfree(a)	nm_xnfree(a,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 #define nstrdup(a)	nm_nstrdup(a,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 #define xnstrdup(a)	nm_xnstrdup(a,__FILE__,__LINE__,__PRETTY_FUNCTION__)
+#define nstrndup(a,b)	nm_nstrndup(a,b,__FILE__,__LINE__,__PRETTY_FUNCTION__)
+#define xnstrndup(a,b)	nm_xnstrndup(a,b,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 #define nmemdup(a,b)	nm_nmemdup(a,b,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 #define xnmemdup(a,b)	nm_xnmemdup(a,b,__FILE__,__LINE__,__PRETTY_FUNCTION__)
 #define memdup(a,b)	nm_memdup(a,b,__FILE__,__LINE__,__PRETTY_FUNCTION__)

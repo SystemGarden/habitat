@@ -321,6 +321,37 @@ char *nm_nstrdup(const char *s, char *rfile, int rline, const char *rfunc) {
 	return p;
 }
 
+/* As strdup(3) but with a maximum number of characters,  parameter checking
+ * and leak safeguards. The string will always be terminated */
+char *nm_nstrndup(const char *s, size_t max, char *rfile, int rline, 
+		  const char *rfunc) {
+	char *p;
+
+	if (s == NULL)
+	     elog_die(FATAL, "s == NULL at %s:%d:%s",
+		      rfile, rline, rfunc);
+
+	p = nmalloc(max);
+	strncpy(p, s, max);
+
+	return p;
+}
+
+/* As nstrndup above, but will abort application if not enough memory */
+char *nm_xnstrndup(const char *s, size_t max, char *rfile, int rline, 
+		   const char *rfunc) {
+	char *p;
+
+	if (s == NULL)
+	     elog_die(FATAL, "s == NULL at %s:%d:%s",
+		      rfile, rline, rfunc);
+
+	p = xnmalloc(max);
+	strncpy(p, s, max);
+
+	return p;
+}
+
 /* As nstrdup above, but will abort application if not enough memory */
 char *nm_xnstrdup(const char *s, char *rfile, int rline, const char *rfunc) {
 	char *p;
