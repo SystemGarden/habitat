@@ -953,7 +953,7 @@ char *util_strrtrim(char *s) {
 
 /* Remove leading whitespace from string */
 char *util_strltrim(char *s) {
-	char *t;
+     char *t;
 
      if (s == NULL)
           elog_die(FATAL, "s == NULL");
@@ -1758,6 +1758,38 @@ char *util_fqhostname() {
 	  return util_fqhostname_t;
 }
 
+
+/* Take an HTML string and remove the formatting elements is a simplistic
+ * and half-arsed way. Removes removes text surrounded by < and >.
+ * Modifies the string you pass as sugment, so make a copy before calling 
+ * ths routine if you wish to preserve the HTML original.
+ */
+void util_html2text(char *original) {
+     char *span1, *span2;
+
+     span1 = original;
+     while (*span1) {
+          /* find start of next span */
+          span1 += strcspn(span1, "<");
+	  if (! *span1)
+	       return;		/* completed */
+
+	  /* find closing address of span */
+	  span2 = span1 + strcspn(span1, ">");
+
+	  /* span1 points to '<'
+	   * span2 points to '>' or '\0' */
+
+	  /* copy remainder of line */
+	  if (*span2 != '\0') {
+	       strcpy(span1, span2+1);
+	  } else {
+	       /* formatting runs out, terminate line instead */
+	       *span1 = '\0';
+	       return;
+	  }
+     }
+}
 
 
 #if defined(TEST)
