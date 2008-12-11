@@ -27,14 +27,18 @@ size_t http_send(void *ptr, size_t size, size_t nmemb, void *userp);
 /* initialise the curl class */
 void http_init()
 {
-     unsetenv("HTTP_PROXY");	/* stop libcurl being affected by the 
-				 * environment */
+     /* stop libcurl being affected by the environment */
+     unsetenv("HTTP_PROXY");
+     unsetenv("http_proxy");
+     unsetenv("ftp_proxy");
+     unsetenv("all_proxy");
+
      http_curlh = curl_easy_init();
      if (! http_curlh)
 	  elog_die(FATAL, "unable to initialise curl");
 
      /* general curl configuration  - avoid signals, don't call DNS 
-      * excesively and dont wait too long to connect */
+      * excessively and don't wait too long to connect */
      curl_easy_setopt(http_curlh, CURLOPT_NOSIGNAL, (long) 1);
      curl_easy_setopt(http_curlh, CURLOPT_DNS_CACHE_TIMEOUT, (long) 3600);
      curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 15);
@@ -114,16 +118,32 @@ char *http_get(char   *url, 	/* standard url */
      curl_easy_setopt(http_curlh, CURLOPT_ERRORBUFFER, errbuf);
      if (userpwd && *userpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_USERPWD, userpwd);
-     if (proxy && *proxy)
+     else
+	  curl_easy_setopt(http_curlh, CURLOPT_USERPWD, NULL);
+     if (proxy && *proxy) {
+          /* set longer for proxy traffic, proabably irrational */
+          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 10);
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXY, proxy);
+          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 60);
+     } else {
+          /* set shorter for non-proxy traffic, proabably optimistic */
+          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 8);
+	  curl_easy_setopt(http_curlh, CURLOPT_PROXY, NULL);
+          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 60);
+     }
      if (proxyuserpwd && *proxyuserpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXYUSERPWD, proxyuserpwd);
+     else
+	  curl_easy_setopt(http_curlh, CURLOPT_PROXYUSERPWD, NULL);
      if (sslkeypwd && *sslkeypwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLKEYPASSWD, sslkeypwd);
+     else
+	  curl_easy_setopt(http_curlh, CURLOPT_SSLKEYPASSWD, NULL);
      if (cert && *cert) {
 	  certpath = util_strjoin(iiab_dir_etc, "/", cert, NULL);
 	  curl_easy_setopt(http_curlh, CURLOPT_SSLCERT, certpath);
-     }
+     } else
+	  curl_easy_setopt(http_curlh, CURLOPT_SSLCERT, NULL);
 
      /* load request with cookies, which expects the format 
       * cookie=value; [c=v; ...] */
@@ -160,6 +180,13 @@ char *http_get(char   *url, 	/* standard url */
                  cert         && *cert         ? certpath     : "(none)",
 		 *cookies_str                  ? cookies_str  : "(none)",
 		 cookiejar    && *cookiejar    ? cookiejar    : "(none)");
+
+     /* prepare the timeouts if local */
+     if (strcmp(host, "localhost")) {
+          /* if things are local, we expect it to be much faster */
+          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 4);
+          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 30);
+     }
 
      /* action the GET */
      r = curl_easy_perform(http_curlh);
