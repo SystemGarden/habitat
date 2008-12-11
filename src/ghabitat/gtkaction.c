@@ -2004,12 +2004,14 @@ GtkWidget *gtkaction_mkgraphattr(RESDAT dres	/* result structure */)
 	  if (picklist_button[i].state == 1) {
 	       colour = gtkaction_drawcurve(dres, tree_getkey(hd), 1.0, 0.0);
 
-	       /* colour the button */
-	       gdk_color_alloc (gtk_widget_get_colormap (witem), colour);
-	       newstyle = gtk_style_copy(gtk_widget_get_default_style());
-	       newstyle->bg[GTK_STATE_ACTIVE] = *colour;
-	       newstyle->bg[GTK_STATE_PRELIGHT] = *colour;
-	       gtk_widget_set_style(witem, newstyle);
+	       if (colour) {
+		    /* colour the button */
+		    gdk_color_alloc (gtk_widget_get_colormap (witem), colour);
+		    newstyle = gtk_style_copy(gtk_widget_get_default_style());
+		    newstyle->bg[GTK_STATE_ACTIVE] = *colour;
+		    newstyle->bg[GTK_STATE_PRELIGHT] = *colour;
+		    gtk_widget_set_style(witem, newstyle);
+	       }
 	  }
 
 	  i++;
