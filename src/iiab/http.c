@@ -40,8 +40,21 @@ void http_init()
      /* general curl configuration  - avoid signals, don't call DNS 
       * excessively and don't wait too long to connect */
      curl_easy_setopt(http_curlh, CURLOPT_NOSIGNAL, (long) 1);
-     curl_easy_setopt(http_curlh, CURLOPT_DNS_CACHE_TIMEOUT, (long) 3600);
-     curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 15);
+
+     if (cf_defined(iiab_cf, HTTP_CF_DNS_CACHE_TIMEOUT))
+          curl_easy_setopt(http_curlh, CURLOPT_DNS_CACHE_TIMEOUT, 
+			   (long) cf_getint(iiab_cf, 
+					    HTTP_CF_DNS_CACHE_TIMEOUT));
+     else
+          curl_easy_setopt(http_curlh, CURLOPT_DNS_CACHE_TIMEOUT, 
+			   (long) HTTP_DNS_CACHE_TIMEOUT);
+
+     if (cf_defined(iiab_cf, HTTP_CF_CONNECT_TIMEOUT))
+          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, 
+			   (long) cf_getint(iiab_cf, HTTP_CF_CONNECT_TIMEOUT));
+     else
+          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, 
+			   (long) HTTP_CONNECT_TIMEOUT);
 }
 
 /* shut down the curl class */
@@ -82,6 +95,7 @@ char *http_get(char   *url, 	/* standard url */
      char *host, *certpath, cookies_str[HTTP_COOKIESTRLEN], *proxy=NULL;
      char errbuf[CURL_ERROR_SIZE];
      int hostlen, rowkey, i;
+     long connect_timeout, timeout;
      TREE *cookie_list;
 
      /* Get host from url and look up in the auth table */
@@ -122,15 +136,33 @@ char *http_get(char   *url, 	/* standard url */
 	  curl_easy_setopt(http_curlh, CURLOPT_USERPWD, NULL);
      if (proxy && *proxy) {
           /* set longer for proxy traffic, proabably irrational */
-          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 10);
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXY, proxy);
-          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 60);
+          if (cf_defined(iiab_cf, HTTP_CF_PROXY_CONNECT_TIMEOUT))
+	       connect_timeout = cf_getint(iiab_cf, 
+					   HTTP_CF_PROXY_CONNECT_TIMEOUT);
+	  else
+	       connect_timeout = HTTP_PROXY_CONNECT_TIMEOUT;
+
+          if (cf_defined(iiab_cf, HTTP_CF_PROXY_TIMEOUT))
+	       timeout = cf_getint(iiab_cf, HTTP_CF_PROXY_TIMEOUT);
+	  else
+	       timeout = HTTP_PROXY_TIMEOUT;
      } else {
           /* set shorter for non-proxy traffic, proabably optimistic */
-          curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 8);
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXY, NULL);
-          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 60);
+          if (cf_defined(iiab_cf, HTTP_CF_NONPROXY_CONNECT_TIMEOUT))
+	       connect_timeout = cf_getint(iiab_cf, 
+					   HTTP_CF_NONPROXY_CONNECT_TIMEOUT);
+	  else
+	       connect_timeout = HTTP_NONPROXY_CONNECT_TIMEOUT;
+
+          if (cf_defined(iiab_cf, HTTP_CF_NONPROXY_TIMEOUT))
+	       timeout = cf_getint(iiab_cf, HTTP_CF_NONPROXY_TIMEOUT);
+	  else
+	       timeout = HTTP_NONPROXY_TIMEOUT;
      }
+     curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, connect_timeout);
+     curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, timeout);
      if (proxyuserpwd && *proxyuserpwd)
 	  curl_easy_setopt(http_curlh, CURLOPT_PROXYUSERPWD, proxyuserpwd);
      else
@@ -170,8 +202,8 @@ char *http_get(char   *url, 	/* standard url */
 
      /* Diagnostic dump */
      elog_printf(DIAG, "HTTP GET %s  ... userpwd=%s, proxy=%s, "
-		 "proxyuserpwd=%s, sslkeypwd=%s, certpath=%s, cookies=<<%s>>"
-		 "cookiejar=%s", 
+		 "proxyuserpwd=%s, sslkeypwd=%s, certpath=%s, cookies=<<%s>>, "
+		 "cookiejar=%s, connect_timeout=%ld, timeout=%ld", 
 		 url,
 		 userpwd      && *userpwd      ? userpwd      : "(none)",
 		 proxy        && *proxy        ? proxy        : "(none)",
@@ -179,7 +211,8 @@ char *http_get(char   *url, 	/* standard url */
 		 sslkeypwd    && *sslkeypwd    ? sslkeypwd    : "(none)",
                  cert         && *cert         ? certpath     : "(none)",
 		 *cookies_str                  ? cookies_str  : "(none)",
-		 cookiejar    && *cookiejar    ? cookiejar    : "(none)");
+		 cookiejar    && *cookiejar    ? cookiejar    : "(none)",
+		 connect_timeout, timeout);
 
      /* prepare the timeouts if local */
      if (strcmp(host, "localhost")) {
@@ -191,7 +224,7 @@ char *http_get(char   *url, 	/* standard url */
      /* action the GET */
      r = curl_easy_perform(http_curlh);
      if (r)
-          elog_printf(DIAG, "HTTP GET error: %s (url=%s)", errbuf, url);
+          elog_printf(ERROR, "HTTP GET error: %s (url=%s)", errbuf, url);
      else
 	  elog_printf(DIAG, "HTTP GET success");
 
