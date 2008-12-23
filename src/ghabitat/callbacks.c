@@ -2096,7 +2096,7 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
 	  }
 	  if (proxyuserpwd && *proxyuserpwd) {
 	       /* user[:pwd] is the format */
-	       len = strcspn(proxy, ":");
+	       len = strcspn(proxyuserpwd, ":");
 	       proxy_user = xnmemdup(proxyuserpwd, len+1);
 	       proxy_user[len] = '\0';
 	       gtk_entry_set_text(GTK_ENTRY(repos_proxy_user_entry), 
