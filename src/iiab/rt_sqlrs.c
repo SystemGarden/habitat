@@ -178,9 +178,13 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
      /* post it */
      rt->posttext = http_post(rt->puturl, form, NULL, parts, cookies, 
 			      cookiejar, auth, 0);
+
+     /* free data */
      tree_destroy(form);
-     if (parts) 
-          tree_destroy(parts);
+     if (parts) tree_destroy(parts);
+     if (auth) table_destroy(auth);
+     if (cookies) cf_destroy(cookies);
+     if (cookiejar) nfree(cookiejar);
      if (rt->posttext && strncmp(rt->posttext, "OK", 2) == 0) {
 	  return buflen;
      } else {
@@ -296,6 +300,10 @@ ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
 
           text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
 
+	  /* free data */
+	  if (auth) table_destroy(auth);
+	  if (cookies) cf_destroy(cookies);
+	  if (cookiejar) nfree(cookiejar);
      }
      if (!text)
 	  return NULL;
@@ -365,6 +373,7 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
 	  /* free data */
 	  if (auth) table_destroy(auth);
 	  if (cookies) cf_destroy(cookies);
+	  if (cookiejar) nfree(cookiejar);
      }
      if (!text)
 	  return NULL;
@@ -472,6 +481,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 {
      char *auth_purl,    auth_expanded_purl[1024], *authtxt;
      char *cookies_purl, cookies_expanded_purl[1024];
+     char *cookiejar_unexpanded, *cookiejar_expanded;
      int len, r;
 
      /* get the configuration details */
@@ -543,20 +553,32 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 		    }
 	       }
 	  }
-          *cookiejar = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIEJAR_FILEKEY);
-	  if (*cookiejar == NULL) {
+
+	  /* cookiejar file name */
+          cookiejar_unexpanded = cf_getstr(rt_sqlrs_cf, 
+					   RT_SQLRS_COOKIEJAR_FILEKEY);
+	  if (cookiejar_unexpanded == NULL) {
 	       elog_printf(DIAG, "cookie jar configuration not found: %s, "
 			   "proceeding with out the jar for %s",
 			   RT_SQLRS_COOKIEJAR_FILEKEY, purl);
+	       *cookiejar = NULL;
 	  } else {
 	       /* chop off any driver prefix given by mistake as CURL won't
 	        * understand it */
-	       if (strncmp(*cookiejar, "file:", 5) == 0)
-	            *cookiejar += 5;
-	       else if (strncmp(*cookiejar, "filea:", 6) == 0)
-	            *cookiejar += 6;
-	       else if (strncmp(*cookiejar, "fileov:", 7) == 0)
-	            *cookiejar += 7;
+	       cookiejar_expanded = xnmalloc(strlen(cookiejar_unexpanded)+250);
+	       if (strncmp(cookiejar_unexpanded, "file:", 5) == 0)
+		    route_expand(cookiejar_expanded, cookiejar_unexpanded+5,
+				 NULL, 0);
+	       else if (strncmp(cookiejar_unexpanded, "filea:", 6) == 0)
+		    route_expand(cookiejar_expanded, cookiejar_unexpanded+6,
+				 NULL, 0);
+	       else if (strncmp(cookiejar_unexpanded, "fileov:", 7) == 0)
+		    route_expand(cookiejar_expanded, cookiejar_unexpanded+7,
+				 NULL, 0);
+	       else
+		    route_expand(cookiejar_expanded, cookiejar_unexpanded, 
+				 NULL, 0);
+	       *cookiejar = cookiejar_expanded;
 	  }
      }
 }
