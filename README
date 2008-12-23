@@ -37,14 +37,18 @@ This release includes the following changes over the 0.99.x series:-
 	- Added cookiejar for session token (default ~/.habjar)
 	- Added cookies for account security (default ~/.habcookies) 
 	- Added basic authentication for site security
-	- Established communication with Harvest 2.0 as read-only repository 
-	  (systemgarden.com/harvest)
+	- Established communication with Harvest 2.0 as READ-ONLY repository 
+	  (see http://systemgarden.com/harvest)
 	- Fixed a class of atoi() bug
 	- Fixed charts when data suddenly becomes empty after a suspend
 	- Window form to read, configure and write repository credentials
 	  in ghabitat (File->Repository)
 	- More efficient config line replacement
-	- unset PROXY_HTTP env variable which affects libcurl
+	- unset PROXY_HTTP, proxy_http env variable which affects libcurl
+	- More saftey from zero length attributes within bigger table data
+	- Selective use of proxy servers, used for repository, not used when
+	  talking to clockwork on local machine
+	- Better HTTP handling with improved timeouts and better errors
 
 	VERSION 1.0.0
 	- Process instance identifier changed from pid to one made up from
@@ -481,5 +485,5 @@ Take a look at http://www.systemgarden.com/harvest for more information.
 Nigel Stuckey
 
 System Garden Ltd
-July 2005
+December 2008
 nigel.stuckey@systemgarden.com
