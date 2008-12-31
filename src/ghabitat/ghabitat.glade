@@ -7657,7 +7657,7 @@ Diagnostic +
 	<widget>
 	  <class>GtkEntry</class>
 	  <name>repos_harv_org_entry</name>
-	  <tooltip>Repository organisation name, where provided by administrators</tooltip>
+	  <tooltip>Repository organisation name, where provided by administrators. Otherwise, leave blank</tooltip>
 	  <can_focus>True</can_focus>
 	  <editable>True</editable>
 	  <text_visible>True</text_visible>
