@@ -491,6 +491,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 	  *cookies = NULL;
 	  *cookiejar = NULL;
      } else {
+          /* get authorisation & connection details */
           auth_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_AUTH_URLKEY);
 	  if (auth_purl == NULL) {
 	       elog_printf(DIAG, "authorisation configuration not found: %s, "
@@ -516,6 +517,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 		         elog_printf(DIAG, "Unable to read authorisation "
 				     "route %s. Is it there? Is it readable?",
 				     auth_expanded_purl);
+			 *auth = NULL;
 		    } else {
 		         *auth = table_create();
 			 r = table_scan(*auth, authtxt, "\t", TABLE_SINGLESEP,
@@ -524,6 +526,8 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
  		    }
 	       }
 	  }
+
+          /* get cookies, containing Harvest credentials */
           cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
 	  if (cookies_purl == NULL) {
 	       elog_printf(DIAG, "cookie configuration not found: %s, "
@@ -654,6 +658,7 @@ int rt_sqlrs_put_cookies_cred(char *purl,	/* route name for diag msg */
  * The route may NOT be sqlrs:, http: or https: to avoid infinite reursion.
  * Just in case, this routine will spot those driver prefixes and refuse the
  * call to route_twrite(), thereby avoiding the loop.
+ * Attemtps to make sure the file is mode 600, u=rw only.
  *
  * Returns 1 for success, 0 for failure
  *
@@ -665,6 +670,7 @@ int rt_sqlrs_put_proxy_cred(char *purl,		/* route name for diag msg */
      char *proxy_purl, proxy_expanded_purl[1024];
      ROUTE rt;
      int r;
+     mode_t old_mode;
 
      /* check we have data to save */
      if (table_nrows(proxy) <= 0) {
@@ -700,6 +706,7 @@ int rt_sqlrs_put_proxy_cred(char *purl,		/* route name for diag msg */
 
      /* personalise the proxy url by expansion to get 
       * the user's homedir */
+     old_mode = umask(S_IRWXG | S_IRWXO | S_IXUSR);	/* u=rw, mode 600 */
      route_expand(proxy_expanded_purl, proxy_purl, NULL, 0);
      rt = route_open(proxy_expanded_purl, "Proxy config information", NULL, 
 		     10);
@@ -709,6 +716,8 @@ int rt_sqlrs_put_proxy_cred(char *purl,		/* route name for diag msg */
 	  return 0;	/* failure */
      }
      r = route_twrite(rt, proxy);
+     umask(old_mode);
+     route_close(rt);
 
      return r;
 }
