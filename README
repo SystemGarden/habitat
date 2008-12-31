@@ -1,11 +1,22 @@
 SYSTEM GARDEN HABITAT
 =====================
 
-Version 1.1
-===========
+Welcome to System Garden Habitat, the monitoring and visualisation tool for
+systems and applications.
 
-Welcome to System Garden Habitat, the monitoring, management and 
-visualisation tool.
+VERSION 1.1
+-----------
+
+The focus of this release is to provide connectivity with Harvest as 
+a repository, working over HTTP proxys. Data held on Harvest can now be
+visualised as if it were local.
+
+FUTURE RELEASES
+---------------
+Future
+
+LICENSE
+-------
 
 System Garden has released Habitat under the Free Software Foundation's 
 Gnu Public License (GPL).   Please look at the file LICENSE in the 
@@ -15,8 +26,6 @@ and agree to the license.
 
 CHANGES
 -------
-This release includes the following changes over the 0.99.x series:- 
-
 
 	VERSION 1.1
 	- Tweeked the spaces in the choice node property window
@@ -49,6 +58,7 @@ This release includes the following changes over the 0.99.x series:-
 	- Selective use of proxy servers, used for repository, not used when
 	  talking to clockwork on local machine
 	- Better HTTP handling with improved timeouts and better errors
+	- .habauth is saved is mode 600, but can be read in any mode
 
 	VERSION 1.0.0
 	- Process instance identifier changed from pid to one made up from
@@ -72,183 +82,6 @@ This release includes the following changes over the 0.99.x series:-
 	- Choice tree popup added for general and node specific functions
 	- Property window added with expert and inherited options
 	- Added dynamic chocie node update
-
-0.99.x CHANGES
---------------
-For information, the collected changes in the 0.99.x series is as follows:-
-
-	VERSION 0.99.6
-	- Inventory of compressed man pages for RPM changed to .* to
-	  allow RPMs to be built on mandrake and fedora
-	- path simplification measures to more reliably find supporting 
-	  files, like ghabitat's style (gtk rc)
-	- improved exit messages from clockwork
-	- More changes for solaris io probe to collect partition 
-          information
-	- Some makefile changes to cope with static and dynamic creation
-
-	VERSION 0.99.5
-	- lots of changes to linux ps probe: removed unavailable columns,
-	  added linux specific ones, fixed calculation for others.
-	- Library dependences cleared up in preparation for 
-	  for an LSB version
-	- Added a log popup in ghabitat from the status bar bomb button
-	- Detailed logs working (column hiding) in ghabitat
-	- Colourization of logs working in ghabitat
-	- Severity of logs working in ghabitat
-	- Dynamic logs now working in ghabitat
-	- Tables now popup their records in separate windows when double
-	  clicked in the viewing area in ghabitat
-	- psolio changes to display full details on Solaris local storage
-	- Solaris probes updated to remove depricated measurements
-	- RPM post install script fixed following LSB changes
-	- Fix to allow RPMs to be created under fedora
-
-	VERSION 0.99.4
-	- bug in enforcing maxes in sys probe fixed
-	- reading csv formats fixed in ghabitat
-	- reading text formats fixed in ghabitat
-	- fixed a bug when refreshing of logs in ghabiat
-	- max info values now honoured in graph displays of single and
-	  multi instance charts in ghabiat -- great for percentages
-	- fha, csv and text file information now displayed in ghabitat
-	- if data is ok, can now display graphs from fha & csv files
-	  in ghabitat
-	- Fixed crashing bug on data sets without time
-	- Added host information to 'this host' node in ghabitat
-	- Added host information to nodes under 'my host' in ghabitat
-
-	VERSION 0.99.3
-	- fixed bug in Linux IO header block
-	- added maxima for % calculations in probe: I/O and sys
-	- limited % calculations to 100.0% in I/O and sys
-	- RPMs now run as daemon user not root for extra security
-	- lock file moved to /var/lib/habitat with data file as it 
-	  can be written to be daemon
-	- sys probe now called system, io now called storage, defaults 
-	  changed
-	- some ghabitat input field prompts brought up to date
-	- a few icons in the choice tree juggled around
-	- solaris I/O probe updated to have similar capabilities to linux
-	  (although a couple of columns not yet calculated)
-	- HTTP methods now report HTTP server errors directly
-	- Fixed minor external library issue on Solaris
-	- Key startup directories now saved in configuration table
-	- %v added to route_expand for location of $HAB/var
-	- replication config changed to use %v
-	- HTTP posts give diagnositc logs & report server-side errors
-	- Added -v flag to print version and exit
-	- Help->About... now prints habitat version in popup
-	- replication->state in choice tree of ghabitat now gives table 
-          of values directly
-	- logs->errors in choice tree of ghabitat removes the duration node
-          (which is always 0) and has a 'ring,dur' label
-	- Man pages fixed and -v flag put in; user man updated
-	- Man pages for habprobe, habmeth and irs added
-	- Ghabitat tables now have a title that reflects their contents
-	- Help menu in ghabitat updated to give more clarity
-	- Can now launch key manpages from ghabiat
-
-	VERSION 0.99.2
-	- GUI Logging level adjustable from Help menu
-	- Zoom is not reset when curves are selected or deselected
-	- Makefile now produces inventory for packaging
-	- subcommands of 'change' added to irs: 'change name', 
-	  'change duration', 'change about', 'change long' & 'change slots'
-	- Added license file to src and bin tars
-	- meth_relay() slowed down to 30 seconds to reduce system call impact
-	- RPM generation added, initially for Mandrake, adding an INVENTORY
-	  file and some menu code to launch ghabitat from the desktop.
-	  Runs from /usr/bin locations, rather than clustered round a 
-	  single dir
-	- Detection of running in Linux system locations improved
-	- Lock rendezvous much improved
-	- Changed the initial display to look at 'this host'->'cpu' first
-	- Fixed some memory leaks in clockwork
-	- RPM now installs into rc?.d directories to autostart clockwork in
-	  Red Hat and LSB compliant systems
-	- Linux disk mount collection method changed: now gives a device 
-	  name for /dev/root
-	- default ghabitat display changed to 'this host->1 hour'
-	- new, more descriptive label placed above charts
-	- ordering changed in choice menu
-
-	VERSION 0.99.1
-	- psoldown probe change rtbuf to ROUTE and given linux usage text
-	- elog and nmalloc classes use const to suppress warnings from gcc
-	- this README added to src and bin distributions
-	- gnu/Make.sub was replaced as it had the wrong contents
-	- 'my services' and 'grouped services' removed to avoid confusion
-	- more space around some GUI buttons for clarity
-	- increased performance by only asking for new data in updates (^L)
-	- fixed empty data transfer sometimes crashing the server
-	- fixed graph redraw: new data is appended
-	- when zoomed, dynamically updating of graphs is inhibited
-	- IO probe (for disks) only reports active devices
-	- linux IO service times now appearing (where available)
-	- probe/Make.sub changed to avoid linking bug
-	- new Solaris sys probe producing absolute values not counters
-	  good for reuse; speed of calculation also addressed 
-	- Moved 'this client' down the choice tree
-	- Added a label above the chart to describe the location
-
-	VERSION 0.99.0
-	- the 'route' I/O system replaced with a more modular version
-	- new storage method: ringstore added
-	- habget, habput interface changed. 
-          'Fat Headed Arrays' are now the default way to move data around
-	- irs added to examine and manipulate ringstores
-	- Holstore, tablestore, timestore and versionstore have been 
-          deprecated
-	- ihol, its, itab, iver management apps have been removed, 
-          although the data will still be available
-	- ispan has been removed
-	- stat command added to irs to examine ring's status
-	- full ringstore addressing supported (compatible with sqlrs)
-	- mget added to irs to get several records at once
-	- igdbm added to utils as a dev utility
-	- formatting bug fixed in table
-	- ringstore header storage made more sophisticated
-	- cascade reimplemented to work on routes and tables and to
-	  correctly sample multi-instance data. API changed, tests improved.
-	- event class ported to ringstore and revised ROUTE semantics
-	- runq class ported to new ROUTE
-	- caching bug fixed in ringstore
-	- man page for irs written
-	- %d added to expand clockwork job names with duration
-	- duration command added to irs to change duration within rings
-	- increates the functions available to the sample method
-	- standard names and data locations altered in clockwork's job table
-	- ringstores added to ghabitat
-	- direct scanning and display of .CSV and .FHA files in ghabitat
-          using open->file. Appears under 'my files'
-	- changed the meaning of the start value in job tables
-	- consolidated ring store added as table and chart
-	- selective display of logs and errors
-	- job table added to the choice tree
-	- simple view of uptime as a table added to choice tree
-	- additional icons added to choice tree
-	- some rings renamed dynamically to make more sense (eg io->disk)
-	- some recognised rings get special icons (sys, io, net etc)
-	- filter out known non-performance stats from perf branches
-	- created simple utility to edit ring data: habedit
-	- added /local to web service in clockwork, attached to local 
-	  ringstore data.
-	- 'this host' now working as a choice in the gui
-	- 'my hosts' now able to pick up peer clockwork instances in
-	  addition to repository hosts (File->Host)
-	- save and restore selections under 'my hosts' to ~/.habrc
-	- 'my files' and 'my hosts' save and restore entries separated
-	- improved status messages when starting and stopping ghabitat,
-	  useful if the user has to wait on net or i/o
-	- removed File->Import and File->Export from ghabitat as csv'a can
-	  be displayed and import/export is possible on command line
-	- Added a scroll bar to the File->Close window
-	- Added dynamic changing of logging level to ghabitat
-	- Added manual pages to help menu
-	- Pulldowns for history added to File->Host and File->Route
-	- Comments and long names of ringstores made a sane length i
-
 
 INSTALLATION
 ------------
@@ -366,10 +199,11 @@ running on the local system, it will ask if you wish to run it and
 optionally leave it running.
 
 However, to collect data on several machines, just run 'clockwork'
-on each machine, which as a daemon wil background itself and deal with 
-its own errors for later management. The data is saved in a file named 
-after the local system in a standard location accessable by file sharing 
-(NFS, SMB/CIFS, etc), and also publish it using a network service.
+on each machine, which as a daemon will background itself and log its own
+errors and warnings for later management. The data is saved in a file named 
+after the local host in a standard location accessable by file sharing 
+(NFS, SMB/CIFS, etc), and also publish it using a network service from
+clockwork.
 
 If there is a problem launching clockwork, starting
 
@@ -404,8 +238,8 @@ Inside this file are rings of data, one of which is a log file (`log') and
 another is a set of directives (`clockwork'). The directives have a section
 of their own below, but for now lets look at the log.
 
-The utility 'irs' can be used to look at this data, or the 'data' section
-of the tree will give a view to the raw data.
+The command line utility 'irs' can be used to look at this data, or the 
+'data' section of the tree will give a view to the raw data.
 
 All the parts of habitat are configured in the same way, using 
 $HAB/etc/habitat.conf and ~/.habrc. It can also be augmented from 
@@ -432,27 +266,31 @@ TO EXIT THE FRONT END
 
 Type ^X or click on `File->Exit' to leave the application.
 
-STOPPING CLOKWORK NORMALLY AND WHAT TO EXPECT
----------------------------------------------
+STOPPING CLOCKWORK NORMALLY AND WHAT TO EXPECT
+----------------------------------------------
 
 Clockwork is a daemon, detached from the command line.
 As such, it is designed to stay runnning indefinitely, permanently 
 recording your system's activities. There are no problems leaving it
-to run as it always trys to curtail the amount to disk space used.
+to run as it always trys to curtail the amount to disk space used by
+removing the oldest high frequency data, leaving lower frequency samples.
 
 To stop clockwork from obtaining samples, use 'killclock'. This will 
 find the lock file created from clockwork and attempts to send a
 signal to the running process in order to end it.
 
-From the 'ghabitat' GUI, select Collect->local Data... from the menu
+From the 'ghabitat' GUI, select Collect->Local Data... from the menu
 and stop local data collection from the pop-up window.
+
+To restart, just run 'clockwork' from the command line or in 'ghabitat'
+select 'Collect->Local Data...' from the menu and start it from the button.
 
 OTHER COMMANDS
 --------------
 Other commands exists to complement the GUI and data collector.
 
 	killclock - stop the clockwork daemon
-	habrs     - command line interface to ringstore storage & admin
+	irs       - command line interface to ringstore storage & admin
 	habget    - get data from a route
 	habput    - send data to a route
 	habedit   - edit a route or ringstore (useful for configuring
@@ -474,12 +312,15 @@ written, it will be placed there, so check back periodically.
 
 HARVEST
 -------
-Enterprise level management is delivered by System Garden Harvest, 
-a commercial web service that reveals the hardware value locked inside
-your organisation. Harvest employs Habitat and other sources to populate
-a long term archive for company benchmarking, internal compitition, 
-service level reports, system trending, capacity management 
-and other data analysis. Every part of the IT organisation benifits!
+If Habitat monitors and visualises low level data, Harvest aggregates the
+the data to maximise server efficiency accross the entire organisation.
+
+System Garden Harvest is a web service that reveals the hardware value 
+locked inside your organisation, by analysing data from Habitat and other
+system monitors. It delivers a long term archive for oranisation benchmarking
+(comparing yours with other organisations), internal competition, 
+system trending, cost estimation, power estimation, capacity management 
+and other data analysis. Every part of the IT organisation benefits!
 Take a look at http://www.systemgarden.com/harvest for more information.
 
 Nigel Stuckey
