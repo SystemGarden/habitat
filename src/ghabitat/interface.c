@@ -5893,7 +5893,7 @@ create_repos_prop_window (void)
   gtk_table_attach (GTK_TABLE (repos_account_gui_table), repos_harv_org_entry, 1, 2, 2, 3,
                     (GtkAttachOptions) (GTK_EXPAND | GTK_FILL),
                     (GtkAttachOptions) (0), 0, 0);
-  gtk_tooltips_set_tip (tooltips, repos_harv_org_entry, "Repository organisation name, where provided by administrators", NULL);
+  gtk_tooltips_set_tip (tooltips, repos_harv_org_entry, "Repository organisation name, where provided by administrators. Otherwise leave blank", NULL);
 
   repos_key_entry = gtk_text_new (NULL, NULL);
   gtk_widget_set_name (repos_key_entry, "repos_key_entry");
