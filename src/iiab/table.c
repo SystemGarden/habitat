@@ -1617,7 +1617,7 @@ char  *table_outtable_full(TABLE t, char sep, int withcolnames, int withinfo)
  * or the columns were not constant in each row (allowing for the extra info 
  * name column)
  * Otherwise returns the number of data rows parsed, which exclude the 
- * columnn names, info lines and separator (--).
+ * column names, info lines and separator (--).
  */
 int table_scan(TABLE t, char *buffer, char *sepstr, int mode, 
 	       int hascolnames, int hasruler)

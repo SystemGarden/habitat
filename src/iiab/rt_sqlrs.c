@@ -392,7 +392,7 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
      table_freeondestroy(tab, text);
      r = table_scan(tab, text, ",", TABLE_SINGLESEP, TABLE_HASCOLNAMES, 
 		    TABLE_HASRULER);
-     if (r < 1) {
+     if (r < 0) {
 	  /* table scanning error, so not valid data. 
 	   * Text has been altered by table_scan(), so we look at copytext
 	   * which contains a small copy of the data to extract an error.
@@ -417,6 +417,8 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
 	  nfree(copytext);
 	  table_destroy(tab);
 	  tab = NULL;
+     } else if (r == 0) {
+          elog_printf(DIAG, "No data from repository");
      }
 
      return tab;
