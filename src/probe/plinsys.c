@@ -2,9 +2,10 @@
  * Linux system probe for iiab
  * Nigel Stuckey, October 1999, March 2000
  * Updates February 2000
- * Revised for Linux 2.4 kernel Apriil 2001
+ * Revised for Linux 2.4 kernel April 2001
+ * Updates Janurary 2008
  *
- * Copyright system Garden Ltd 1999-2001. All rights reserved.
+ * Copyright System Garden Ltd 1999-2008. All rights reserved.
  */
 
 #if linux
@@ -44,16 +45,26 @@ struct probe_sampletab plinsys_cols[] = {
   {"swap_used",	"",	"u32",  "abs", "", "", "swap space used (kB)"},
   {"swap_free",	"",	"u32",  "abs", "", "", "swap space free (kB)"},
   /* /proc/stat */
-  {"cpu_tick_user", "",	"u32",  "cnt", "", "", "accumulated ticks cpu spent "
+  {"cpu_tick_user", "",	"u64",  "cnt", "", "", "accumulated ticks cpu spent "
                                                "in user space"},
-  {"cpu_tick_nice", "",	"u32",  "cnt", "", "", "accumulated ticks cpu spent at"
+  {"cpu_tick_nice", "",	"u64",  "cnt", "", "", "accumulated ticks cpu spent at"
 					       " nice priority in user space"},
-  {"cpu_tick_system","","u32",  "cnt", "", "", "accumulated ticks cpu spent "
+  {"cpu_tick_system","","u64",  "cnt", "", "", "accumulated ticks cpu spent "
                                                "in kernel"},
-  {"cpu_tick_idle","",	"u32",  "cnt", "", "", "accumulated ticks cpu was "
+  {"cpu_tick_idle","",	"u64",  "cnt", "", "", "accumulated ticks cpu was "
                                                "idle"},
-  {"cpu_tick_wait","",	"u32",  "cnt", "", "", "accumulated ticks cpu was "
+  {"cpu_tick_wait","",	"u64",  "cnt", "", "", "accumulated ticks cpu was "
                                                "idle but waiting for I/O"},
+  {"cpu_tick_irq","",	"u64",  "cnt", "", "", "accumulated ticks cpu handles "
+                                               "hardware interrupts"},
+  {"cpu_tick_softirq","","u64", "cnt", "", "", "accumulated ticks cpu handles "
+                                               "soft interrupts"},
+  {"cpu_tick_steal","",	"u64",  "cnt", "", "", "accumulated ticks cpu was "
+                                               "stolen by other virtual "
+                                               "machines"},
+  {"cpu_tick_guest","",	"u64",  "cnt", "", "", "accumulated ticks cpu was "
+                                               "hosting a guest cpu under our "
+                                               "control"},
   {"vm_pgpgin",	"",	"u32",  "cnt", "", "", "npages paged in"},
   {"vm_pgpgout","",	"u32",  "cnt", "", "", "npages paged out"},
   {"vm_pgswpin","",	"u32",  "cnt", "", "", "npages swapped in"},
@@ -73,8 +84,16 @@ struct probe_sampletab plinsys_cols[] = {
   {"pc_idle",	"%idle","nano", "abs", "100","","% time cpu was idle"},
   {"pc_wait",	"%wait","nano", "abs", "100","","% time cpu was idle waiting "
                                                "for I/O"},
+  {"pc_irq",	"%irq", "nano", "abs", "100","","% time cpu was handling hard "
+                                               "interrupts"},
+  {"pc_softirq","%softirq","nano","abs","100","","% time cpu was handling soft"
+                                               " soft interrupts"},
+  {"pc_steal",	"%steal","nano","abs", "100","","% time cpu was stolen to run "
+                                               "peer VMs"},
+  {"pc_guest",	"%guest","nano","abs", "100","","% time cpu was running "
+                                               "guest CPUs under our control"},
   {"pc_work",	"%work","nano", "abs", "100","","% time cpu was working "
-					       "(%user+%nice+%system)"},
+					       "(excludes %idle+%wait)"},
   {"pagein",	"",	"i32",  "abs", "", "", "pages paged in per second"},
   {"pageout",	"",	"i32",  "abs", "", "", "pages paged out per second"},
   {"swapin",	"",	"i32",  "abs", "", "", "pages swapped in per second"},
@@ -121,6 +140,10 @@ char *plinsys_pub[] = {
      "pc_system",
      "pc_idle",
      "pc_wait",
+     "pc_irq",
+     "pc_softirq",
+     "pc_steal",
+     "pc_guest",
      "pc_work",
      "pagein",
      "pageout",
@@ -144,7 +167,8 @@ int plinsys_linuxversion=24;
  * Initialise probe for linux system information
  */
 void plinsys_init() {
-     char *data, *vpt, *ticks;
+     char *data, *vpt;
+     long ticks;
 
      /* we need to work out which version of linux we are running */
      data = probe_readfile("/proc/version");
@@ -170,9 +194,9 @@ void plinsys_init() {
      }
 
      /* get the tick frequency */
-     ticks = getenv("HZ");
-     if ( ticks )
-          plinsys_hz = strtol(ticks, NULL, 10);
+     ticks = sysconf(_SC_CLK_TCK);
+     if ( ticks != -1 )
+          plinsys_hz = ticks;
      else {
 	  elog_send(DEBUG, "HZ environment variable missing, assuming 100");
 	  plinsys_hz = 100;
@@ -457,6 +481,8 @@ void  plinsys_col_stat(TABLE tab, char *data)
      /* /proc/stat in 2.2 & 2.4 has a layout similar to this below:-
       *
       * cpu  2311 11281 8225 357467
+      * cpu0 2311 11281 8225 357467
+      * cpu1 2311 11281 8225 357467
       * disk 69387 0 0 0
       * disk_rio 63419 0 0 0
       * disk_wio 5968 0 0 0
@@ -473,14 +499,16 @@ void  plinsys_col_stat(TABLE tab, char *data)
       * search for the tokens on the left will make the it work for 
       * 2.4 kernel which moves disk information somewhere else and 
       * gives lots more information.
+      *
+      * For 2.6 kernels, see below plinsys_col_stat26
       */
      char *value, *linecheck;
 
      /* read cpu line */
      linecheck = strtok(data, " ");
      if (strcmp(linecheck, "cpu")) {
-          elog_printf(ERROR,"can't find cpu line, have %s; aborting probe",
-		      linecheck);
+          elog_printf(ERROR,"can't find cpu line as first line in /proc/stat, "
+		      "have %s; aborting probe", linecheck);
 	  return;
      }
 
@@ -498,6 +526,10 @@ void  plinsys_col_stat(TABLE tab, char *data)
      table_replacecurrentcell(tab, "cpu_tick_idle", value);
 
      table_replacecurrentcell(tab, "cpu_tick_wait", "0");
+     table_replacecurrentcell(tab, "cpu_tick_irq", "0");
+     table_replacecurrentcell(tab, "cpu_tick_softirq", "0");
+     table_replacecurrentcell(tab, "cpu_tick_steal", "0");
+     table_replacecurrentcell(tab, "cpu_tick_guest", "0");
 
      /* skip over \0 from strtok and go to paging line */
      linecheck = strchr(value, '\0')+1;
@@ -582,6 +614,10 @@ void  plinsys_col_stat26(TABLE tab, ITREE *lol)
       *   processes 2995
       *   procs_running 4
       *   procs_blocked 0
+      *
+      * Added on to the cpu lines are:-
+      *   In 2.6.18 Steal are the number of ticks spent in other VMs
+      *   In 2.6.24 Guest is the time spent running guest VMs
       */
      char *value, *attr;
      ITREE *row;
@@ -613,8 +649,28 @@ void  plinsys_col_stat26(TABLE tab, ITREE *lol)
 	       value = itree_get(row);
 	       table_replacecurrentcell(tab, "cpu_tick_wait", value);
 
-	       /* the next two figures are irq and softirq, but we don't
-		* want them */
+	       itree_next(row);		/* irq cpu jiffies / ticks */
+	       value = itree_get(row);
+	       table_replacecurrentcell(tab, "cpu_tick_irq", value);
+
+	       itree_next(row);		/* softirq cpu jiffies / ticks */
+	       value = itree_get(row);
+	       table_replacecurrentcell(tab, "cpu_tick_softirq", value);
+
+	       /* virtual machine figures if present */
+	       itree_next(row);		/* steal cpu jiffies / ticks */
+	       if (!itree_isbeyondend(row)) {
+		    value = itree_get(row);
+		    table_replacecurrentcell(tab, "cpu_tick_steal", value);
+	       } else
+		    table_replacecurrentcell(tab, "cpu_tick_steal", "0");
+
+	       itree_next(row);		/* guest cpu jiffies / ticks */
+	       if (!itree_isbeyondend(row)) {
+		 value = itree_get(row);
+		 table_replacecurrentcell(tab, "cpu_tick_guest", value);
+	       } else
+		 table_replacecurrentcell(tab, "cpu_tick_guest", "0");
 	  }
 
 	  if (strcmp(attr, "intr") == 0) {
@@ -658,42 +714,65 @@ void  plinsys_col_uptime(TABLE tab, char *data)
 /* Derive new calculations and metrics from current and previous data */
 void plinsys_derive(TABLE prev, TABLE cur)
 {
-     long new_tick_user, new_tick_nice, new_tick_system, new_tick_idle, 
-          new_tick_wait;
-     long old_tick_user, old_tick_nice, old_tick_system, old_tick_idle,
-          old_tick_wait;
-     long diff_ticks;
-     float userfp, systemfp, nicefp, idlefp, waitfp, workfp;
+     unsigned long long new_tick_user, new_tick_nice, new_tick_system, 
+          new_tick_idle, new_tick_wait, new_tick_irq, new_tick_softirq,
+          new_tick_steal, new_tick_guest;
+     unsigned long long old_tick_user, old_tick_nice, old_tick_system, 
+          old_tick_idle, old_tick_wait, old_tick_irq, old_tick_softirq,
+          old_tick_steal, old_tick_guest;
+     unsigned long long diff_ticks;
+     float userfp, systemfp, nicefp, idlefp, waitfp, irqfp, softirqfp,
+          stealfp, guestfp, workfp;
      char *value;
 
      /* extract cpu tick figures from old table */
      table_first(prev);
-     new_tick_user   = strtol (table_getcurrentcell (cur,  "cpu_tick_user"),
-			       NULL, 10);
-     new_tick_nice   = strtol (table_getcurrentcell (cur,  "cpu_tick_nice"),
-			       NULL, 10);
-     new_tick_system = strtol (table_getcurrentcell (cur,  "cpu_tick_system"),
-			       NULL, 10);
-     new_tick_idle   = strtol (table_getcurrentcell (cur,  "cpu_tick_idle"),
-			       NULL, 10);
-     new_tick_wait   = strtol (table_getcurrentcell (cur,  "cpu_tick_wait"),
-			       NULL, 10);
-     old_tick_user   = strtol (table_getcurrentcell (prev, "cpu_tick_user"),
-			       NULL, 10);
-     old_tick_nice   = strtol (table_getcurrentcell (prev, "cpu_tick_nice"),
-			       NULL, 10);
-     old_tick_system = strtol (table_getcurrentcell (prev, "cpu_tick_system"),
-			       NULL, 10);
-     old_tick_idle   = strtol (table_getcurrentcell (prev, "cpu_tick_idle"),
-			       NULL, 10);
-     old_tick_wait   = strtol (table_getcurrentcell (prev, "cpu_tick_wait"),
-			       NULL, 10);
+     new_tick_user   = strtoull(table_getcurrentcell (cur,  "cpu_tick_user"),
+				NULL, 10);
+     new_tick_nice   = strtoull(table_getcurrentcell (cur,  "cpu_tick_nice"),
+				NULL, 10);
+     new_tick_system = strtoull(table_getcurrentcell (cur,  "cpu_tick_system"),
+				NULL, 10);
+     new_tick_idle   = strtoull(table_getcurrentcell (cur,  "cpu_tick_idle"),
+				NULL, 10);
+     new_tick_wait   = strtoull(table_getcurrentcell (cur,  "cpu_tick_wait"),
+				NULL, 10);
+     new_tick_irq    = strtoull(table_getcurrentcell (cur,  "cpu_tick_irq"),
+				NULL, 10);
+     new_tick_softirq= strtoull(table_getcurrentcell (cur, "cpu_tick_softirq"),
+				NULL, 10);
+     new_tick_steal  = strtoull(table_getcurrentcell (cur,  "cpu_tick_steal"),
+				NULL, 10);
+     new_tick_guest  = strtoull(table_getcurrentcell (cur,  "cpu_tick_guest"),
+				NULL, 10);
+     old_tick_user   = strtoull(table_getcurrentcell (prev, "cpu_tick_user"),
+				NULL, 10);
+     old_tick_nice   = strtoull(table_getcurrentcell (prev, "cpu_tick_nice"),
+				NULL, 10);
+     old_tick_system = strtoull(table_getcurrentcell (prev, "cpu_tick_system"),
+				NULL, 10);
+     old_tick_idle   = strtoull(table_getcurrentcell (prev, "cpu_tick_idle"),
+				NULL, 10);
+     old_tick_wait   = strtoull(table_getcurrentcell (prev, "cpu_tick_wait"),
+				NULL, 10);
+     old_tick_irq    = strtoull(table_getcurrentcell (prev, "cpu_tick_irq"),
+				NULL, 10);
+     old_tick_softirq= strtoull(table_getcurrentcell (prev,"cpu_tick_softirq"),
+				NULL, 10);
+     old_tick_steal  = strtoull(table_getcurrentcell (prev, "cpu_tick_steal"),
+				NULL, 10);
+     old_tick_guest  = strtoull(table_getcurrentcell (prev, "cpu_tick_guest"),
+				NULL, 10);
 
      /* calculate % */
      diff_ticks =   new_tick_user   + new_tick_nice 
 	          + new_tick_system + new_tick_idle
+	          + new_tick_irq    + new_tick_irq
+	          + new_tick_steal  + new_tick_guest
 	          - old_tick_user   - old_tick_nice 
-	          - old_tick_system - old_tick_idle;
+	          - old_tick_system - old_tick_idle
+	          - new_tick_irq    - new_tick_irq
+	          - old_tick_steal  - old_tick_guest;
      if (diff_ticks < 1) {
 	  elog_printf(ERROR, "improbable difference, no %");
      } else {
@@ -733,7 +812,36 @@ void plinsys_derive(TABLE prev, TABLE cur)
 	  table_replacecurrentcell(cur, "pc_wait", value);
 	  table_freeondestroy(cur, value);
 
-	  workfp = userfp + systemfp + nicefp;
+	  irqfp = (float)(new_tick_irq - old_tick_irq) * 100/diff_ticks;
+	  if (irqfp > 100.0)
+	       irqfp = 100.0;
+	  value = xnstrdup(util_ftoa(irqfp));
+	  table_replacecurrentcell(cur, "pc_irq", value);
+	  table_freeondestroy(cur, value);
+
+	  softirqfp = (float)(new_tick_softirq - old_tick_softirq) 
+	                        * 100/diff_ticks;
+	  if (softirqfp > 100.0)
+	       softirqfp = 100.0;
+	  value = xnstrdup(util_ftoa(softirqfp));
+	  table_replacecurrentcell(cur, "pc_softirq", value);
+	  table_freeondestroy(cur, value);
+
+	  stealfp = (float)(new_tick_steal - old_tick_steal) * 100/diff_ticks;
+	  if (stealfp > 100.0)
+	       stealfp = 100.0;
+	  value = xnstrdup(util_ftoa(stealfp));
+	  table_replacecurrentcell(cur, "pc_steal", value);
+	  table_freeondestroy(cur, value);
+
+	  guestfp = (float)(new_tick_guest - old_tick_guest) * 100/diff_ticks;
+	  if (guestfp > 100.0)
+	       guestfp = 100.0;
+	  value = xnstrdup(util_ftoa(guestfp));
+	  table_replacecurrentcell(cur, "pc_guest", value);
+	  table_freeondestroy(cur, value);
+
+	  workfp = userfp + systemfp + nicefp + stealfp + guestfp;
 	  if (workfp > 100.0)
 	       workfp = 100.0;
 	  value = xnstrdup(util_ftoa(workfp));
