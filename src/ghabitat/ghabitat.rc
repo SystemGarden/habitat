@@ -6,6 +6,11 @@
 # Nigel Stuckey, revised May 2000
 #
 
+style "default-text"
+{
+	fontset = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
+}
+
 style "text"
 {
 	bg[NORMAL] = "#ffffff"
@@ -15,6 +20,7 @@ style "text"
 style "splash"
 {
 	font = "-*-helvetica-bold-r-normal-*-34-240-*-*-*-*-*-*"
+	fontset = "-*-helvetica-bold-r-normal-*-34-240-*-*-*-*-*-*"
 #	font = "-*-helvetica-bold-r-normal-*-*-480-*-*-*-*-*-*"
 	fg[NORMAL] = "#006699"
 }
@@ -22,6 +28,7 @@ style "splash"
 style "about"
 {
 	font = "-*-helvetica-bold-r-normal-*-34-240-*-*-*-*-*-*"
+	fontset = "-*-helvetica-bold-r-normal-*-34-240-*-*-*-*-*-*"
 	bg[NORMAL] = "#ffffff"
 	fg[NORMAL] = "#006699"
 }
@@ -33,12 +40,15 @@ style "editable"
 
 style "dynamic"
 {
+	font = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
+	fontset = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
 	fg[NORMAL] = "#0000ff"
 }
 
 style "menutitle"
 {
-	font = "-*-helvetica-bold-r-normal-*-*-120-*-*-*-*-*-*"
+	font = "-*-helvetica-bold-r-*-*-*-120-*-*-*-*-*-*"
+	fontset = "-*-helvetica-bold-r-*-*-*-120-*-*-*-*-*-*"
 	fg[NORMAL] = "#000000"
 	fg[PRELIGHT] = "#000000"
 	fg[ACTIVE] = "#000000"
@@ -47,7 +57,8 @@ style "menutitle"
 
 style "graph"
 {
-	font = "-*-helvetica-medium-r-normal-*-*-80-*-*-*-*-*-*"
+	font = "-*-helvetica-medium-r-*-*-*-80-*-*-*-*-*-*"
+	fontset = "-*-helvetica-medium-r-*-*-*-80-*-*-*-*-*-*"
 	bg[NORMAL] = "#ffffff"
 	bg[PRELIGHT] = "#ffffff"
 	bg[ACTIVE] = "#ffffff"
