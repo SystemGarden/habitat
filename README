@@ -4,28 +4,30 @@ SYSTEM GARDEN HABITAT
 Welcome to System Garden Habitat, the monitoring and visualisation tool for
 systems and applications.
 
-VERSION 1.1
------------
+VERSION 1.1.1
+-------------
 
-The focus of this release is to provide connectivity with Harvest as 
-a repository, working over HTTP proxys. Data held on Harvest can now be
-visualised as if it were local.
-
-FUTURE RELEASES
----------------
-Future
+Bug fixes for fonts, VM metrics and longer running under linux.
 
 LICENSE
 -------
 
 System Garden has released Habitat under the Free Software Foundation's 
-Gnu Public License (GPL).   Please look at the file LICENSE in the 
+Gnu Public License version 2 (GPLv2).   Please look at the file LICENSE in the 
 top directory for a full description of the GPL and to understand 
 the legal position.  Do not use this software unless you understand 
 and agree to the license.
 
 CHANGES
 -------
+
+	VERSION 1.1.1
+	- Upgraded clock tick counters with 64 bit quantities for
+	  longer run time in Linux
+	- New recipe for calaculating %wait in Linux
+	- New support for virtual machine inspired metrics in Linux 
+	  (%steal & %guest)
+	- Improved ugly fonts in some implementations of Gtk 1 (Ubuntu)
 
 	VERSION 1.1
 	- Tweeked the spaces in the choice node property window
@@ -326,5 +328,5 @@ Take a look at http://www.systemgarden.com/harvest for more information.
 Nigel Stuckey
 
 System Garden Ltd
-December 2008
+March 2009
 nigel.stuckey@systemgarden.com
