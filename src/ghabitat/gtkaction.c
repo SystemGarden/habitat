@@ -2,7 +2,7 @@
  * Habitat Gtk GUI implementation
  *
  * Nigel Stuckey, May 1999-Aug 2000
- * Copyright System Garden Limited 1999-2004. All rights reserved.
+ * Copyright System Garden Limited 1999-2009. All rights reserved.
  */
 
 #include <stdio.h>
@@ -376,9 +376,11 @@ gtkaction_makechoice(GtkCTreeNode *parent,       /* gui parent */
      GdkPixmap *pixmap;
      GdkBitmap *mask;
      static GtkStyle *edstyle=NULL, *dystyle=NULL;
+     GtkStyle *orig_style;
      GdkColor red, blue;
 
      /* initialisation */
+     orig_style = gtk_widget_get_style(baseWindow);
      if ( ! edstyle ) {
 	  red.red   = 65535;
 	  red.green = 0;
@@ -387,10 +389,10 @@ gtkaction_makechoice(GtkCTreeNode *parent,       /* gui parent */
 	  blue.green = 0;
 	  blue.blue  = 65535;
 
-	  edstyle = gtk_style_new ();
+	  edstyle = gtk_style_copy(orig_style);
 	  edstyle->fg[GTK_STATE_NORMAL] = red;
 
-	  dystyle = gtk_style_new ();
+	  dystyle = gtk_style_copy(orig_style);
 	  dystyle->fg[GTK_STATE_NORMAL] = blue;
      }
 

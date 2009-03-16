@@ -2,8 +2,9 @@
 # System Garden Habitat
 # Standard look and feel
 #
-# Copyright System Garden Limited 1999-2001. All rights reserved.
+# Copyright System Garden Limited 1999-2009. All rights reserved.
 # Nigel Stuckey, revised May 2000
+# Nigel Stuckey, revised March 2009
 #
 
 style "default-text"
@@ -33,18 +34,6 @@ style "about"
 	fg[NORMAL] = "#006699"
 }
 
-style "editable"
-{
-	fg[NORMAL] = "#ff0000"
-}
-
-style "dynamic"
-{
-	font = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
-	fontset = "-*-helvetica-medium-r-*-*-*-100-*-*-*-*-*-*"
-	fg[NORMAL] = "#0000ff"
-}
-
 style "menutitle"
 {
 	font = "-*-helvetica-bold-r-*-*-*-120-*-*-*-*-*-*"
@@ -69,19 +58,10 @@ style "graph"
 	fg[SELECTED] = "#003366"
 }
 
-style "pickstyle"
-{
-#	font = "-adobe-helvetica-bold-r-normal-*-34-240-*-*-p-*-iso8859-1"
-	bg[SELECTED] = "#ccb5cc"
-#	base[SELECTED] = "#ccb5cc"
-}
-
 widget "baseWindow.*splash_view" style "text"
 widget "baseWindow.*splashprod" style "splash"
 widget "baseWindow.*graphframe" style "graph"
 widget "baseWindow.*gmcgraph*" style "graph"
-widget "baseWindow.*ednode" style "editable"
-widget "baseWindow.*dynode" style "dynamic"
 widget "about_dialog" style "about"
 widget "*choice_popup_label*" style "menutitle"
 
