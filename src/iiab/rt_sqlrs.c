@@ -30,7 +30,7 @@ const struct route_lowlevel rt_sqlrs_method = {
      rt_sqlrs_init,       rt_sqlrs_fini,       rt_sqlrs_access,
      rt_sqlrs_open,       rt_sqlrs_close,      rt_sqlrs_write,
      rt_sqlrs_twrite,     rt_sqlrs_tell,       rt_sqlrs_read,
-     rt_sqlrs_tread
+     rt_sqlrs_tread,      rt_sqlrs_status
 };
 CF_VALS rt_sqlrs_cf;
 
@@ -95,8 +95,8 @@ RT_LLD rt_sqlrs_open (char *p_url,	/* address valid until ..close() */
 	  return NULL;
      }
      rt->puturl = util_strjoin(url, "?a=sqlrs:", basename, "!csv", NULL);
-     rt->ringdesc = comment ? xnstrdup(comment) : NULL;
-     rt->posttext = NULL;
+     rt->ringdesc     = comment ? xnstrdup(comment) : NULL;
+     rt->posttext     = NULL;
 
      return rt;
 }
@@ -122,9 +122,11 @@ void   rt_sqlrs_close (RT_LLD lld)
  * A status line is returned as a result of the post together with
  * optional text to give further information. This data is held until the
  * next call to rt_sqlrs_write(); they can be retrieved by reading the
- * special p_urls of 'sqlrs:_WRITE_STATUS_' (defined to 
- * RT_SQLRS_WRITE_STATUS) and 'sqlrs:_WRITE_RETURN_' (defined to 
- * RT_SQLRS_WRITE_RETURN).
+ * special p_urls of 'sqlrs:_WRITE_STATUS_' for the status (defined to 
+ * RT_SQLRS_WRITE_STATUS and normally a simple word or string token) and 
+ * 'sqlrs:_WRITE_INFO_' (defined to RT_SQLRS_WRITE_INFO) for more information
+ * (error also sent to elog).
+ * Do not free the error strings, as they will be managed by rt_sqlrs.
  * Data format is comma separated fat headed array: cvs fha and defined
  * by the habitat to harvest protocol.
  * Returns the number of characters written if successful or -1 for failure.
@@ -185,7 +187,13 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
      if (auth) table_destroy(auth);
      if (cookies) cf_destroy(cookies);
      if (cookiejar) nfree(cookiejar);
-     if (rt->posttext && strncmp(rt->posttext, "OK", 2) == 0) {
+
+     /* deal with status reporting */
+     if ( ! rt->posttext) {
+          elog_printf(DIAG, "Repository gave no status, assume wider error "
+		      "and rejection");
+	  return -1;
+     } else if (strncmp(rt->posttext, "OK", 2) == 0) {
 	  return buflen;
      } else {
           elog_printf(DIAG, "Repository rejected post: %s", rt->posttext);
@@ -198,8 +206,11 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
  * The write is carried out using an HTTP POST method.
  * If any text is returned as a result of the post, it is held until the
  * next call to rt_sqlrs_write(); it can be retrieved by reading the
- * special p_url of 'sqlrs:_WRITE_RETURN_', with caps and underlines 
- * preserved. Do not free this text, as it will be managed by rt_sqlrs.
+ * special p_urls of 'sqlrs:_WRITE_STATUS_' for the status (defined to 
+ * RT_SQLRS_WRITE_STATUS and normally a simple word or string token) and 
+ * 'sqlrs:_WRITE_INFO_' (defined to RT_SQLRS_WRITE_INFO) for more information
+ * (error also sent to elog).
+ * Do not free the error strings, as they will be managed by rt_sqlrs.
  * Returns 1 for success or 0 for failure
  */
 int    rt_sqlrs_twrite (RT_LLD lld,	/* route low level descriptor */
@@ -251,9 +262,9 @@ int    rt_sqlrs_tell  (RT_LLD lld,	/* route low level descriptor */
  * so that it is hidden from normal use
  * Special addresses exist to read from the internal status of SQLRS
  * (no HTTP request is made).
- *     '_WRITE_STATUS_'  (#defined as RT_SQLRS_WRITE_STATUS)  
+ *     '_WRITE_STATUS_' (#defined as RT_SQLRS_WRITE_STATUS)  
  *         The status line (1st) from a previous rt_sqlrs_write()
- *     '_WRITE_RETURN_'  (#defined as RT_SQLRS_WRITE_STATUS)
+ *     '_WRITE_INFO_'   (#defined as RT_SQLRS_WRITE_INFO)
  *         The data lines (2nd on) from a previous rt_sqlrs_write()
  * Returns an ordered list of sequence buffers, unless no data is available
  * or there is an error, when NULL is returned.
@@ -284,10 +295,11 @@ ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
 	       text = xnmalloc(1);
 	  }
 	  text[len] = '\0';
-     } else if (strcmp(RT_SQLRS_WRITE_RETURN, rt->url) == 0) {
+     } else if (strcmp(RT_SQLRS_WRITE_INFO, rt->url) == 0) {
 	  if (rt->posttext) {
 	       len = strcspn(rt->posttext, "\n");
 	       text = xnstrdup(rt->posttext+len+1);
+	       len = strlen(text);
 	  } else {
 	       len = 0;
 	       text = xnstrdup("");
@@ -357,10 +369,11 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
 	  len = strcspn(rt->posttext, "\n");
 	  text = util_strjoin("status\n--\n", rt->posttext, NULL);
 	  text[len+10] = '\0';
-     } else if (strcmp(RT_SQLRS_WRITE_RETURN, rt->url) == 0) {
-          /* special token for the previous whole write return */
+     } else if (strcmp(RT_SQLRS_WRITE_INFO, rt->url) == 0) {
+          /* special token for the previous status (2nd) line */
 	  len = strcspn(rt->posttext, "\n");
 	  text = xnstrdup(rt->posttext+len+1);
+	  len = strlen(rt->posttext);
      } else {
           /* normal connection */
 
@@ -424,6 +437,37 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
      return tab;
 }
 
+
+/*
+ * Return the status of an open SQLRS descriptor.
+ * Free the data from status and info with nfree() if non NULL.
+ * If no data is available, either or both status and info may return NULL
+ */
+void   rt_sqlrs_status(RT_LLD lld, char **status, char **info) {
+     RT_SQLRSD rt;
+     int len;
+
+     rt = rt_sqlrs_from_lld(lld);
+
+     if (status != NULL) {
+          if (rt->posttext) {
+	       len = strcspn(rt->posttext, "\n");
+	       *status = xnmemdup(rt->posttext, len+1);
+	       (*status)[len] = '\0';
+	  } else {
+	       *status = NULL;
+	  }
+     }
+
+     if (info != NULL) {
+          if (rt->posttext) {
+	       len = strcspn(rt->posttext, "\n");
+	       *info = xnstrdup(rt->posttext+len+1);
+	  } else {
+	       info = NULL;
+	  }
+     }
+}
 
 /* --------------- Private routines ----------------- */
 

@@ -48,6 +48,6 @@ int    rt_file_tell  (RT_LLD lld, int *seq, int *size, time_t *modt);
 int    rt_file_stat  (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_file_read  (RT_LLD lld, int seq, int offset);
 TABLE  rt_file_tread (RT_LLD lld, int seq, int offset);
-
+void   rt_file_status(RT_LLD lld, char **status, char **info);
 
 #endif /* _RT_FILE_H_ */

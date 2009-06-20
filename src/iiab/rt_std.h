@@ -53,6 +53,6 @@ int    rt_std_twrite (RT_LLD lld, TABLE tab);
 int    rt_std_tell   (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_std_read   (RT_LLD lld, int seq, int offset);
 TABLE  rt_std_tread  (RT_LLD lld, int seq, int offset);
-
+void   rt_std_status (RT_LLD lld, char **status, char **info);
 
 #endif /* _RT_STD_H_ */

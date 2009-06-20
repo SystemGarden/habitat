@@ -30,7 +30,7 @@
  * On an example machine called kevin, 'sqlrs:%h,tom,3600>tab:var/%h.rs,tom' 
  * in the IN list, will take data from the remote ring 'sqlrs:kevin,tom,3600'
  * and will replicate to the local ring 'tom' in the file 'var/kevin.rs'.
- * Hourly samples are downloaded.
+ * The result: Hourly samples are downloaded.
  * Return -1 for error.
  */
 int rep_action(ROUTE out,		/* route output */
@@ -46,7 +46,7 @@ int rep_action(ROUTE out,		/* route output */
      int r, local_seq, remote_seq, nslots;
      time_t youngest_t;
      char *local_ring, *remote_ring, purl[REP_PURL_LEN], *buf, *from, *to;
-     char *desc, *pt;
+     char *desc, *pt, *status, *stinfo;
 
      /* check arguments */
      if (state_purl == NULL || *state_purl == '\0') {
@@ -63,7 +63,8 @@ int rep_action(ROUTE out,		/* route output */
      }
 
      /* set up the route for saving the state of the replication
-      * we only need one copy, so should ideally be a holstore  */
+      * we only need one copy, so should ideally be one slot ring
+      * or a singleton */
      state_rt = route_open(state_purl, "replication state", NULL, 1);
      if (! state_rt) {
 	  elog_die(ERROR, "unable to open state storage (%s)", state_purl);
@@ -212,7 +213,7 @@ int rep_action(ROUTE out,		/* route output */
 	  table_replacecurrentcell_alloc(state, "rep_t", 
 					 util_i32toa(time(NULL)));
 	  if (!route_twrite(state_rt, state))
-	       elog_printf(ERROR, "unable to save state having read in %s", to);
+	       elog_printf(ERROR,"unable to save state having read in %s", to);
      }
 
      /* *** outbound *** */
@@ -279,11 +280,11 @@ int rep_action(ROUTE out,		/* route output */
 	       continue;	/* can't carry on with this ring */
 	  }
 	  if (!route_twrite(rt, io)) {
-	       buf = route_read("sqlrs:_WRITE_STATUS_", NULL, &r);
+	       route_getstatus(rt, &status, &stinfo);
 	       elog_printf(ERROR, "failed to replicate to repository "
-			   "address %s error returned: %s", 
-			   remote_ring, buf);
-	       nfree(buf);
+			   "address '%s': %s %s", remote_ring, status, stinfo);
+	       nfree(status);
+	       nfree(stinfo);
 	       route_close(rt);
 	       table_destroy(io);
 	       continue;	/* can't carry on with this ring */
@@ -291,8 +292,11 @@ int rep_action(ROUTE out,		/* route output */
 	  route_close(rt);
 	  table_destroy(io);
 
+	  /* WANT STATE TABLE ADDRESS IN LOCAL RING
+	     NO!! THIS IS NOT GOING TO WORK!! */
+
 	  /* collect sequence & time - locally and remotely */
-	  info = route_tread("sqlrs:_WRITE_RETURN_", NULL);
+	  info = route_tread("sqlrs:_WRITE_INFO_", NULL);
 	  if (!info) {
 	       elog_printf(ERROR, "no repository state returned but "
 			   "outbound replication suceeded: unable to save "

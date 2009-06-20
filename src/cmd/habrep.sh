@@ -15,6 +15,15 @@ cd $DIR
 PATH=`pwd`:/usr/bin:/bin; export PATH
 cd $MYDIR
 
+echo "Replicating to repository now..."
+
 habmeth $* replicate replicate.in replicate.out "rs:%v/%h.rs,rstate,0"
 
-exit $?;
+RETURN=$?;
+
+if [ $RETURN -ne 0 ];
+then
+    echo "$0: replication failed";
+fi
+
+exit $RETURN;

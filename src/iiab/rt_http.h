@@ -48,6 +48,6 @@ int    rt_http_twrite(RT_LLD lld, TABLE tab);
 int    rt_http_tell  (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_http_read  (RT_LLD lld, int seq, int offset);
 TABLE  rt_http_tread (RT_LLD lld, int seq, int offset);
-
+void   rt_http_status(RT_LLD lld, char **status, char **info);
 
 #endif /* _RT_HTTP_H_ */

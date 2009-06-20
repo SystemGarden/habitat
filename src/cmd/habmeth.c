@@ -70,8 +70,9 @@ int main(int argc, char *argv[]) {
 	  exit(1);
      }
      
-     if ((r = meth_actiononly(methid, command, "stdout", "stderr", 0)))
-	  elog_printf(FATAL, "Method failed, returning %d", r);
+     if ((r = meth_actiononly(methid, command, "stdout:", "stderr:", 0)))
+       elog_printf(FATAL, "Method %s failed, returning %d", 
+		   cf_getstr(iiab_cmdarg, "argv1"), r);
 
      /* shutdown */
      meth_fini();

@@ -31,6 +31,6 @@ int    rt_none_twrite (RT_LLD lld, TABLE tab);
 int    rt_none_tell   (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_none_read   (RT_LLD lld, int seq, int offset);
 TABLE  rt_none_tread  (RT_LLD lld, int seq, int offset);
-
+void   rt_none_status (RT_LLD lld, char **status, char **info);
 
 #endif /* _RT_NONE_H_ */

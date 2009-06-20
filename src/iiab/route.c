@@ -778,6 +778,15 @@ void route_free_routebuf(ITREE *chain	/* ROUTE_BUF list */ )
 char *route_getpurl(ROUTE rt) { return rt->p_url; }
 
 
+/*
+ * Return an extended status on the status of an open route.
+ * This can be perticularlly useful diagnosiing I/O to more complicated 
+ * output methods, such as HTTP */
+void route_getstatus(ROUTE rt, char **status, char **info) {
+     return rt->method->ll_status(rt->handle, status, info);
+}
+
+
 #if TEST
 
 #include "elog.h"

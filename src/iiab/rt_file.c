@@ -27,7 +27,7 @@ const struct route_lowlevel rt_filea_method = {
      rt_file_init,       rt_file_fini,       rt_file_access,
      rt_filea_open,      rt_file_close,      rt_file_write,
      rt_file_twrite,     rt_file_tell,       rt_file_read,
-     rt_file_tread
+     rt_file_tread,      rt_file_status
 };
 
 const struct route_lowlevel rt_fileov_method = {
@@ -35,7 +35,7 @@ const struct route_lowlevel rt_fileov_method = {
      rt_file_init,       rt_file_fini,       rt_file_access,
      rt_fileov_open,     rt_file_close,      rt_file_write,
      rt_file_twrite,     rt_file_tell,       rt_file_read,
-     rt_file_tread
+     rt_file_tread,      rt_file_status
 };
 
 char *rt_file_tabschema[] = {"data", "_time", NULL};
@@ -361,6 +361,19 @@ TABLE rt_file_tread  (RT_LLD lld, int seq, int offset)
      table_freeondestroy(tab, buf);
 
      return tab;
+}
+
+
+/*
+ * Return the status of an open FILE descriptor.
+ * Free the data from status and info with nfree() if non NULL.
+ * If no data is available, either or both status and info may return NULL
+ */
+void   rt_file_status(RT_LLD lld, char **status, char **info) {
+     if (status)
+          *status = NULL;
+     if (info)
+          *info = NULL;
 }
 
 

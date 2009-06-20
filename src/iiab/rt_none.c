@@ -13,7 +13,7 @@ const struct route_lowlevel rt_none_method = {
      rt_none_init,     rt_none_fini,     rt_none_access,
      rt_none_open,     rt_none_close,    rt_none_write,
      rt_none_twrite,   rt_none_tell,     rt_none_read,
-     rt_none_tread 
+     rt_none_tread,    rt_none_status
 };
 
 int    rt_none_magic() { return RT_NONE_LLD_MAGIC; }
@@ -32,6 +32,14 @@ int    rt_none_tell  (RT_LLD lld, int *seq, int *size, time_t *modt)
                      {return 0;}
 ITREE *rt_none_read  (RT_LLD lld, int seq, int offset) {return NULL;}
 TABLE  rt_none_tread (RT_LLD lld, int seq, int offset) {return NULL;}
+void   rt_none_status(RT_LLD lld, char **status, char **info) {
+     if (status)
+          *status = NULL;
+     if (info)
+          *info = NULL;
+}
+
+
 
 #if TEST
 

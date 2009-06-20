@@ -20,7 +20,7 @@
 #define RT_SQLRS_COOKIES_URLKEY    "route.sqlrs.cookieurl"
 #define RT_SQLRS_COOKIEJAR_FILEKEY "route.sqlrs.cookiejar"
 #define RT_SQLRS_WRITE_STATUS      "sqlrs:_WRITE_STATUS_"
-#define RT_SQLRS_WRITE_RETURN      "sqlrs:_WRITE_RETURN_"
+#define RT_SQLRS_WRITE_INFO        "sqlrs:_WRITE_INFO_"
 
 typedef struct rt_sqlrs_desc {
      int   magic;
@@ -55,6 +55,7 @@ int    rt_sqlrs_twrite(RT_LLD lld, TABLE tab);
 int    rt_sqlrs_tell  (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_sqlrs_read  (RT_LLD lld, int seq, int offset);
 TABLE  rt_sqlrs_tread (RT_LLD lld, int seq, int offset);
+void   rt_sqlrs_status(RT_LLD lld, char **status, char **info);
 void   rt_sqlrs_get_credentials (char *purl, TABLE *auth, CF_VALS *cookies, 
 				 char **cookiejar);
 int    rt_sqlrs_put_cookies_cred(char *purl, CF_VALS cookies);

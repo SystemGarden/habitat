@@ -28,7 +28,7 @@ const struct route_lowlevel rt_http_method = {
      rt_http_init,       rt_http_fini,       rt_http_access,
      rt_http_open,       rt_http_close,      rt_http_write,
      rt_http_twrite,     rt_http_tell,       rt_http_read,
-     rt_http_tread
+     rt_http_tread,      rt_http_status
 };
 
 const struct route_lowlevel rt_https_method = {
@@ -36,7 +36,7 @@ const struct route_lowlevel rt_https_method = {
      rt_http_init,       rt_http_fini,       rt_http_access,
      rt_http_open,       rt_http_close,      rt_http_write,
      rt_http_twrite,     rt_http_tell,       rt_http_read,
-     rt_http_tread
+     rt_http_tread,      rt_http_status
 };
 
 char *rt_http_tabschema[] = {"data", "_time", NULL};
@@ -228,6 +228,19 @@ TABLE rt_http_tread  (RT_LLD lld, int seq, int offset)
      }
 
      return tab;
+}
+
+
+/*
+ * Return the status of an open FILE descriptor.
+ * Free the data from status and info with nfree() if non NULL.
+ * If no data is available, either or both status and info may return NULL
+ */
+void   rt_http_status(RT_LLD lld, char **status, char **info) {
+     if (status)
+          *status = NULL;
+     if (info)
+          *info = NULL;
 }
 
 

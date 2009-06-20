@@ -1179,7 +1179,7 @@ char  *util_ftoa(float src)
 char *util_u32toaoct(unsigned long src)
 {
      static char buf[UTIL_U32STRLEN];
-     snprintf(buf, UTIL_U32STRLEN, "%o", src);
+     snprintf(buf, UTIL_U32STRLEN, "%lo", src);
      return buf;
 }
 
@@ -1244,12 +1244,12 @@ char  *util_tstoa(struct timespec *src)
 
 
 /* converts linux's jiffy format into seconds. input and output are strings */
-char  *util_jiffytoa(long long jiffies)
+char  *util_jiffytoa(unsigned long long jiffies)
 {
      static char buf[UTIL_NANOSTRLEN];
 
      /* a jiffy is 1/100th of a second in linux */
-     sprintf(buf, "%lu.%lu", jiffies / 100, jiffies % 100);
+     sprintf(buf, "%llu.%llu", jiffies / 100, jiffies % 100);
 
      return buf;
 }

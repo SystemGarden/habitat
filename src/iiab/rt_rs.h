@@ -54,6 +54,6 @@ int    rt_rs_tell  (RT_LLD lld, int *seq, int *size, time_t *modt);
 int    rt_rs_stat  (RT_LLD lld, int *seq, int *size, time_t *modt);
 ITREE *rt_rs_read  (RT_LLD lld, int seq, int offset);
 TABLE  rt_rs_tread (RT_LLD lld, int seq, int offset);
-
+void   rt_rs_status(RT_LLD lld, char **status, char **info);
 
 #endif /* _RT_RS_H_ */

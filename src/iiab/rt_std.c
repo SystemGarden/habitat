@@ -27,7 +27,7 @@ const struct route_lowlevel rt_stdin_method = {
      rt_std_init,       rt_std_fini,       rt_std_access,
      rt_stdin_open,     rt_std_close,      rt_std_write,
      rt_std_twrite,     rt_std_tell,       rt_std_read,
-     rt_std_tread 
+     rt_std_tread,      rt_std_status
 };
 
 const struct route_lowlevel rt_stdout_method = {
@@ -35,7 +35,7 @@ const struct route_lowlevel rt_stdout_method = {
      rt_std_init,       rt_std_fini,       rt_std_access,
      rt_stdout_open,    rt_std_close,      rt_std_write,
      rt_std_twrite,     rt_std_tell,       rt_std_read,
-     rt_std_tread 
+     rt_std_tread,      rt_std_status
 };
 
 const struct route_lowlevel rt_stderr_method = {
@@ -43,7 +43,7 @@ const struct route_lowlevel rt_stderr_method = {
      rt_std_init,       rt_std_fini,       rt_std_access,
      rt_stderr_open,    rt_std_close,      rt_std_write,
      rt_std_twrite,     rt_std_tell,       rt_std_read,
-     rt_std_tread 
+     rt_std_tread,      rt_std_status
 };
 
 char *rt_std_tabschema[] = {"data", "_time", NULL};
@@ -225,6 +225,19 @@ TABLE rt_std_tread  (RT_LLD lld, int seq, int offset)
      table_freeondestroy(tab, buf);
 
      return tab;
+}
+
+
+/*
+ * Return the status of an open STD* descriptor.
+ * Free the data from status and info with nfree() if non NULL.
+ * If no data is available, either or both status and info may return NULL
+ */
+void   rt_std_status(RT_LLD lld, char **status, char **info) {
+     if (status)
+          *status = NULL;
+     if (info)
+          *info = NULL;
 }
 
 

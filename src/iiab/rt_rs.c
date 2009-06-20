@@ -28,7 +28,7 @@ const struct route_lowlevel rt_rs_method = {
      rt_rs_init,    rt_rs_fini,     rt_rs_access,
      rt_rs_open,    rt_rs_close,    rt_rs_write,
      rt_rs_twrite,  rt_rs_tell,     rt_rs_read,
-     rt_rs_tread 
+     rt_rs_tread,   rt_rs_status
 };
 
 char *rt_rs_schema[] = {"_time", "_seq", "text", NULL};
@@ -384,6 +384,19 @@ TABLE rt_rs_tread  (RT_LLD lld, int seq, int offset)
        return rs_mget_range(rt->rs_id, rt->from_s, rt->to_s,
 			    rt->from_t, rt->to_t);
      }
+}
+
+
+/*
+ * Return the status of an open RS descriptor.
+ * Free the data from status and info with nfree() if non NULL.
+ * If no data is available, either or both status and info may return NULL
+ */
+void   rt_rs_status(RT_LLD lld, char **status, char **info) {
+     if (status)
+          *status = NULL;
+     if (info)
+          *info = NULL;
 }
 
 

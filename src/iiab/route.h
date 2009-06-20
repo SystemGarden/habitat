@@ -41,6 +41,7 @@ typedef const struct route_lowlevel {
      int    (*ll_tell)  (RT_LLD lld, int *seq, int *size, time_t *modt);
      ITREE *(*ll_read)  (RT_LLD lld, int  seq, int  offset);
      TABLE  (*ll_tread) (RT_LLD lld, int  seq, int  offset);
+     void   (*ll_status)(RT_LLD lld, char **status, char **info);
 } *ROUTE_METHOD;
 
 /* buffer structure */
@@ -85,9 +86,10 @@ TABLE  route_tread   (char *p_url, char *password);
 int    route_tell    (ROUTE rt,    int *seq, int *size, time_t *modt);
 int    route_stat    (char *p_url, char *password, int *seq, int *size, 
 		      time_t *modt);
-ITREE *route_seekread(ROUTE rt, int seq, int offset);
+ITREE *route_seekread (ROUTE rt, int seq, int offset);
 TABLE  route_seektread(ROUTE rt, int seq, int offset);
 void   route_free_routebuf(ITREE *buflist);
-char * route_getpurl (ROUTE rt);
+char * route_getpurl  (ROUTE rt);
+void   route_getstatus(ROUTE rt, char **status, char **info);
 
 #endif /* _ROUTE_H_ */

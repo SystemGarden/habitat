@@ -80,7 +80,7 @@ char  *util_u32toaoct(unsigned long src);
 #else
   char  *util_tstoa(struct timespec *src);
 #endif /* __svr4__ */
-char  *util_jiffytoa(long long jiffies);
+char  *util_jiffytoa(unsigned long long jiffies);
 char  *util_decdatetime(time_t t);
 char  *util_shortadaptdatetime(time_t t);
 char  *util_basename(char *path);
