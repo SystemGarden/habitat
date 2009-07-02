@@ -119,18 +119,15 @@ void   rt_sqlrs_close (RT_LLD lld)
 
 /* Establish an SQLRS connection given the address provided in rt_sqlrs_open().
  * The write is carried out using an HTTP POST method.
- * A status line is returned as a result of the post together with
- * optional text to give further information. This data is held until the
- * next call to rt_sqlrs_write(); they can be retrieved by reading the
- * special p_urls of 'sqlrs:_WRITE_STATUS_' for the status (defined to 
- * RT_SQLRS_WRITE_STATUS and normally a simple word or string token) and 
- * 'sqlrs:_WRITE_INFO_' (defined to RT_SQLRS_WRITE_INFO) for more information
- * (error also sent to elog).
+ * A status line and optional information lines are returned as a result 
+ * of the post, which can be retrived with route_status() [or directly with
+ * rt_sqlrs_status()]. The buffer stays until the next write or twrite call
+ * and errors are also sent to elog.
  * Do not free the error strings, as they will be managed by rt_sqlrs.
  * Data format is comma separated fat headed array: cvs fha and defined
  * by the habitat to harvest protocol.
  * Returns the number of characters written if successful or -1 for failure.
- * On failure, read 'sqlrs:_WRITE_STATUS_' to see why
+ * On failure, call rt_sqlrs_stat() to see why.
  */
 int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
 {
@@ -163,7 +160,7 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
      /* if the buffer is small, add it as a regular form parameter (updata),
       * or if its big then add it as a file upload (upfile). This is due to
       * efficiency */
-     if (buflen > 1000) {
+     if (buflen > 1024) {
           parts = tree_create();
           tree_add(parts, "upfile", (void *) buf);
      } else {
@@ -204,12 +201,10 @@ int    rt_sqlrs_write (RT_LLD lld, const void *buf, int buflen)
 
 /* Establish an SQLRS connection given the address provided in rt_sqlrs_open().
  * The write is carried out using an HTTP POST method.
- * If any text is returned as a result of the post, it is held until the
- * next call to rt_sqlrs_write(); it can be retrieved by reading the
- * special p_urls of 'sqlrs:_WRITE_STATUS_' for the status (defined to 
- * RT_SQLRS_WRITE_STATUS and normally a simple word or string token) and 
- * 'sqlrs:_WRITE_INFO_' (defined to RT_SQLRS_WRITE_INFO) for more information
- * (error also sent to elog).
+ * A status line and optional information lines are returned as a result 
+ * of the post, which can be retrived with route_status() [or directly with
+ * rt_sqlrs_status()]. The buffer stays until the next write or twrite call
+ * and errors are also sent to elog.
  * Do not free the error strings, as they will be managed by rt_sqlrs.
  * Returns 1 for success or 0 for failure
  */
@@ -250,7 +245,7 @@ int    rt_sqlrs_tell  (RT_LLD lld,	/* route low level descriptor */
      *seq=0;
      *size=-1;
      *modt=-1;
-     return 1;	/* always succeed */
+     return 1;	/* always succeed at returning null */
 }
 
 /* Establish an SQLRS connection given the address provided in rt_sqlrs_open().
@@ -260,12 +255,6 @@ int    rt_sqlrs_tell  (RT_LLD lld,	/* route low level descriptor */
  * Declarations in the configuration [passed in rt_sqlrs_init()] dictate
  * the proxy, user accounts, passwords, cookie environment and ssl tokens
  * so that it is hidden from normal use
- * Special addresses exist to read from the internal status of SQLRS
- * (no HTTP request is made).
- *     '_WRITE_STATUS_' (#defined as RT_SQLRS_WRITE_STATUS)  
- *         The status line (1st) from a previous rt_sqlrs_write()
- *     '_WRITE_INFO_'   (#defined as RT_SQLRS_WRITE_INFO)
- *         The data lines (2nd on) from a previous rt_sqlrs_write()
  * Returns an ordered list of sequence buffers, unless no data is available
  * or there is an error, when NULL is returned.
  */
@@ -285,38 +274,16 @@ ITREE *rt_sqlrs_read  (RT_LLD lld,	/* route low level descriptor */
 
      rt = rt_sqlrs_from_lld(lld);
 
-     /* special locations that return the status of the last write action */
-     if (strcmp(RT_SQLRS_WRITE_STATUS, rt->url) == 0) {
-	  if (rt->posttext) {
-	       len = strcspn(rt->posttext, "\n");
-	       text = xnmemdup(rt->posttext, len+1);
-	  } else {
-	       len = 0;
-	       text = xnmalloc(1);
-	  }
-	  text[len] = '\0';
-     } else if (strcmp(RT_SQLRS_WRITE_INFO, rt->url) == 0) {
-	  if (rt->posttext) {
-	       len = strcspn(rt->posttext, "\n");
-	       text = xnstrdup(rt->posttext+len+1);
-	       len = strlen(text);
-	  } else {
-	       len = 0;
-	       text = xnstrdup("");
-	  }
-     } else {
-          /* normal connection */
+     /* get authentication credentials */
+     rt_sqlrs_get_credentials(rt->url, &auth, &cookies, &cookiejar);
 
-          /* get authentication credentials */
-          rt_sqlrs_get_credentials(rt->url, &auth, &cookies, &cookiejar);
+     text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
 
-          text = http_get(rt->geturl, cookies, cookiejar, auth, 0);
+     /* free data */
+     if (auth) table_destroy(auth);
+     if (cookies) cf_destroy(cookies);
+     if (cookiejar) nfree(cookiejar);
 
-	  /* free data */
-	  if (auth) table_destroy(auth);
-	  if (cookies) cf_destroy(cookies);
-	  if (cookiejar) nfree(cookiejar);
-     }
      if (!text)
 	  return NULL;
 
@@ -364,6 +331,7 @@ TABLE rt_sqlrs_tread  (RT_LLD lld,	/* route low level descriptor */
 
      rt = rt_sqlrs_from_lld(lld);
 
+     /* DEPRECATED */
      if (strcmp(RT_SQLRS_WRITE_STATUS, rt->url) == 0) {
           /* special token for the previous write status in a table */
 	  len = strcspn(rt->posttext, "\n");
