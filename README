@@ -20,6 +20,9 @@ and agree to the license.
 
 CHANGES
 -------
+	VERSION 1.1.2 (unreleased)
+	- Improved replication and http errors
+	- Integration with harvest as repository for outbound replication
 
 	VERSION 1.1.1
 	- Upgraded clock tick counters with 64 bit quantities for
