@@ -43,10 +43,11 @@ int rep_action(ROUTE out,		/* route output */
      TABLE state, io, info, seq_data;
      ITREE *seq_i;
      TREE  *seq_a;
-     int r, local_seq, remote_seq, nslots;
+     int r, local_seq, remote_seq, nslots, len;
      time_t youngest_t;
      char *local_ring, *remote_ring, purl[REP_PURL_LEN], *buf, *from, *to;
-     char *desc, *pt, *status, *stinfo;
+     char *desc, *pt, *status, *stinfo, *rtstatus, *rtinfo;
+     char *remote_youngest_t, *remote_youngest_s;
 
      /* check arguments */
      if (state_purl == NULL || *state_purl == '\0') {
@@ -54,7 +55,7 @@ int rep_action(ROUTE out,		/* route output */
 	  return -1;
      }
 
-     /* get state in table */
+     /* get replication state in table */
      state = route_tread(state_purl, NULL);
      if (!state) {
 	  buf   = xnstrdup(REP_STATE_HDS);
@@ -79,29 +80,13 @@ int rep_action(ROUTE out,		/* route output */
      elog_printf(DIAG, "REPLICATE TABLE\n%s", table_print(state));
 #endif
 
-     /* *** inbound *** */
+     /* ********** inbound replicated data **********
+      * iterate over the in-bound rings, reading new data into local rings */
      itree_traverse(in_rings) {
+          /* get replication end points and last remote sequence */
 	  rep_endpoints(itree_get(in_rings), &from, &to);
-
-	  /* find last sequence from state, using the local ring as the name */
-	  if (table_search(state, "name", itree_get(in_rings)) == -1) {
-	       /* no record of it before, start a new one and fill in 
-		* some initial values */
-	       table_addemptyrow(state);
-	       table_replacecurrentcell_alloc(state, "name",  
-					      itree_get(in_rings));
-	       table_replacecurrentcell_alloc(state, "lname", to);
-	       table_replacecurrentcell_alloc(state, "rname", from);
-	       table_replacecurrentcell_alloc(state, "rseq",  "-1");
-	       table_replacecurrentcell_alloc(state, "lseq",  "-1");
-	       table_replacecurrentcell_alloc(state, "rep_t", "0");
-	  }
-
-	  /* read back values */
-	  local_ring  = table_getcurrentcell(state, "lname");
-	  remote_ring = table_getcurrentcell(state, "rname");
-	  remote_seq  = strtol(table_getcurrentcell(state, "rseq"), 
-			       (char**)NULL, 10);
+	  remote_seq = rep_state_new_or_get(state, itree_get(in_rings), to, 
+					    from, &local_ring, &remote_ring);
 
 	  /* run fetch method using standard ringstore addressing */
 	  r = snprintf(purl, REP_PURL_LEN, "%s,*,s=%d-", remote_ring, 
@@ -216,7 +201,7 @@ int rep_action(ROUTE out,		/* route output */
 	       elog_printf(ERROR,"unable to save state having read in %s", to);
      }
 
-     /* *** outbound *** */
+     /* ********** outbound replicated data ********** */
      tree_traverse(out_rings) {
 	  rep_endpoints(itree_get(out_rings), &from, &to);
 
@@ -281,46 +266,99 @@ int rep_action(ROUTE out,		/* route output */
 	  }
 	  if (!route_twrite(rt, io)) {
 	       route_getstatus(rt, &status, &stinfo);
-	       elog_printf(ERROR, "failed to replicate to repository "
-			   "address '%s': %s %s", remote_ring, status, stinfo);
-	       nfree(status);
-	       nfree(stinfo);
+	       if (status) {
+		 elog_printf(ERROR, "failed to replicate to repository "
+			     "address '%s': %s %s", remote_ring, status, 
+			     stinfo);
+		 nfree(status);
+		 nfree(stinfo);
+	       } else {
+		 elog_printf(ERROR, "failed to replicate to repository "
+			     "address '%s', no status", remote_ring);
+	       }
 	       route_close(rt);
 	       table_destroy(io);
 	       continue;	/* can't carry on with this ring */
 	  }
+	  route_getstatus(rt, &rtstatus, &rtinfo);	/* grab status */
 	  route_close(rt);
 	  table_destroy(io);
 
-	  /* WANT STATE TABLE ADDRESS IN LOCAL RING
-	     NO!! THIS IS NOT GOING TO WORK!! */
+	  /* For efficiency, attempt to parse the successful info message
+	   * from the post to the repository for sequences and times.
+	   * If it fails then we need to revert to a remote status call
+	   * to get the same info, which will slow us down...
+	   */
+	  if (rtstatus && rtinfo) {
+	    len = strlen(rtinfo);
+	    /* cut out the youngest time from return buffer */
+	    buf = strstr(rtinfo, "youngest_t");
+	    if (buf) {
+	      buf += 10;
+	      buf += strspn(buf, " ");
+	      len = strcspn(buf, " ");
+	      remote_youngest_t = xnmemdup(buf, len+1);
+	      remote_youngest_t[len] = '\0';
 
-	  /* collect sequence & time - locally and remotely */
-	  info = route_tread("sqlrs:_WRITE_INFO_", NULL);
-	  if (!info) {
-	       elog_printf(ERROR, "no repository state returned but "
+	      /* cut out the youngest sequence from return buffer */
+	      buf = strstr(rtinfo, "youngest_s");
+	      if (buf) {
+		buf += 10;
+		buf += strspn(buf, " ");
+		len = strcspn(buf, " ");
+		remote_youngest_s = xnmemdup(buf, len+1);
+		remote_youngest_s[len] = '\0';
+	      } else {
+		/* bufer does not contain 'youngest_s' */
+		remote_youngest_s = NULL;
+	      }
+	    } else {
+	      /* bufer does not contain 'youngest_t' */
+	      remote_youngest_t = NULL;
+	      remote_youngest_s = NULL;
+	    }
+	  } else {
+	    /* no return information */
+	    remote_youngest_t = NULL;
+	    remote_youngest_s = NULL;
+	  }
+
+	  if ( ! remote_youngest_s ) {
+	    /* No return info or status, so make a specific request */
+
+	    /* TO BE IMPLEMENTED */
+	    info = route_tread("sqlrs:remote_ring", NULL);
+	    if (!info) {
+	      elog_printf(ERROR, "no repository state returned but "
 			   "outbound replication suceeded: unable to save "
 			   "state, out of sync");
-	       continue;
+	      continue;
+	    }
+
+	    table_last(info);	/* ASSUMPTION! that io is seq/time ordered
+				 * and the last row is the youngest */
+
+	    remote_youngest_s = xnstrdup(table_getcurrentcell(info, 
+							      "youngest"));
+	    remote_youngest_t = xnstrdup(table_getcurrentcell(info, 
+							      "youngest_t"));
 	  }
+
+	  /* collect local sequence & time */
 	  if (!route_stat(local_ring, NULL, &local_seq, &r, &youngest_t))
 	       elog_printf(ERROR, "can't stat local ring: %s", 
 			   local_ring);
 
-	  /* Write state table to storage every time a fetch has been done.
+	  /* Write the state table to specified storage for every post.
 	   * Whilst inefficient, it is far safer */
-	  table_last(info);	/* ASSUMPTION! that io is seq/time ordered
-				 * and the last row is the youngest */
-	  table_replacecurrentcell_alloc(state, "lseq", 
-					 util_i32toa(local_seq));
-	  table_replacecurrentcell_alloc(state, "rseq", 
-					 table_getcurrentcell(info, 
-							      "youngest") );
-	  table_replacecurrentcell_alloc(state, "youngest_t", 
-					 table_getcurrentcell(info,
-							      "youngest_t") );
 	  table_replacecurrentcell_alloc(state, "rep_t", 
 					 util_i32toa(time(NULL)));
+	  table_replacecurrentcell_alloc(state, "lseq", 
+					 util_i32toa(local_seq));
+	  table_replacecurrentcell(state, "rseq",       remote_youngest_s);
+	  table_replacecurrentcell(state, "youngest_t", remote_youngest_t);
+	  table_freeondestroy(state, remote_youngest_s);
+	  table_freeondestroy(state, remote_youngest_t);
 	  if (!route_twrite(state_rt, state))
 	       elog_printf(ERROR, "unable to save state having written to %s",
 			   to);
@@ -330,6 +368,68 @@ int rep_action(ROUTE out,		/* route output */
      route_close(state_rt);
 
      return 0;		/* success */
+}
+
+
+/* ------- Replication helpers -------- */
+
+/*
+ * Return the last read remote sequence for the replication relationship 
+ * called 'name'. Also returns the local and remote ring names.
+ * If the relationship does not exist in the table, it is created using
+ * the default ring names provided by the caller.
+ * Don't nfree() the returned data as they are part of the table.
+ * Copies of the default are made.
+ */
+long rep_state_new_or_get(TABLE state, char *name, 
+			  char *default_remote, char *default_local,
+			  char **actual_remote, char **actual_local) {
+     long remote_seq;
+
+     /* find last sequence from state, using the local ring as the name */
+     if (table_search(state, "name", name) == -1) {
+          /* no record of it before, start a new one and fill in 
+	   * some initial/default values */
+          table_addemptyrow(state);
+	  table_replacecurrentcell_alloc(state, "name", name);
+	  table_replacecurrentcell_alloc(state, "lname", default_local);
+	  table_replacecurrentcell_alloc(state, "rname", default_remote);
+	  table_replacecurrentcell_alloc(state, "rseq",  "-1");
+	  table_replacecurrentcell_alloc(state, "lseq",  "-1");
+	  table_replacecurrentcell_alloc(state, "rep_t", "0");
+     }
+
+     /* read back values */
+     *actual_local  = table_getcurrentcell(state, "lname");
+     *actual_remote = table_getcurrentcell(state, "rname");
+     remote_seq  = strtol(table_getcurrentcell(state, "rseq"), 
+			       (char**)NULL, 10);
+
+     return remote_seq;
+}
+
+/* write the replication state to a route */
+/* NOT YET USED */
+rep_state_write() {
+#if 0
+     /* set up the route for saving the state of the replication
+      * we only need one copy, so should ideally be one slot ring
+      * or a singleton */
+     state_rt = route_open(state_purl, "replication state", NULL, 1);
+     if (! state_rt) {
+	  elog_die(ERROR, "unable to open state storage (%s)", state_purl);
+	  table_destroy(state);
+	  return -1;
+     }
+#endif
+
+#if 0
+     elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
+     itree_strdump(in_rings,  " in-> ");
+     itree_strdump(out_rings, " out-> ");
+     elog_printf(DIAG, "REPLICATE TABLE\n%s", table_print(state));
+#endif
+
 }
 
 
@@ -387,6 +487,7 @@ void rep_endpoints(char *directive, char **from, char **to) {
 
      return;
 }
+
 
 
 #if TEST
