@@ -2,6 +2,7 @@
 
 #include "rb.h"
 #include <stdio.h>
+#include <stdlib.h>
 
 /* an example -- this allocates a red-black tree for integers.  For a 
  * user-specified number of iterations, it does the following:
