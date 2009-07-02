@@ -260,7 +260,7 @@ char *http_get(char   *url, 	/* standard url */
 char *http_post(char   *url, 	/* standard url */
 		TREE   *form, 	/* key-value list of form items */
 		TREE   *files, 	/* file list: key=send name val=filename */
-		TREE   *upload,	/* file list: key=send name val=data */
+		TREE   *upload,	/* form list: key=send name val=data */
 		CF_VALS cookies,/* input cookies */
 		char   *cookiejar,/* filenane to store returned cookies */
 		TABLE   auth,	/* authorisation table */
@@ -420,7 +420,10 @@ char *http_post(char   *url, 	/* standard url */
      /*elog_printf(DEBUG, "REP - sending\n");*/
      r = curl_easy_perform(http_curlh);
      if (r)
-	  elog_printf(ERROR, "HTTP POST error: %s", errbuf);
+          if (errbuf && *errbuf)
+	       elog_printf(ERROR, "HTTP POST error: %s", errbuf);
+	  else
+	       elog_printf(ERROR, "Unable to connect to %s", host);
      else
 	  elog_printf(DIAG,  "HTTP POST success");
 
