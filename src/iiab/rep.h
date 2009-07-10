@@ -43,9 +43,20 @@ int   rep_action(ROUTE out, ROUTE err, ITREE *rings_in, ITREE *rings_out,
 
 /* local */
 void  rep_endpoints(char *directive, char **from, char **to);
-long  rep_state_new_or_get(TABLE state, char *name, 
+void  rep_state_new_or_get(TABLE state, char *name, 
 			   char *default_remote, char *default_local,
-			   char **actual_remote, char **actual_local);
+			   char **actual_remote, char **actual_local,
+			   int *remote_seq, int *local_seq);
+TABLE rep_remote_get(char *remote_ring, int remote_seq);
+TABLE rep_local_get(char *local_ring, int local_seq);
+ROUTE rep_local_open_or_create(char *local_ring, char *remote_ring);
+void  rep_local_save(ROUTE rt, TABLE io);
+void  rep_state_update(TABLE state, char *name, int local_seq, 
+		       int remote_seq, time_t youngest_t);
+int   rep_remote_put(ROUTE rt, TABLE io, char **rtstatus, char **rtinfo);
+void  rep_remote_status(char *rtstatus, char *rtinfo, int *remote_youngest_s,
+			time_t *remote_youngest_t);
+
 
 TABLE rep_scan_inbound(char *buf, int len, int *local_seq, int *remote_seq, 
 		       time_t *youngest_t);

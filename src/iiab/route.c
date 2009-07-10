@@ -781,7 +781,9 @@ char *route_getpurl(ROUTE rt) { return rt->p_url; }
 /*
  * Return an extended status on the status of an open route.
  * This can be perticularlly useful diagnosiing I/O to more complicated 
- * output methods, such as HTTP */
+ * output methods, such as HTTP
+ * Returned data status and info are nmalloc()ed and should be nfree()'ed
+ * by the caller */
 void route_getstatus(ROUTE rt, char **status, char **info) {
      return rt->method->ll_status(rt->handle, status, info);
 }

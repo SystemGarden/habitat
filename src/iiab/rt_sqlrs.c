@@ -446,10 +446,12 @@ RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld	/* typeless low level data */)
 	  elog_die(FATAL, "passed NULL low level descriptor");
      if (((RT_SQLRSD)lld)->magic != RT_SQLRS_LLD_MAGIC)
 	  elog_die(FATAL, "magic type mismatch: we were given "
-		   "%s (%s) but can handle only %s (%s)", 
+		   "%s (%s) [%d] but can handle only %s (%s) [%d]", 
 		   ((RT_SQLRSD)lld)->prefix, 
 		   ((RT_SQLRSD)lld)->description,
-		   rt_sqlrs_prefix(),  rt_sqlrs_description() );
+		   ((RT_SQLRSD)lld)->magic,
+		   rt_sqlrs_prefix(),  rt_sqlrs_description(),
+		   RT_SQLRS_LLD_MAGIC);
 
      return (RT_SQLRSD) lld;
 }
