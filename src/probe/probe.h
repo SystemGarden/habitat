@@ -138,7 +138,7 @@ void  psoldown_derive(TABLE prev, TABLE cur);
 struct probe_sampletab *plinps_getcols();
 struct probe_rowdiff   *plinps_getrowdiff();
 char                  **plinps_getpub();
-void   plinps_init();
+void   plinps_init(char *probeargs);
 void   plinps_fini();
 void   plinps_collect(TABLE tab);
 void   plinps_col_fperm(TABLE tab, char *pfile, ITREE *uidtoname);
