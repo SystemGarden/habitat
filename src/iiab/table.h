@@ -73,8 +73,8 @@ int    table_addtable(TABLE t, TABLE rows, int expand);
 void   table_rmrow(TABLE t, int rowkey);
 void  *table_getcell(TABLE t, int rowkey, char *colname);
 int    table_search(TABLE t, char *haystack, char *needle);
-int    table_search2(TABLE t, char *haystack1, char *needle1, char *haystack2,
-		     char *needle2);
+int    table_search2(TABLE t, char *haystack1, char *needle1, 
+		     char *haystack2, char *needle2);
 int    table_replacecell_alloc(TABLE t, int rowkey, char *colname, 
 			       char *newcelldata);
 int    table_replacecell_noalloc(TABLE t, int rowkey, char *colname, 
@@ -121,6 +121,7 @@ int    table_isatlast(TABLE t);
 int    table_isbeyondend(TABLE t);
 TREE  *table_getcurrentrow(TABLE t);
 void   table_rmcurrentrow(TABLE t);
+void   table_rmallrows(TABLE t);
 void  *table_getcurrentcell(TABLE t, char *colname);
 int    table_getcurrentrowkey(TABLE t);
 int    table_replacecurrentcell(TABLE t, char *colname, void *data);
