@@ -100,7 +100,7 @@ void plindown_collect(TABLE tab) {
 	  return;
      }
 
-     /* read boot and alive values from holstore */
+     /* read boot and alive values from route */
      bootstr = route_read(plindown_purl_boot, NULL, &len);
      if (bootstr == NULL) {
 	  /* No boot timestamp, which we have a responsibility to
