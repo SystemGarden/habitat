@@ -1,8 +1,8 @@
 /*
  * Linux process probe for iiab
- * Nigel Stuckey, September 1999, March 2000
+ * Nigel Stuckey, September 1999, March 2000, July 2009
  *
- * Copyright System Garden Ltd 1999-2001. All rights reserved.
+ * Copyright System Garden Ltd 1999-2001, 2009. All rights reserved.
  */
 
 #if linux
@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include "../iiab/tableset.h"
 
 #define PLINPS_STATSZ 256
 
@@ -48,6 +49,10 @@ int    plinps_pagesize;		/* pagesize in bytes */
 float  plinps_pagetokb;		/* factor to multiply pages to get kb */
 time_t plinps_boot_t;		/* time system booted */
 long   plinps_total_mem;	/* total memory size */
+time_t plinps_filter_t;		/* time stamp of filter route */
+char * plinps_filter_purl;	/* p-url of the filter */
+char * plinps_filter_cmds;	/* table of filter commands */
+TABSET plinps_filter_tset;	/* compiled table set instance */
 
 /* table constants for system probe */
 struct probe_sampletab plinps_cols[] = {
@@ -134,11 +139,25 @@ struct probe_sampletab *plinps_getcols()    {return plinps_cols;}
 struct probe_rowdiff   *plinps_getrowdiff() {return plinps_diffs;}
 char                  **plinps_getpub()     {return NULL;}
 
+/* prototypes */
+void plinps_load_filter(char *probeargs);
+void plinps_compile_filter(TABLE tab);
+
 /*
  * Initialise probe for linux system information
+ * Takes an optional argument, which is the p-url name of a filter table.
+ * If absent, the whole process table is used.
  */
-void plinps_init() {
-     /* create the user list */
+void plinps_init(char *probeargs) {
+
+     /* set filter parameters and carry out initial load */
+     plinps_filter_t    = (time_t) 0;
+     plinps_filter_purl = NULL;
+     plinps_filter_cmds = NULL;
+     plinps_filter_tset = NULL;
+     plinps_load_filter(probeargs);
+
+     /* create the uid-to-name user list */
      plinps_uidtoname = itree_create();
 
      /* conversion factors for pages */
@@ -164,6 +183,117 @@ void plinps_fini() {
 }
 
 
+
+/*
+ * Check for newer data from the route containing filter conditions and 
+ * load them if available
+ * If probeargs is not NULL, load from a new location before loading
+ */
+void plinps_load_filter(char *probeargs) {
+     char *filter_purl = NULL;	/* new purl location */
+     char *filter_cmds = NULL;	/* new commands */
+     time_t check_t;		/* time of last check */
+     int len, seq, r;
+
+     /* check for a new p-url location supplied as an agrument */
+     if (probeargs && *probeargs) {
+          /* collect arguments from command line */
+          filter_purl = strtok(probeargs, " ");
+	  if (filter_purl == NULL) {
+	       /* if arguments are specified but route does not exist, then
+		* this causes the filter to be cleared and for ps to
+		* carry on with out a filter */
+	       elog_printf(ERROR, "no filter p-url in ps probe argument '%s'; "
+			   "filtering turned off", probeargs);
+	       if (plinps_filter_purl)
+		    nfree(plinps_filter_purl);
+	       plinps_filter_purl = NULL;
+	       plinps_filter_t = 0;
+	       if (plinps_filter_tset)
+		    tableset_destroy(plinps_filter_tset);
+	       plinps_filter_tset = NULL;
+	       return;
+	  }
+
+	  /* hold new location and force load by resetting timestamp */
+          if (plinps_filter_purl)
+	       nfree(plinps_filter_purl);
+	  plinps_filter_purl = xnstrdup(filter_purl);
+	  plinps_filter_t = (time_t) 0;
+          elog_printf(DIAG, "new ps probe filter '%s'", plinps_filter_purl);
+     }
+
+     /* empty route, no filter */
+     if (!probeargs || !*probeargs)
+          return;		/* no route name */
+
+     /* check timestamp of filter route */
+     r = route_stat(plinps_filter_purl, NULL, &seq, &len, &check_t);
+     if ( ! r ) {
+          if (plinps_filter_tset)
+	       elog_printf(ERROR, "Unable to find '%s'; ps probe "
+			   "continues without change", plinps_filter_purl);
+	  else
+	       elog_printf(ERROR, "Unable to find '%s'; no filtering "
+			   "configured", plinps_filter_purl);
+	  return;
+     }
+     if (check_t <= plinps_filter_t)
+          return;	/* up to date, no work to do */
+
+     /* fresh data from route: remove existing tableset and read in new one */
+     plinps_filter_t = check_t;
+     if (plinps_filter_tset)
+          tableset_destroy(plinps_filter_tset);
+     plinps_filter_tset = NULL;
+     filter_cmds = route_read(filter_purl, NULL, &len);
+     if (filter_cmds == NULL || len < 1) {
+          /* if the route is empty, then treat it as wanting everything.
+	   * Keep the route in place so the contents can be checked again
+	   * but keep the table set at NULL */
+          elog_printf(WARNING, "Empty filter '%s' to ps probe matches "
+		      "everything; filtering turned off", filter_purl);
+	  return;
+     }
+
+     /* save command text for compilation when probe is actioned */
+     plinps_filter_cmds = filter_cmds;
+}
+
+
+
+/*
+ * Compile the filter from commands brought in by plinps_load_filter()
+ */
+void plinps_compile_filter(TABLE tab) {
+     int r;
+
+     /* if no command text, abandon */
+     if ( ! plinps_filter_cmds )
+          return;
+
+     /* if there is a tableset already, clear it */
+     if (plinps_filter_tset)
+          tableset_destroy(plinps_filter_tset);
+
+     /* create tableset on this sample table & save
+      * Having to compile on each sample table is an inefficiency !!! */
+     plinps_filter_tset = tableset_create(tab);
+     r = tableset_configure(plinps_filter_tset, plinps_filter_cmds);
+     if ( ! r ) {
+          /* tableset has failed so run without filter */
+          elog_printf(ERROR, "Failed configuration '%s' turns off filtering",
+		      plinps_filter_purl);
+          tableset_destroy(plinps_filter_tset);
+	  plinps_filter_tset = NULL;
+	  return;	/* failure */
+     }
+
+     /* success ! */
+}
+
+
+
 /*
  * Linux specific routines
  */
@@ -172,6 +302,7 @@ void plinps_collect(TABLE tab) {
      struct dirent *d;
      char pfile[PATH_MAX];
      void *data;
+     TABLE filtered_tab;
 
      /* open procfs */
      dir = opendir("/proc");
@@ -234,6 +365,23 @@ void plinps_collect(TABLE tab) {
 
      /* close procfs and clean up */
      closedir(dir);
+
+     /* check to see if there is any change in the route content (and
+      * thus the filter clause), then compile the filter on this tab 
+      * (inefficient, ought to compile once)  */
+     plinps_load_filter(NULL);
+     plinps_compile_filter(tab);
+     if (plinps_filter_tset) {
+          /* filter the main table into a subset, then replace the original
+	   * with the subset */
+          filtered_tab = tableset_into(plinps_filter_tset);
+	  table_rmallrows(tab);
+	  if (table_nrows(filtered_tab))
+	       if (table_addtable(tab, filtered_tab, 0) == -1) {
+		    elog_printf(FATAL, "unable to replace table");
+	       }
+	  table_destroy(filtered_tab);
+     }
 }
 
 /* finds the owner of the process file and thus the process */
