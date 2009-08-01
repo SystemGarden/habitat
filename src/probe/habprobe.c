@@ -21,7 +21,7 @@ char usagetxt[]= "run the data collection probe stand alone\n"
 char *cfdefaults = 
 "nmalloc            0\n"	/* don't check mem leaks (-1 turns on) */
 "elog.all           stderr:\n"	/* log text output to stderr */
-"elog.below warning none:\n"	/* turn off warnings and below */
+"elog.below diag    none:\n"	/* turn off diagnostics and below */
 "elog.allformat     %17$s\n"	/* just want text of log */
 ;
 
