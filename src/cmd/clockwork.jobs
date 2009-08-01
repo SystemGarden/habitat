@@ -4,10 +4,16 @@ job 1
 # Contains the timings for probes to gather data and to process it 
 # afterwards.
 # 
-# Copyright System Garden Ltd 1996-2004, All rights reserved.
+# Copyright System Garden Ltd 1996-2009, All rights reserved.
 #
 # Line format is:-
 #   start   period   phase   count   name   requester   results   errors   nrings   method   command
+# Tokens replaced on startup are:-
+#	%j  job name, eg 'alive'
+#	%d  duration of job, eq 0
+#	%h  host name of this machine
+# All files created relative to the data directory, typically <home>/var,
+# but can change depending on installation
 
 #
 # ----- one off probes -----
@@ -16,12 +22,12 @@ job 1
 0 0 0 1 name    sysgar    rs:%h.rs,%j,%d rs:%h.rs,err,0 20 probe names
 
 #
-# ----- probes for uptime and downtime -----
+# ----- probes for uptime, downtime and alive-ness -----
 # the alive probe implements a heartbeat, showing when the last recorded
 # time the system was alive. The down probe is run once per invocation and
 # attempts to find any recent down time that was recorded and the
 # last time the machine was up. Finally, uptime runs once a day to give a
-# the inverse of down time: how log the machine has been running.
+# the inverse of down time: how long the machine has been running.
 #
 # tstamp probe: each minute
 0 60    0 0 alive   sysgar rs:%h.rs,%j,%d rs:%h.rs,err,0 60  tstamp -
@@ -71,7 +77,9 @@ job 1
 
 #
 # process probe: 1h@60s
-# disabled as the data volume is high and chews cpu; uncomment if needed
+# data volume is high if unfiltered and the probe can be quite high on cpu
+# when it runs. The default set of filtering criteria collects only the 
+# biggest processes
 #
 #0 60    0 0 ps,%d   sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  probe ps
 
@@ -89,9 +97,10 @@ job 1
 # analysis and fectching new configurations. 
 # 
 # The job below (commented out by default) triggers a replication 
-# every 23 hours. Log output does into rep,82800; state goes into rstate,0.
-# See the habrep(1) command to run replication from the command line.
-# See www.systemgarden.com for details of the on-line harvest web service
+# every 23 hours. Log output goes into rep,82800; state goes into rstate,0.
+# See the habrep(1) command to run ad hoc replication from the command line.
+# See www.systemgarden.com/harvest for details of the on-line harvest 
+# web service
 #0 82800 0 0 rep,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  replicate "replicate.in replicate.out rs:%h.rs,rstate,0"
 
 #
