@@ -124,7 +124,7 @@ int probe_init(char *command, 		/* command line */
 	  dinfo->pub     = psolnames_getpub();
 	  dinfo->derive  = psolnames_derive;
      } else if (strstr(probename, "ps")) {
-	  psolps_init();
+	  psolps_init(probeargs);
 	  dinfo->rowdiff = psolps_getrowdiff();
 	  dinfo->pub     = psolps_getpub();
 	  dinfo->derive  = psolps_derive;
@@ -174,7 +174,7 @@ int probe_init(char *command, 		/* command line */
 	  dinfo->pub     = plinnames_getpub();
 	  dinfo->derive  = plinnames_derive;
      } else if (strstr(probename, "ps")) {
-	  plinps_init();
+	  plinps_init(probeargs);
 	  dinfo->rowdiff = plinps_getrowdiff();
 	  dinfo->pub     = plinps_getpub();
 	  dinfo->derive  = plinps_derive;
