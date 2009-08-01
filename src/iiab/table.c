@@ -401,7 +401,7 @@ int table_addemptyrow(TABLE t)
  * fight against the column checking when expand is false).
  * All data is duplicated resulting in the new table having no dependency 
  * on the contributing table.
- * Returns the number of rows added or -1 if the colums did not match and 
+ * Returns the number of rows added or -1 if the columns did not match and 
  * expand was false.
  */
 int table_addtable(TABLE t, TABLE rows, int expand) {
@@ -444,10 +444,11 @@ int table_addtable(TABLE t, TABLE rows, int expand) {
 	       return -1;
 
 	  if (t->ncols) {
-	       /* check column names */
+	       /* check donor table has at least the same column names 
+		* as this recipient table */
 	       tree_first(rows->data);
 	       tree_traverse(t->data) {
-		    if (strcmp(tree_get(t->data), tree_get(rows->data)))
+		    if (strcmp(tree_getkey(t->data), tree_getkey(rows->data)))
 			 return -1;
 		    tree_next(rows->data);
 	       }
@@ -1049,12 +1050,14 @@ int *table_everycolwidth(TABLE t)
 }
 
 
-/* print entire table in string, see table_printrows() for details */
+/* print entire table in string, see table_printrows() for details,
+ * nfree() after use */
 char *table_print(TABLE t) {
   return table_printrows(t, t->minrowkey, t->maxrowkey);
 }
 
-/* print entire table in string, see table_printrows() for details */
+/* print a single row in a string, see table_printrows() for details, 
+ * nfree() after use*/
 char *table_printrow(TABLE t, int rowkey) {
   return table_printrows(t, rowkey, rowkey);
 }
@@ -2019,7 +2022,8 @@ int table_isbeyondend(TABLE t)
 }
 
 /* 
- * Return the current row. Cells are returned indexed by their column names.
+ * Return the current row as a TREE list. 
+ * Cells are returned indexed by their column names.
  * Free the returned tree with tree_destroy(), as the key and cell data
  * are NOT copies.
  */
@@ -2080,9 +2084,23 @@ void table_rmcurrentrow(TABLE t)
 }
 
 
+/*
+ * remove all rows in a table
+ */
+void table_rmallrows(TABLE t)
+{
+     table_first(t);
+     while (t->nrows) {
+          table_rmcurrentrow(t);
+     }
+}
+
+
+
 /* 
- * return the location of a named cell in the current row. 
- * the returned data is not a copy, so dont free it or overwrite it.
+ * return the location of a named cell in the current row or NULL if unable 
+ * to find it.
+ * The returned data is not a copy, so dont free it or overwrite it.
  */
 void *table_getcurrentcell(TABLE t, char *colname)
 {
