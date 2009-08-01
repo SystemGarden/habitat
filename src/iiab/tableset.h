@@ -24,10 +24,10 @@
 #define TABSET_SORT_NUM_DESC	2
 #define TABSET_SORT_NUM_ASC	3
 
-enum tabout_op {eq, ne, gt, lt, ge, le, begins};
+enum tableset_op {eq, ne, gt, lt, ge, le, begins};
 struct tableset_cond {
      char *col;
-     enum tabout_op op;
+     enum tableset_op op;
      char *value;
      int iswhere;	/* 1=where, 0=unless */
 };
@@ -49,21 +49,22 @@ struct tableset {
 };
 typedef struct tableset * TABSET;
 
-TABSET tableset_create  (TABLE tab);
-void   tableset_destroy (TABSET t);
+TABSET tableset_create   (TABLE tab);
+void   tableset_destroy  (TABSET t);
 void   tableset_freeondestroy(TABSET t, void *tokill);
-void   tableset_reset   (TABSET t);		  /* use all cols [default] */
-void   tableset_select  (TABSET t, ITREE *cols);  /* only use ordered cols */
-void   tableset_selectt (TABSET t, char *cols);   /* only use ordered cols */
-void   tableset_exclude (TABSET t, TREE *nocols); /* use all but nocols */
-void   tableset_excludet(TABSET t, char *nocols); /* use all but nocols */
-void   tableset_where   (TABSET t, char *col, enum tabout_op op, char *val);
-void   tableset_unless  (TABSET t, char *col, enum tabout_op op, char *val);
-void   tableset_groupby (TABSET t, char *col, enum tabout_op op, char *val);
-void   tableset_sortby  (TABSET t, char *col, int ascending);
-TABLE  tableset_into    (TABSET t);
-char * tableset_print   (TABSET t, int pretty, 
-			 int with_names, int with_info, int with_body);
+void   tableset_reset    (TABSET t);		  /* use all cols [default] */
+void   tableset_select   (TABSET t, ITREE *cols);  /* only use ordered cols */
+void   tableset_selectt  (TABSET t, char *cols);   /* only use ordered cols */
+void   tableset_exclude  (TABSET t, TREE *nocols); /* use all but nocols */
+void   tableset_excludet (TABSET t, char *nocols); /* use all but nocols */
+void   tableset_where    (TABSET t, char *col, enum tableset_op op, char *val);
+void   tableset_unless   (TABSET t, char *col, enum tableset_op op, char *val);
+void   tableset_groupby  (TABSET t, char *col, enum tableset_op op, char *val);
+void   tableset_sortby   (TABSET t, char *col, int ascending);
+int    tableset_configure(TABSET t, char *commands);
+TABLE  tableset_into     (TABSET t);
+char * tableset_print    (TABSET t, int pretty, 
+			  int with_names, int with_info, int with_body);
 void   tableset_delete();
 
 #endif /* _TABLESET_H_ */
