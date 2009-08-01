@@ -9,23 +9,27 @@
  *          the default is all columns.
  * Stage 3, (optional) filter rows in or out using tableset_where() and
  *          tableset_unless(). The conditions are run in the call order
- *          and are 'and'ed together.
+ *          and are AND'ed together.
  * Stage 4, (optional) group rows. Not yet implemeted
  * Stage 5, (optional) sort the accumulated rows with tableset_sortby()
  * Stage 6, use the final data with tableset_into() to save in a new table,
  *          tableset_print() to format to a string.
  *
- * Nigel Stuckey, November 2003, June 2004
+ * Nigel Stuckey, November 2003, June 2004, July 2009
  */
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include "table.h"
 #include "tableset.h"
 #include "nmalloc.h"
-#include "string.h"
 #include "strbuf.h"
+#include "elog.h"
 
 void tableset_priv_execute_where(TABSET tset);
+
+char *tableset_optxt[] = {"eq", "ne", "gt", "lt", "ge", "le", "begins", NULL};
 
 /* create a TABSET instance from a TABLE instance and reset the filters */
 TABSET tableset_create (TABLE tab)
@@ -194,13 +198,14 @@ void   tableset_excludet(TABSET tset	/* tableset instance */,
 
 /*
  * Choose rows depending on column relationships. 
- * Where and unless conditions accumulate in the order they are executed.
+ * Where and unless conditions accumulate in the order they are executed
+ * and form AND relationships between each condition.
  * They can be reset using tableset_reset().
  * The data for col and val are copied and may be released after this call.
  */
 void   tableset_where  (TABSET tset		/* tableset instance */, 
 			char *col		/* column name */,
-			enum tabout_op op	/* condition operator */, 
+			enum tableset_op op	/* condition operator */, 
 			char *val		/* value */ )
 {
      TABSET_COND cond;
@@ -224,12 +229,13 @@ void   tableset_where  (TABSET tset		/* tableset instance */,
 /* 
  * Filter out rows depending on column relationships. 
  * Where and unless conditions accumulate in the order they are executed.
+ * In effect, each call to where or unless AND's the conditions.
  * They can be reset using tableset_reset().
  * The data for col and val are copied and may be released after this call.
  */
 void   tableset_unless (TABSET tset		/* tableset instance */, 
 			char *col		/* column name */,
-			enum tabout_op op	/* condition operator */, 
+			enum tableset_op op	/* condition operator */, 
 			char *val		/* value */ )
 {
      TABSET_COND cond;
@@ -250,10 +256,101 @@ void   tableset_unless (TABSET tset		/* tableset instance */,
      tset->nunless++;
 }
 
+
+/*
+ * Configure the tableset from text, returning an error if parse fails
+ * Currently, this is a very simple format consisting of individual lines,
+ * each introduced by the verb token. Conditions are AND'ed together
+ * Syntax:  where  <col> <op> <val>
+ *          unless <col> <op> <val>
+ * <op>:    eq - equal                       (string context)
+ *          ne - not equal                   (string context)
+ *          gt - greater than                (numeric context)
+ *          lt - less than                   (numeric context)
+ *          ge - greater than or equal to    (numeric context)
+ *          le - less than or equal to       (numeric context)
+ *          begins - text string begins with (string context)
+ * example: "where col1 eq fred" or "unless col4 begins kev"
+ * Returns 1 for success or 0 for failure, errors are sent to elog
+ * The commands text buffer does not have to be kept, as it is duplicated 
+ * internally.
+ */
+int    tableset_configure(TABSET t, char *commands) {
+     TABLE tabcmds;
+     int r, i;
+     char *cmds, *mode, *col, *optxt, *val;
+     enum tableset_op op;
+
+     /* check arguments are present */
+     if ( ! t )
+          elog_die(FATAL, "No tableset specified");
+     if ( ! commands || ! *commands ) {
+          elog_printf(DIAG, "No commands supplied with which to configure");
+	  return 0;	/* failure */
+     }
+     cmds = xnstrdup(commands);
+
+     /* scan text commands into an unheaded table, which is to manage memory */
+     tabcmds = table_create();
+     r = table_scan(tabcmds, cmds, " \t", TABLE_MULTISEP, TABLE_NOCOLNAMES, 
+		    TABLE_NORULER);
+     if (r == -1) {
+          elog_printf(ERROR, "Unable to scan commands: '%s'", commands);
+	  nfree(cmds);
+	  return 0;	/* failure */
+     }
+     table_freeondestroy(tabcmds, cmds);
+
+     /* now interpret the commands into the tableset */
+     table_traverse(tabcmds) {
+          /* First column is the column/attribute name, second is the 
+	   * operation to apply, third is the value */
+          mode  = table_getcurrentcell(tabcmds, "column_0");
+          col   = table_getcurrentcell(tabcmds, "column_1");
+          optxt = table_getcurrentcell(tabcmds, "column_2");
+          val   = table_getcurrentcell(tabcmds, "column_3");
+	  if ((mode && col && optxt && val) == 0) {
+	       elog_printf(ERROR, "None of the rows has the right number of "
+			   "columns (should be 4: mode col optxt val)");
+	       return 0;	/* failure */
+	  }
+
+	  /* translate the operation text into enum */
+	  for (i=0; tableset_optxt[i]; i++)
+	       if (strcmp(tableset_optxt[i], optxt) == 0) {
+		    op = i;
+		    break;
+	       }
+	  if (tableset_optxt[i] == NULL) {
+	       elog_printf(ERROR, "Line %d has an unknown operator '%s'; "
+			   "not using this line", 
+			   table_getcurrentrowkey(tabcmds) + 1, optxt);
+	       return 0;	/* failure */
+	    
+	  }
+
+	  /* match the command to carry out operation */
+          if (strncmp(mode, "where", 5) == 0) {
+	       tableset_where(t, col, op, val);
+	  } else if (strncmp(mode, "unless", 6) == 0) {
+	       tableset_unless(t, col, op, val);
+	  } else {
+	       elog_printf(ERROR, "Unable to recognise configuration "
+			   "statement, line %d: %s %s %s %s; not using this "
+			   "line", table_getcurrentrowkey(tabcmds) + 1, 
+			   mode, col, optxt, val);
+	  }
+     }
+
+     return 1;	/* success */
+}
+
+
 /* row grouping dependent on column relationship */
+/* NOT YET IMPLEMENTED */
 void   tableset_groupby(TABSET tset, 
 			char *col, 
-			enum tabout_op op, 
+			enum tableset_op op, 
 			char *val)
 {
 }
@@ -426,12 +523,15 @@ void   tableset_delete(TABSET tset)
 
 /*
  * Carry out the pending row and sorting actions, saving data rows 
- * by index (rownum) in the tableset structure
+ * by index (rownum) in the tableset structure. Effectively an AND 
+ * relationship where there are multiple where clauses.
  */
 void tableset_priv_execute_where(TABSET tset)
 {
      TABSET_COND cond;
-     int a, b, clause_true;
+     int clause_true, fpcontext;
+     double af, bf;
+     long al,bl;
      char *value;
      TREE *sorted;
      ITREE *isorted;
@@ -449,10 +549,29 @@ void tableset_priv_execute_where(TABSET tset)
 
      table_traverse(tset->tab) {
           /* iterate over the conditions for each row */
-          clause_true=0;
+          clause_true=0;		/* accumulated condition */
           itree_traverse(tset->where) {
 	       cond = itree_get(tset->where);
 	       value = table_getcurrentcell(tset->tab, cond->col);
+
+	       /* decide context */
+	       if (cond->op == gt || cond->op == lt || cond->op == ge || 
+		   cond->op == le) {
+		    /* numeric context, find out if floating point too */
+		    if (strchr(value, '.') || strchr(cond->value, '.')) {
+		         /* fp context */
+		         af = atof(value)/*strtof(value, (char**)NULL)*/;
+			 bf = atof(cond->value);
+			 fpcontext = 1;
+		    } else {
+		         /* long int context */
+		         al = strtol(value, (char**)NULL, 10);
+			 bl = strtol(cond->value, (char**)NULL, 10);
+			 fpcontext = 0;
+		    }
+	       }
+
+	       /* evaluate operator against arguments */
 	       switch (cond->op) {
 	       case eq:
 	            if (strcmp(value, cond->value) == 0)
@@ -463,28 +582,40 @@ void tableset_priv_execute_where(TABSET tset)
 		         clause_true++;
 	            break;
 	       case gt:
-		    a = strtol(value, (char**)NULL, 10);
-		    b = strtol(cond->value, (char**)NULL, 10);
-	            if (a > b)
-		         clause_true++;
+		    if (fpcontext) {
+		         if (af > bf)
+			      clause_true++;
+		    } else {
+		         if (al > bl)
+			      clause_true++;
+		    }
 	            break;
 	       case lt:
-		    a = strtol(value, (char**)NULL, 10);
-		    b = strtol(cond->value, (char**)NULL, 10);
-	            if (a < b)
-		         clause_true++;
+		    if (fpcontext) {
+		         if (af < bf)
+			      clause_true++;
+		    } else {
+		         if (al < bl)
+			      clause_true++;
+		    }
 	            break;
 	       case ge:
-		    a = strtol(value, (char**)NULL, 10);
-		    b = strtol(cond->value, (char**)NULL, 10);
-	            if (a >= b)
-		         clause_true++;
+		    if (fpcontext) {
+		         if (af >= bf)
+			      clause_true++;
+		    } else {
+		         if (al >= bl)
+			      clause_true++;
+		    }
 	            break;
 	       case le:
-		    a = strtol(value, (char**)NULL, 10);
-	            b = strtol(cond->value, (char**)NULL, 10);
-	            if (a <= b)
-		         clause_true++;
+		    if (fpcontext) {
+		         if (af <= bf)
+			      clause_true++;
+		    } else {
+		         if (al <= bl)
+			      clause_true++;
+		    }
 	            break;
 	       case begins:			/* begins with */
 		    if (value && cond->value && 
@@ -492,6 +623,10 @@ void tableset_priv_execute_where(TABSET tset)
 		         clause_true++;
 	            break;
 	       }
+
+	       /* implement an AND relationship with other clauses.
+		* if a cluase is false (false for where, true for unless)
+		* then the next data is checked */
 	       if ( ! clause_true && cond->iswhere )
 		    goto next_row;
 	       if ( clause_true && ! cond->iswhere )
@@ -506,7 +641,7 @@ void tableset_priv_execute_where(TABSET tset)
      }
 
 
-     /* sort */
+     /* sort if requested */
      if (tset->sortby) {
 	  isorted = itree_create();
           if (tset->sorthow == TABSET_SORT_ASCII_DESC ||
