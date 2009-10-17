@@ -172,8 +172,10 @@ void *itree_find(ITREE *t, unsigned int ikey) {
 }
 
 /*
- * Search the tree's elements for 'needle' and return the key of the first match.
- * The search is made scanning the tree sequentially and so can be long [O(n/2)].
+ * Search the tree's elements for 'needle' and return the key of the 
+ * first match.
+ * The search is made scanning the tree sequentially and so can be long 
+ * [O(n/2)].
  * A match is made when 'needle' corresponds to the first 'needlelen' bytes of
  * an element.
  * Returns -1 if no match is made.
