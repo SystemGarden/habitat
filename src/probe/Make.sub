@@ -32,6 +32,7 @@ probe/psolsys.h		\
 
 BIN += probe/habprobe
 SOLIB += probe/libprobe.so
+LIB += probe/ps.conf
 
 # Binary dependencies
 probe/habprobe: -lprobe -liiab

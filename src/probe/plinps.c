@@ -126,12 +126,15 @@ struct probe_sampletab plinps_cols[] = {
   {"pendsig",	"",	"str",	"abs", "", "", "set of process pending signals"},
   {"stack_vaddr","",	"hex",	"abs", "", "", "virtual address of process stack"},
   {"stack_size","",	"hex",	"abs", "", "", "size of process stack in bytes"},
+  {"pc_cpu_diff","",	"u32",	"abs", "", "", "blah blah blah"},
   PROBE_ENDSAMPLE
 };
 
 
+/* currently the diff does not work with multi instance data */
 struct probe_rowdiff plinps_diffs[] = {
-     PROBE_ENDROWDIFF
+  PROBE_ENDROWDIFF,
+     {"pc_cpu",  "pc_cpu_diff"}
 };
 
 /* static data return methods */
@@ -434,13 +437,13 @@ void plinps_col_stat(TABLE tab, char *ps, ITREE *uidtoname)
       *     12. majflt - number of major faults: needing disk page
       *     13. cmajflt - majflt of children when in wait()
       *     14. utime - number of jiffies this process has been 
-      *                 scheduled in user mode
+      *                 scheduled in user mode since its creation
       *     15. stime - number of jiffies this process has been 
-      *                 scheduled in kernel mode
+      *                 scheduled in kernel mode since its creation
       *     16. cutime - jiffies of children scheduled in user mode when
-      *                  this process is in wait()
+      *                  this process is in wait() since its creation
       *     17. cstime - jiffies of children scheduled in kernel mode when
-      *                  this process is in wait()
+      *                  this process is in wait() since its creation
       *     18. priority - nice value 19 (nice) to -19 (not nice)
       *     19. (ignore)
       *     20. irealvalue - jiffies before next SIGALRM
@@ -522,7 +525,6 @@ void plinps_col_stat(TABLE tab, char *ps, ITREE *uidtoname)
      table_replacecurrentcell(tab, "sid",       value);
      value = strtok(NULL, " ");
      table_replacecurrentcell(tab, "tty",       value);
-elog_printf(DEBUG, "tty = %s", value);
 
      /* TODO: tpgid (controlling tty process group id) is currently 
       * ignored */
@@ -575,8 +577,10 @@ elog_printf(DEBUG, "tty = %s", value);
      runstart = plinps_boot_t + (strtol(value, NULL, 10) / 100);
      table_replacecurrentcell_alloc(tab, "start", util_i32toa(runstart));
 
-     /* %cpu -- algorithm: time taken on CPU over life of process
-      *         not the one I was expecting!! */
+     /* %cpu -- time taken on CPU over life of process
+      *         thus, the incremental value and time is recorded since 
+      *         the last sample for the process key */
+     /* TODO: not yet implemented, atm it is just averaged over its life */
      runtime = time(NULL) - runstart;
      pcpu = (float) (_utime+_stime) / runtime;
      if (pcpu < 0.0)
