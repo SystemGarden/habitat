@@ -46,8 +46,8 @@
  *    CASCADE_MAX  - Find maximum number in the sample run
  *    CASCADE_SUM  - Calculate the sum of the corresponding figures
  *    CASCADE_LAST - Echo the last set of figures (same result as snap method)
- *    CASCADE_FIRST- Echo the last set of figures (same result as snap method)
- *    CASCADE_DIFF - Echo the last set of figures (same result as snap method)
+ *    CASCADE_FIRST- Echo the first set of figures
+ *    CASCADE_DIFF - Difference between the first and last
  *    CASCADE_RATE - Calculate mean rate, to get per sec figures. cf. avg
  *
  * Counters are not dealt with by cascade: the data is expected to
@@ -124,26 +124,42 @@ void cascade_fini(CASCADE *session)
  * Sample the tablestore ring set up by cascade_init and described in CASCADE.
  * See the description above for how the thing works.
  * The computed table is sent to the output route and errors are sent to 
- * the error route. Returns 1 for success or 0 for failure.
+ * the error route. Returns 0 for success or -1 for failure.
  */
 int cascade_sample(CASCADE *session,	/* cascade reference */
 		   ROUTE output,	/* output route */
 		   ROUTE error		/* error route */ )
 {
      ROUTE rt;
-     int r, seq, size;
+     int r, seq, size, ret=0;
      time_t modt;
      TABLE dataset, result;
 
      /* attempt to read from the current point to the last */
      rt = route_open(session->purl, NULL, NULL, 0);
-     if ( ! rt )
-          return 0;	/* monitored route does not exist (yet).
+     if ( ! rt ) {
+          elog_printf(ERROR, "route does not exist %s", session->purl);
+          return -1;	/* monitored route does not exist (yet).
 			 * so return successfully so we can try again 
 			 * next time */
+     }
      dataset = route_seektread(rt, session->seq, -1);
      r = route_tell(rt, &seq, &size, &modt);
      route_close(rt);
+     if ( ! dataset ) {
+          /* NULL dataset is not an error here, just an indicaton that we 
+	   * don't have any data to return and thus process */
+          elog_printf(DIAG, "no data to cascade sample in %s", session->purl);
+          return 0;	/* success */
+     }
+     if ( table_nrows(dataset) == 0 ) {
+          /* Empty table means the same as above */
+          elog_printf(DIAG, "no rows to cascade sample in %s", session->purl);
+	  table_destroy(dataset);
+          return 0;	/* success */
+     }
+
+     /* update session sequence for next time */
      session->seq = seq+1;
 
      /* now carry out the aggregation on the table */
@@ -151,14 +167,19 @@ int cascade_sample(CASCADE *session,	/* cascade reference */
 
      /* save the results */
      if ( result ) {
-          if ( ! route_twrite(output, result) )
+          if ( ! route_twrite(output, result) ) {
 	       elog_printf(ERROR, "unable to write result");
+	       ret = -1;
+	  }
 	  table_destroy(result);
+     } else {
+	  elog_printf(ERROR, "no results produced from cascade");
+	  ret = -1;
      }
      if (dataset)
           table_destroy(dataset);
      
-     return 1;
+     return ret;	/* success */
 }
 
 
@@ -190,10 +211,13 @@ TABLE cascade_aggregate(enum cascade_fn func, 	/* aggregation function */
      time_t t1, t2, tdiff;
 
      /* assert special cases */
-     if ( ! dataset )
+     if ( ! dataset ) {
+          elog_printf(DIAG, "no dataset given to aggregate");
           return NULL;
-     if (table_nrows(dataset) == 0)
-          return NULL;
+     }
+     if (table_nrows(dataset) == 0) {
+          elog_printf(DIAG, "no rows to aggregate in dataset");
+     }
      if ( ! table_hascol(dataset, "_time")) {
           tmpstr = table_outheader(dataset);
           elog_printf(ERROR, "attempting to aggregate a table without _time "
@@ -851,10 +875,10 @@ void test_cascade(enum cascade_fn mode,
      if ( ! cas)
 	  elog_die(FATAL, "[9a] can't start cascade");
      r = cascade_sample(cas, out, err);
-     if ( !r )
+     if ( r )
 	  elog_die(FATAL, "[9b] cascade sample failed");
      r = cascade_sample(cas, out, err);
-     if ( !r )
+     if ( r )
 	  elog_die(FATAL, "[9c] cascade sample failed");
 
      /* [10] add tab_sing to table and sample */
@@ -873,7 +897,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[10a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[10b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
@@ -908,7 +932,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[11a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[11b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
@@ -940,7 +964,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[12a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[12b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
@@ -979,7 +1003,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[13a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[13b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
@@ -1014,7 +1038,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[14a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[14b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
@@ -1046,7 +1070,7 @@ void test_cascade(enum cascade_fn mode,
      if ( r < 0 )
 	  elog_die(FATAL, "[15a] add table failed");
      r = cascade_sample(cas, resrt, err);
-     if ( !r )
+     if ( r )
           elog_die(FATAL, "[15b] cascade sample failed, mode %s", mode_label);
      r = route_tell(resrt, &resseq, &resoff, &modt);
      if ( !r )
