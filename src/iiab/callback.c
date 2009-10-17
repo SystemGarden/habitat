@@ -151,7 +151,7 @@ int  callback_raise(char *e_name, void *arg1, void *arg2, void *arg3,
      cbs = tree_get(callback_events);
      itree_traverse(cbs) {
 	  cb = (void *) itree_getkey(cbs);
-	  elog_printf(DEBUG, "event %s raised -> calling %x", 
+	  elog_printf(DEBUG, "event %s raised -> calling %p", 
 		      e_name, cb);
 	  (*cb)(arg1, arg2, arg3, arg4);
 	  n++;
