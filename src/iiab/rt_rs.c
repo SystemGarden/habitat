@@ -41,7 +41,7 @@ char * rt_rs_description() { return "ringstore"; }
 void   rt_rs_init  (CF_VALS cf, int debug) {rt_rs_debug=debug;}
 void   rt_rs_fini  () {}
 
-/* Check accessability of the holstore file. Returns 1 for can access or 
+/* Check accessability of the ringstore file. Returns 1 for can access or 
  * 0 for no access */
 int    rt_rs_access(char *p_url, char *password, char *basename, int flag)
 {
@@ -77,7 +77,7 @@ int    rt_rs_access(char *p_url, char *password, char *basename, int flag)
      }
 }
 
-/* open holstore, returning the descriptor for success or NULL for failure.
+/* open ringstore, returning the descriptor for success or NULL for failure.
  * There are some special routes, donated by adding suffixes:-
  *   ?info    Information about the ring
  *   ?linfo   Long information about the ring (takes more effort)
@@ -214,7 +214,7 @@ void   rt_rs_close (RT_LLD lld)
      nfree(rt);
 }
 
-/* write to holstore, return the number of charaters written 
+/* write to ringstore, return the number of charaters written 
  * or -1 for error */
 int    rt_rs_write (RT_LLD lld, const void *buf, int buflen)
 {
@@ -237,7 +237,7 @@ int    rt_rs_write (RT_LLD lld, const void *buf, int buflen)
 	  return -1;
 }
 
-/* write to holstore, return 1 for success or 0 for failure */
+/* write to ringstore, return 1 for success or 0 for failure */
 int    rt_rs_twrite (RT_LLD lld, TABLE tab)
 {
      RT_RSD rt;
