@@ -16,7 +16,7 @@
 
 char usagetxt[]= "run the data collection probe stand alone\n"
                  "probes are: intr, io, names, ps, sys, timer, up, down, net\n"
-                 "      -2         run probe again after 5 seconds";
+                 "      -2          run probe again after 5 seconds";
 
 char *cfdefaults = 
 "nmalloc            0\n"	/* don't check mem leaks (-1 turns on) */

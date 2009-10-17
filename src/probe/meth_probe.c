@@ -71,7 +71,7 @@ TABLE probe_tabinit(struct probe_sampletab *hd /* col defs */ )
 	       elog_die(FATAL, "unable to add info @%s,%s=%s", "key", 
 			p->name, p->key);
 	  if ( ! table_replaceinfocell(tab, "name", p->name, p->rname) )
-	       elog_die(FATAL, "unable to add info @%s,%s=%s", "info", 
+	       elog_die(FATAL, "unable to add info @%s,%s=%s", "rname", 
 			p->name, p->info);
 	  if ( ! table_replaceinfocell(tab, "info", p->name, p->info) )
 	       elog_die(FATAL, "unable to add info @%s,%s=%s", "info", 
@@ -240,25 +240,19 @@ int probe_action(char *command,  		/* command line */
 		 struct meth_runset *rset	/* runset structure */ )
 {
      struct probe_datainfo *dinfo;
-     struct probe_rowdiff *rdiff;
-     char *difftype;
-     long idiff;
-     unsigned long udiff;
-     long long lldiff;
-     unsigned long long ulldiff;
      char *probename, *probeargs;
      int pnlen, i;
      ITREE *origcols, *newcols;
 
      /* separate the command line into a probe name and an optional
       * set of arguments that some probes may need. nmalloc() memory
-      * for this so strtok() can be used. */
+      * for this so strtok() can be used to tokenise. */
      probename = xnstrdup(command);
      pnlen = strcspn(command, " ");
      probename[pnlen] = '\0';
      probeargs = probename+pnlen+1;
 
-     /* fetch probe data entry */
+     /* fetch probe data structure */
      if ( ! probe_data )
 	  elog_die(FATAL, "probe_data not initialised");
      dinfo = itree_find(probe_data, (int) rset);
@@ -269,7 +263,9 @@ int probe_action(char *command,  		/* command line */
 	  return -1;
      }
 
-     /* cycle the old table */
+     /* Maintain two tables of data in the probe structure: old and new.
+      * This is to allow some differencing 'services' to be performed.
+      * Remove the old table and replace with new one */
      if (dinfo->old)
 	  table_destroy(dinfo->old);
      dinfo->old = dinfo->new;
@@ -343,7 +339,7 @@ int probe_action(char *command,  		/* command line */
      } else if (strstr(probename, "up")) {
 #if __svr4__
 	  dinfo->new = probe_tabinit( psolup_getcols() );
-	  psolup_collect( dinfo->new );
+	  /	  psolup_collect( dinfo->new );
 #elif linux
 	  dinfo->new = probe_tabinit( plinup_getcols() );
 	  plinup_collect( dinfo->new );
@@ -365,68 +361,14 @@ int probe_action(char *command,  		/* command line */
 	  return -1;
      }
 
+     /* Return error if probes return NULL */
      if ( ! dinfo->new ) {
 	  nfree(probename);
 	  return -1;
      }
 
-     /* derive historic calculations for iteration 2 onwards */
-     if (dinfo->old != NULL) {
-#if 0
-TO BE DONE
-	  /* find key column */
-	  keycol = tree_findcolfrominfo(dinfo->old, "key", "1");
-
-	  /* create an index on the key columns of the new tables */
-
-	  /* iterate sequentially over the old table, finding the 
-	   * corresponding row key in the new table */
-#endif
-	  table_first(dinfo->new);
-	  table_first(dinfo->old);
-
-	  /* calculate differencies on matched lines */
-	  for (rdiff = dinfo->rowdiff; rdiff != NULL && rdiff->source != NULL; 
-	       rdiff++) {
-	       difftype = table_getinfocell(dinfo->new, "type", rdiff->source);
-	       if (strcmp(difftype, "i32")) {
-		    idiff = strtol(table_getcurrentcell(dinfo->new, 
-						rdiff->source), NULL, 10) - 
-			    strtol(table_getcurrentcell(dinfo->old, 
-							rdiff->source), NULL, 10);
-		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
-						   util_i32toa(idiff));
-	       } else if (strcmp(difftype, "u32")) {
-		    udiff = strtoul(table_getcurrentcell(dinfo->new,
-							 rdiff->source), 
-				    NULL, 10) - 
-			    strtoul(table_getcurrentcell(dinfo->old, 
-							 rdiff->source),
-				    NULL, 10);
-		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
-						   util_u32toa(udiff));
-	       } else if (strcmp(difftype, "i64")) {
-		    lldiff = strtol(table_getcurrentcell(dinfo->new, 
-							 rdiff->source), NULL, 10) - 
-			     strtol(table_getcurrentcell(dinfo->old, 
-							 rdiff->source), NULL, 10);
-		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
-						   util_i64toa(lldiff));
-	       } else if (strcmp(difftype, "u64")) {
-		    ulldiff = strtoull(table_getcurrentcell(dinfo->new, 
-							    rdiff->source),
-				       NULL, 10) - 
-			      strtoull(table_getcurrentcell(dinfo->old, 
-							    rdiff->source),
-				       NULL, 10);
-		    table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
-						   util_u64toa(ulldiff));
-	       }
-	  }
-
-	  /* calulate probe specific, special metrics */
-	  dinfo->derive(dinfo->old, dinfo->new);
-     }
+     /* carry out all differences between samples */
+     probe_rundiff(dinfo);
 
      /* output table in scannable format and destroy after each action.
       * If the publish list is set, print only those columns listed */
@@ -530,6 +472,154 @@ int probe_fini(char *command,  		/* command line */
 
      nfree(probename);
      return 0;
+}
+
+
+
+/*
+ * Calculate row differences, both generic and specific
+ *
+ * In each probe_datainfo structure, there are two sample tables (old and new)
+ * and a probe_rowdiff array. Rowdiff holds details of the column names that
+ * need to be differenced between the two samples and the name of 
+ * result column. Sample TABLE columns should have their types specified
+ * to allow the calculation to take place.
+ *
+ * After the generic differencing and for iteration 2 onwards, run probe 
+ * specific processing with dinfo->derive hook.
+ */
+void probe_rundiff(struct probe_datainfo *dinfo) {
+     int haskey=0, newrowid=0, oldrowid=0;
+     char *keycol;
+     TREE *inforow, *keyvals;
+
+     /* derive historic calculations for iteration 2 onwards */
+     if (dinfo->old != NULL) {
+
+          /* if row differences are set, calculate them */
+          if (dinfo->rowdiff && dinfo->rowdiff->source) {
+	       /* find keys that may exist in the new table.
+		* If they do exist, set haskey and compile the instance names 
+		* into keyvals */
+	       inforow = table_getinforow(dinfo->new, "key");
+	       if (inforow) {
+		    keycol = tree_search(inforow, "1", 2);
+		    if (keycol) {
+		         keyvals = table_uniqcolvals(dinfo->new, keycol, NULL);
+			 if (keyvals) {
+			      haskey++;
+			 } else {
+			      nfree(inforow);
+			 }
+		    }
+	       }
+
+	       /* traverse the new table by instance name, match rows with
+		* the old table then calculate a difference */
+	       if ( haskey ) {
+		    /* multi instance samples */
+		    tree_traverse(keyvals) {
+		         /* current rows of each table to the same key */
+		         newrowid = table_search(dinfo->new, keycol, 
+						 tree_getkey(keyvals));
+			 oldrowid = table_search(dinfo->old, keycol, 
+						 tree_getkey(keyvals));
+			 probe_rowdiff(dinfo);
+		    }
+	       } else {
+		    /* single instance samples */
+
+		    /* Reset current row of both tables */
+		    table_first(dinfo->new);
+		    table_first(dinfo->old);
+
+		    probe_rowdiff(dinfo);
+	       }
+	  }
+
+	  /* calculate probe specific, special metrics */
+	  if (dinfo->derive)
+	       dinfo->derive(dinfo->old, dinfo->new);
+     }
+
+     /* remove the key data */
+     if (haskey) {
+          tree_destroy(keyvals);
+	  tree_destroy(inforow);
+     }
+
+}
+
+
+/* Calculate row differences between current rows of two rows: old and new.
+ *
+ * In each probe_datainfo structure, there are two sample tables (old and new)
+ * and a probe_rowdiff array. Rowdiff holds details of the column names that
+ * need to be differenced between the two samples and the name of 
+ * result column. Sample TABLE columns should have their types specified
+ * to allow the calculation to take place.
+ *
+ * After the generic differencing and for iteration 2 onwards, run probe 
+ * specific processing with dinfo->derive hook.
+ */
+void probe_rowdiff(struct probe_datainfo *dinfo) {
+     struct probe_rowdiff *rdiff;
+     char *difftype;
+     long idiff;
+     unsigned long udiff;
+     long long lldiff;
+     unsigned long long ulldiff;
+
+     /* Each probe nominates a set of columns on which to calculate 
+      * differences. */
+     for (rdiff = dinfo->rowdiff; 
+	  rdiff != NULL && rdiff->source != NULL; 
+	  rdiff++) {
+
+          /* Extract type from info */
+          difftype = table_getinfocell(dinfo->new, "type", rdiff->source);
+	  if (strcmp(difftype, "i32")) {
+
+	       /* signed 32 bit integer */
+	       idiff = strtol(table_getcurrentcell(dinfo->new,rdiff->source),
+			      NULL, 10) - 
+		       strtol(table_getcurrentcell(dinfo->old, rdiff->source), 
+			      NULL, 10);
+	       table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
+					      util_i32toa(idiff));
+
+	  } else if (strcmp(difftype, "u32")) {
+
+	       /* unsigned 32 bit integer */
+	       udiff = strtoul(table_getcurrentcell(dinfo->new,rdiff->source), 
+			       NULL, 10) - 
+		       strtoul(table_getcurrentcell(dinfo->old,rdiff->source),
+			       NULL, 10);
+	       table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
+					      util_u32toa(udiff));
+
+	  } else if (strcmp(difftype, "i64")) {
+
+	       /* signed 64 bit integer */
+	       lldiff = strtol(table_getcurrentcell(dinfo->new,rdiff->source), 
+			       NULL, 10) - 
+		        strtol(table_getcurrentcell(dinfo->old,rdiff->source), 
+			       NULL, 10);
+	       table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
+					      util_i64toa(lldiff));
+
+	  } else if (strcmp(difftype, "u64")) {
+
+	       /* unsigned 64 bit integer */
+	       ulldiff=strtoull(table_getcurrentcell(dinfo->new,rdiff->source),
+				NULL, 10) - 
+		       strtoull(table_getcurrentcell(dinfo->old,rdiff->source),
+				NULL, 10);
+	       table_replacecurrentcell_alloc(dinfo->new, rdiff->result,
+					      util_u64toa(ulldiff));
+	  }
+     }
+
 }
 
 

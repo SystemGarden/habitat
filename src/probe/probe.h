@@ -47,7 +47,7 @@ struct probe_datainfo {
      void (*derive)(TABLE,TABLE);	/* routine to derive new calcs */
 };
 
-/* Difference calculation structure, termincated by PROBE_ENDROWDIFF */
+/* Difference calculation structure, terminated by PROBE_ENDROWDIFF */
 struct probe_rowdiff {
      char *source;			/* source columns to difference */
      char *result;			/* difference stored in this column */
@@ -62,6 +62,8 @@ char *probe_info();
 enum exectype probe_type();
 int   probe_action(char *command,ROUTE out,ROUTE err,struct meth_runset *rset);
 int   probe_fini(char *command,ROUTE out,ROUTE err,struct meth_runset *rset);
+void  probe_rundiff(struct probe_datainfo *dinfo);
+void  probe_rowdiff(struct probe_datainfo *dinfo);
 char *probe_readfile(char *fname);
 extern struct meth_info probe_cbinfo;
 
