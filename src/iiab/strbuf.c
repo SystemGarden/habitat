@@ -8,6 +8,9 @@
 #include "nmalloc.h"
 #include "strbuf.h"
 
+/*
+ * Initialise a buffer structure that holds a string
+ */
 STRBUF strbuf_init()
 {
      STRBUF s;
@@ -21,19 +24,30 @@ STRBUF strbuf_init()
      return s;
 }
 
+/*
+ * Append a string to the buffer buffer string and allocate some spare 
+ * memory in to which we can grow in the future. The string will be 
+ * terminated.
+ */
 void   strbuf_append(STRBUF buf, char *text)
 {
      int len;
 
+     if ( !text || !*text)
+          return;
+
      len = strlen(text);
-     if (buf->strlen+len > buf->blocklen) {
-          buf->blocklen += STRBUF_EXTEND_LEN;
+     if (buf->strlen+len >= buf->blocklen) {
+          buf->blocklen = buf->blocklen + len + STRBUF_EXTEND_LEN;
           buf->buffer = xnrealloc(buf->buffer, buf->blocklen);
      }
-     strcpy(buf->buffer + buf->strlen, text);
+     strcpy(buf->buffer + buf->strlen, text); /* includes \0 */
      buf->strlen += len;
 }
 
+/*
+ * Remove the last character from the string in the buffer
+ */
 void   strbuf_backspace(STRBUF buf)
 {
      if (buf->strlen <= 0)
