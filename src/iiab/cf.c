@@ -560,8 +560,7 @@ void cf_dump(CF_VALS cf		/* Parsed configuration values */ )
 {
      struct cf_entval *entry;
 
-     elog_startprintf(DIAG, "Dump of configuration list ---------- (%x)\n",
-		      cf);
+     elog_startprintf(DIAG, "Dump of configuration list ----------\n");
 
      /* Traverse tree (tree has state, which allows us to do this */
      tree_traverse(cf) {

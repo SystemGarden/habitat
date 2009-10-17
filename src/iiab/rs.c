@@ -2482,14 +2482,14 @@ TABLE rs_priv_dblock_to_table(ITREE *db,	/* list of dblocks */
 	  itree_add(schema, dblock->hd_hashkey, loadtab);
 #endif
 
-	  /* cache the sate of the special cols to make slightly faster */
+	  /* cache the state of the special cols to make slightly faster */
 	  hasseq = hastime = hasdur = 0;
 	  if (table_hascol(tab, "_seq"))
-	    hasseq++;
+	       hasseq++;
 	  if (table_hascol(tab, "_time"))
-	    hastime++;
+	       hastime++;
 	  if (table_hascol(tab, "_dur"))
-	    hasdur++;
+	       hasdur++;
 
 	  /* drop _time, _seq and _dur from loading table and scan 
 	   * dblock's data into it. DBLOCK data areas have these 
