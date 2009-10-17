@@ -135,8 +135,7 @@ Rb_node rb_find_key_n(Rb_node n, char *key, int *fnd)
  
   *fnd = 0;
   if (!ishead(n)) {
-    fprintf(stderr, "rb_find_key_n called on non-head 0x%x\n", 
-	    (unsigned int) n);
+    fprintf(stderr, "rb_find_key_n called on non-head 0x%p\n", (void *) n);
     exit(1);
   }
   if (n->p.root == n) return n;
@@ -168,8 +167,7 @@ Rb_node rb_find_ikey_n(Rb_node n, unsigned int ikey, int *fnd)
 {
   *fnd = 0;
   if (!ishead(n)) {
-    fprintf(stderr, "rb_find_ikey_n called on non-head 0x%x\n", 
-	    (unsigned int) n);
+    fprintf(stderr, "rb_find_ikey_n called on non-head 0x%p\n", (void *) n);
     exit(1);
   }
   if (n->p.root == n) return n;
@@ -201,8 +199,7 @@ Rb_node rb_find_gkey_n(Rb_node n, char *key,int (*fxn)(char *, char *), int *fnd
  
   *fnd = 0;
   if (!ishead(n)) {
-    fprintf(stderr, "rb_find_key_n called on non-head 0x%x\n", 
-	    (unsigned int) n);
+    fprintf(stderr, "rb_find_key_n called on non-head 0x%p\n", (void *) n);
     exit(1);
   }
   if (n->p.root == n) return n;
@@ -359,13 +356,11 @@ void rb_delete_node(Rb_node n)
   char ir;
  
   if (isint(n)) {
-    fprintf(stderr, "Cannot delete an internal node: 0x%x\n", 
-	    (unsigned int) n);
+    fprintf(stderr, "Cannot delete an internal node: 0x%p\n", (void *) n);
     exit(1);
   }
   if (ishead(n)) {
-    fprintf(stderr, "Cannot delete the head of an rb_tree: 0x%x\n", 
-	    (unsigned int) n);
+    fprintf(stderr, "Cannot delete the head of an rb_tree: 0x%p\n", (void *)n);
     exit(1);
   }
   delete_item(n); /* Delete it from the list */
@@ -481,25 +476,24 @@ void rb_print_tree(Rb_node t, int level)
 {
   int i;
   if (ishead(t) && t->p.parent == t) {
-    printf("tree 0x%x is empty\n", (unsigned int) t);
+    printf("tree 0x%p is empty\n", (void *) t);
   } else if (ishead(t)) {
-    printf("Head: 0x%x.  Root = 0x%x\n", (unsigned int) t, 
-	   (unsigned int) t->p.root);
+    printf("Head: 0x%p.  Root = 0x%p\n", (void *) t, (void *) t->p.root);
     rb_print_tree(t->p.root, 0);
   } else {
     if (isext(t)) {
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Ext node 0x%x: %c,%c: p=0x%x, k=%s\n", 
-	     (unsigned int) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
-	     (unsigned int) t->p.parent, t->k.key);
+      printf("Ext node 0x%p: %c,%c: p=0x%p, k=%s\n", 
+	     (void *) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
+	     (void *) t->p.parent, t->k.key);
     } else {
       rb_print_tree(t->c.child.left, level+2);
       rb_print_tree(t->c.child.right, level+2);
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Int node 0x%x: %c,%c: l=0x%x, r=0x%x, p=0x%x, lr=(%s,%s)\n", 
-	     (unsigned int) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
-	     (unsigned int) t->c.child.left, (unsigned int) t->c.child.right, 
-             (unsigned int) t->p.parent, t->k.lext->k.key, t->v.rext->k.key);
+      printf("Int node 0x%p: %c,%c: l=0x%p, r=0x%p, p=0x%p, lr=(%s,%s)\n", 
+	     (void *) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
+	     (void *) t->c.child.left, (void *) t->c.child.right, 
+             (void *) t->p.parent, t->k.lext->k.key, t->v.rext->k.key);
     }
   }
 }
@@ -508,27 +502,27 @@ void rb_iprint_tree(Rb_node t, int level)
 {
   int i;
   if (ishead(t) && t->p.parent == t) {
-    printf("tree 0x%x is empty\n", (unsigned int) t);
+    printf("tree 0x%p is empty\n", (void *) t);
   } else if (ishead(t)) {
-    printf("Head: 0x%x.  Root = 0x%x, < = 0x%x, > = 0x%x\n", 
-	   (unsigned int) t, (unsigned int) t->p.root, 
-	   (unsigned int) t->c.list.blink, (unsigned int) t->c.list.flink);
+    printf("Head: 0x%p.  Root = 0x%p, < = 0x%p, > = 0x%p\n", 
+	   (void *) t, (void *) t->p.root, 
+	   (void *) t->c.list.blink, (void *) t->c.list.flink);
     rb_iprint_tree(t->p.root, 0);
   } else {
     if (isext(t)) {
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Ext node 0x%x: %c,%c: p=0x%x, <=0x%x, >=0x%x k=%d\n", 
-	     (unsigned int) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
-	     (unsigned int) t->p.parent, (unsigned int) t->c.list.blink, 
-	     (unsigned int) t->c.list.flink, t->k.ikey);
+      printf("Ext node 0x%p: %c,%c: p=0x%p, <=0x%p, >=0x%p k=%d\n", 
+	     (void *) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
+	     (void *) t->p.parent, (void *) t->c.list.blink, 
+	     (void *) t->c.list.flink, t->k.ikey);
     } else {
       rb_iprint_tree(t->c.child.left, level+2);
       rb_iprint_tree(t->c.child.right, level+2);
       for (i = 0; i < level; i++) putchar(' ');
-      printf("Int node 0x%x: %c,%c: l=0x%x, r=0x%x, p=0x%x, lr=(%d,%d)\n", 
-	     (unsigned int) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
-	     (unsigned int) t->c.child.left, (unsigned int) t->c.child.right, 
-             (unsigned int) t->p.parent, t->k.lext->k.ikey, t->v.rext->k.ikey);
+      printf("Int node 0x%p: %c,%c: l=0x%p, r=0x%p, p=0x%p, lr=(%d,%d)\n", 
+	     (void *) t, isred(t)?'R':'B', isleft(t)?'l':'r', 
+	     (void *) t->c.child.left, (void *) t->c.child.right, 
+             (void *) t->p.parent, t->k.lext->k.ikey, t->v.rext->k.ikey);
     }
   }
 }
@@ -537,8 +531,8 @@ int rb_nblack(Rb_node n)
 {
   int nb;
   if (ishead(n) || isint(n)) {
-    fprintf(stderr, "ERROR: rb_nblack called on a non-external node 0x%x\n",
-            (unsigned int) n);
+    fprintf(stderr, "ERROR: rb_nblack called on a non-external node 0x%p\n",
+            (void *) n);
     exit(1);
   }
   nb = 0;
@@ -553,8 +547,8 @@ int rb_plength(Rb_node n)
 {
   int pl;
   if (ishead(n) || isint(n)) {
-    fprintf(stderr, "ERROR: rb_plength called on a non-external node 0x%x\n",
-            (unsigned int) n);
+    fprintf(stderr, "ERROR: rb_plength called on a non-external node 0x%p\n",
+            (void *) n);
     exit(1);
   }
   pl = 0;
