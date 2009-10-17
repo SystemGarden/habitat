@@ -2242,11 +2242,13 @@ void gtkaction_graphattr_select(GtkWidget *widget, toggle_state *s)
 	  colour = gtkaction_drawcurve(datapres_data, name, scale, offset);
 	  gtkaction_updateall();
 
-	  gdk_color_alloc (gtk_widget_get_colormap (widget), colour);
-	  newstyle = gtk_style_copy(gtk_widget_get_default_style());
-	  newstyle->bg[GTK_STATE_ACTIVE] = *colour;
-	  newstyle->bg[GTK_STATE_PRELIGHT] = *colour;
-	  gtk_widget_set_style(widget, newstyle);
+	  if (colour) {
+	       gdk_color_alloc (gtk_widget_get_colormap (widget), colour);
+	       newstyle = gtk_style_copy(gtk_widget_get_default_style());
+	       newstyle->bg[GTK_STATE_ACTIVE] = *colour;
+	       newstyle->bg[GTK_STATE_PRELIGHT] = *colour;
+	       gtk_widget_set_style(widget, newstyle);
+	  }
      }
 
      /*g_print("gtkaction_graphattr_clist_select finished\n");*/
