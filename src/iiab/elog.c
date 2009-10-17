@@ -321,7 +321,7 @@ int elog_setallroutes(ROUTE route	/* opened route */ )
 
      for (i=0; i < ELOG_NSEVERITIES; i++)
 	  if ( ! elog_setsevroute(i, route)) {
-	       elog_printf(ERROR, "can't setsevroute(%d,%x)", i, route);
+	       elog_printf(ERROR, "can't setsevroute(%d,%p)", i, route);
 	       return 0;
 	  }
      return 1;
@@ -364,7 +364,7 @@ int elog_setbelowroute(enum elog_severity severity,	/* severity level */
 
      for (i=0; i <= severity; i++)
 	  if ( ! elog_setsevroute(i, route)) {
-	       elog_printf(ERROR, "can't setsevroute(%d,%x)", i, route);
+	       elog_printf(ERROR, "can't setsevroute(%d,%p)", i, route);
 	       return 0;
 	  }
 
@@ -415,7 +415,7 @@ int elog_setaboveroute(enum elog_severity severity,	/* severity level */
 
      for (i=severity; i <= ELOG_NSEVERITIES; i++)
 	  if ( ! elog_setsevroute(i, route)) {
-	       elog_printf(ERROR, "can't setsevroute(%d,%x)", i, route);
+	       elog_printf(ERROR, "can't setsevroute(%d,%p)", i, route);
 	       return 0;
 	  }
 
