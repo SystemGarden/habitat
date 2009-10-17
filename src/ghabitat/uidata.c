@@ -904,7 +904,10 @@ RESDAT uidata_get_route(TREE *nodeargs)
 	       return resdat;	/* in error */
 	  }
 	  lastonly = tree_find(nodeargs, "lastonly");
-	  lseqonly = *lastonly ? strtol(lastonly, (char**)NULL, 10) : 0;
+	  if ( lastonly != TREE_NOVAL ) {
+	       /* optional parameter */
+	       lseqonly = *lastonly ? strtol(lastonly, (char**)NULL, 10) : 0;
+	  }
 
 	  if ( *basepurl == '\0' ) {
 	       elog_printf(ERROR, "basepurl node argument is blank");
@@ -1135,10 +1138,31 @@ RESDAT uidata_get_jobs(TREE *nodeargs)
 	  return resdat;	/* in error */
      }
 
-     /* remove _ringid column if it exists */
+     /* remove surplus columns if they exists */
      table_rmcol(tab, "_ringid");
      table_rmcol(tab, "_time");
      table_rmcol(tab, "_seq");
+     table_rmcol(tab, "_dur");
+
+#if 0
+     /* the table now has a single column: text! 
+      * this column contains the clockwork table which needs to
+      * be scanned into a table */
+     table_first(tab);
+     jobtext = xnstrdup(table_getcurrentcell(tab, "text"));
+     tab2 = table_create_a(uidata_clockcols);
+     table_freeondestroy(tab2, jobtext);
+     table_scan(tab2, jobtext, "\t", TABLE_MULTISEP, TABLE_NOCOLNAMES, 
+		TABLE_NORULER);
+     table_destroy(tab);
+#endif
+
+#if 0
+     /* collect most recent job table as a single peice of text */
+     snprintf(purl, 512, "%s,clockwork,0", basepurl);
+     elog_printf(DEBUG, "reading %s", purl);
+     jobtext = route_read(purl, NULL, NULL);
+#endif
 
      /* we now have a good return, prepare the RESDAT structure to hold it */
      resdat.t = TRES_TABLE;
