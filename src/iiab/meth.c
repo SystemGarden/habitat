@@ -456,7 +456,7 @@ int meth_execute_s(struct meth_invoke *args,	/* Argument structure */
  *    (1) the main thread (discouraged as it may take lots of time)
  *    (2) a new thread
  *    (3) a new process
- * The method is passed command as it argument
+ * The method is passed the command as its argument
  * The I/O should have been setup before execution.
  * Returns 0 for success, non-0 otherwise.
  */
@@ -597,128 +597,24 @@ int meth_execute(char *key,		/* name identifing job/process  */
 		* Redirect stdin, stdout and stderr as directed by
 		* the settings in rp->method.
 		*/
-#if 0
-	       switch (rset->res->method) {
-		 case HOLSTORE:
-		 case TIMESTORE:
-		 case TABLESTORE:
-		 case VERSIONSTORE:
-		 case CALLBACK:
-		 case MAIL:
-#endif
-		    /* redirect stdout to pipe */
-		    if (dup2(respipefd[1], 1) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK TIME/TABLESTORE "
-				  "can't dup2() stdout command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(respipefd[0]);
-		    close(respipefd[1]);
-#if 0
-		    break;
-	       case HTTP:
-	       case HTTPS:
-	       case SQLRS:
-		    break;
-	       case FILEOVER:
-	       case FILEAPPEND:
-		    /* redirect stdout to the open file */
-		    if (dup2(rset->res->open.fd, 1) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK FILEOVER/APPEND "
-				  "can't dup2() stdout command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(rset->res->open.fd);
-		    break;
-	       case NOROUTE:
-		    /* open /dev/null and redirect stdin & stdout to it */
-		    rset->res->open.fd = open("/dev/null", O_RDWR);
-		    if (dup2(rset->res->open.fd, 1) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK NOROUTE "
-				  "can't dup2() stdout command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    if (dup2(rset->res->open.fd, 0) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK NOROUTE "
-				  "can't dup2() stdin command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(rset->res->open.fd);
-	       case SYSLOG:
-		    elog_send(ERROR, "syslog not supported for results");
-		    break;
-	       case STDERR:
-		    /* close stdout and redirect to stderr */
-		    if (dup2(2, 1) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK STDERR "
-				  "can't dup2() stdout command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    break;
-	       case STDOUT:
-		    /* do nothing */
-		    break;
-	       }
-#endif
+	       /* redirect stdout to pipe */
+	       if (dup2(respipefd[1], 1) != 1)
+		    elog_die(FATAL, 
+			     "METH_FORK TIME/TABLESTORE "
+			     "can't dup2() stdout command `%s' %d %s",
+			     command, errno, strerror(errno));
+	       close(respipefd[0]);
+	       close(respipefd[1]);
 
-#if 0
-	       switch (rset->err->method) {
-	       case HOLSTORE:
-	       case TIMESTORE:
-	       case TABLESTORE:
-	       case VERSIONSTORE:
-	       case CALLBACK:
-	       case MAIL:
-#endif
-		    /* redirect stderr to pipe */
-		    if (dup2(errpipefd[1], 2) != 2)
-			 elog_die(FATAL, 
-				  "METH_FORK TIME/TABLESTORE "
-				  "can't dup2() stderr command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(errpipefd[0]);
-		    close(errpipefd[1]);
-#if 0
-		    break;
-	       case HTTP:
-	       case HTTPS:
-	       case SQLRS:
-		    break;
-	       case FILEOVER:	/* Redirect stderr to the open file */
-	       case FILEAPPEND:
-		    if (dup2(rset->err->open.fd, 2) != 2)
-			 elog_die(FATAL, 
-				  "METH_FORK FILEOVER/APPEND "
-				  "can't dup2() stderr command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(rset->err->open.fd);
-		    break;
-	       case NOROUTE:
-		    /* open /dev/null and redirect stderr to it */
-		    rset->err->open.fd = open("/dev/null", O_WRONLY);
-		    if (dup2(rset->err->open.fd, 2) != 1)
-			 elog_die(FATAL, 
-				  "METH_FORK NOROUTE "
-				  "can't dup2() stderr command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    close(rset->err->open.fd);
-	       case SYSLOG:
-		    elog_send(ERROR, 
-			      "syslog not supported for errors");
-		    break;
-	       case STDERR:
-		    /* Do nothing */
-		    break;
-	       case STDOUT:
-		    /* Close stdout and redirect to stderr */
-		    if (dup2(1, 2) != 2)
-			 elog_die(FATAL, 
-				  "METH_FORK STDOUT "
-				  "can't dup2() stderr command `%s' %d %s",
-				  command, errno, strerror(errno));
-		    break;
-	       }
-#endif
+	       /* redirect stderr to pipe */
+	       if (dup2(errpipefd[1], 2) != 2)
+		    elog_die(FATAL, 
+			     "METH_FORK TIME/TABLESTORE "
+			     "can't dup2() stderr command `%s' %d %s",
+			     command, errno, strerror(errno));
+	       close(errpipefd[0]);
+	       close(errpipefd[1]);
+
 	       /* 
 		* Run the method and return its return code as an exit,
 		* which is picked up by wait(). Dont use exit() as it may
@@ -726,7 +622,9 @@ int meth_execute(char *key,		/* name identifing job/process  */
 		* or gtk.
 		* The gtk one is documented to shut down related windows.
 		*/
+
 	       _exit((*run->action)(command, rset->res, rset->err, rset));
+
 	  } /* End of child code */
 
 	  break;
@@ -735,7 +633,7 @@ int meth_execute(char *key,		/* name identifing job/process  */
           elog_send(ERROR, "thread method not supported");
 	  return 1;
      case METH_SOURCE:
-	  /* run inside this thread and process */
+	  /* run inside this thread and process. 'in-proc' */
 #if 0
 	  elog_printf(DEBUG, "source job %-10s stdout fd %d stderr fd %d", 
 		      key, rset->res->open.fd, rset->err->open.fd);
@@ -745,7 +643,10 @@ int meth_execute(char *key,		/* name identifing job/process  */
 	  r = (*run->action)(command, rset->res, rset->err, rset);
 
 	  /* log the return */
-	  elog_printf(INFO, "source job %-10s return=%d", key, r);
+	  if (r)
+	       elog_printf(ERROR, "source job %-10s failure (%d)", key, r);
+	  else
+	       elog_printf(INFO,  "source job %-10s success (%d)", key, r);
 
 	  /* flush I/O and close off if we have to */
 	  route_flush(rset->res);
