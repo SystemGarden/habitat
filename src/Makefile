@@ -47,8 +47,8 @@ APP     := habitat
 VERSION := $(shell cat $(VERFILE))
 CFLAGS  += -DVERSION=\"$(VERSION)\"
 
-# Install libraries, binaries and other products
-# The locations...
+# -- Install libraries, binaries and other products --
+# The standard locations stand-alone build
 DSTBIN  := ../bin
 DSTLIB  := ../lib
 DSTINC  := ../include
@@ -68,6 +68,7 @@ DSTALL  := $(DSTBIN) $(DSTLIB) $(DSTINC) $(DSTETC) $(DSTINIT) $(DSTVAR) \
 		$(DSTMAN1) $(DSTMAN5) $(DSTHTMLMAN1) $(DSTHTMLMAN5) \
 		$(DSTWEB) $(DSTDIST) $(DSTHELP)
 
+# Linux install locations for system friendly build
 LINROOT :=
 LINDSTBIN    := $(LINROOT)/usr/bin
 LINDSTLIB    := $(LINROOT)/usr/lib/$(APP)
@@ -176,6 +177,7 @@ tag:  $(TAGFILE)
 $(TAGFILE): $(SRC) $(OBJ)
 	if [ -f $(MKTAGS) ]; then $(MKTAGS) $(SRC); fi
 
+# Standard install for stand-alone build
 install: all
 	$(MKDIR) $(DSTALL); \
 	$(COPY)  $(BIN)          $(DSTBIN); \
@@ -189,6 +191,7 @@ install: all
 	$(COPY)  $(HTMLMAN1)     $(DSTHTMLMAN1); \
 	$(COPY)  $(HTMLMAN5)     $(DSTHTMLMAN5);
 
+# Linux install for its system friendly build
 linuxinstall: all
 	$(MKDIR) $(LINDSTALL); \
 	$(COPY)  $(BIN)       $(LINDSTBIN); \
