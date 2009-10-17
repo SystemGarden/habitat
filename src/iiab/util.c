@@ -234,7 +234,7 @@ void util_parsedump(ITREE *buffer	/* parsed data */)
 	  return;
      }
 
-     elog_startprintf(DEBUG, "Dump of parse list: `%x' -----\n", buffer);
+     elog_startprintf(DEBUG, "Dump of parse list: `%p' -----\n", buffer);
 
      /* Traverse tree (tree has state, which allows us to do this */
      i = 1;

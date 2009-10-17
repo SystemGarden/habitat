@@ -170,7 +170,7 @@ int runq_add(long start,	/* time work should start in GMT */
      struct runq_work *work;
 
      if (start <0 || interval <0 || phase <0 || count <0 || command == NULL) {
-          elog_printf(ERROR, "bad parameter: %d %d %d %d %x",
+          elog_printf(ERROR, "bad parameter: %d %d %d %d %p",
 		      start, interval, phase, count, command);
 	  nfree(argument);
 	  return -1;

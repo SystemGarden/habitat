@@ -294,7 +294,7 @@ ITREE *rt_file_read  (RT_LLD lld, int seq, int offset)
 
      rtbuf.buflen = sbuf.st_size - offset;
      if (read(rt->fd, rtbuf.buffer, rtbuf.buflen) == -1) {
-          elog_printf(ERROR, "unable to read(%d, %x, %d) from %s\n",
+          elog_printf(ERROR, "unable to read(%d, %p, %d) from %s\n",
                       rt->fd, rtbuf.buffer, rtbuf.buflen, rt->p_url);
           itree_destroy(buflist);
           nfree(rtbuf.buffer);
@@ -347,7 +347,7 @@ TABLE rt_file_tread  (RT_LLD lld, int seq, int offset)
      
      buflen = sbuf.st_size - offset;
      if (read(rt->fd, buf, buflen) == -1) {
-	  elog_printf(ERROR, "unable to read(%d, %x, %d) from %s\n",
+	  elog_printf(ERROR, "unable to read(%d, %p, %d) from %s\n",
 		      rt->fd,buf, buflen, rt->p_url);
 	  table_destroy(tab);
 	  nfree(buf);

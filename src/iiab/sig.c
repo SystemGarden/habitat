@@ -55,7 +55,7 @@ void sig_setchild(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%x", handler);
+     elog_printf(DEBUG, "handler=%p", handler);
 
      /* Set up child event handler */
      s.sa_handler = handler;
@@ -73,7 +73,7 @@ void sig_setalarm(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%x", handler);
+     elog_printf(DEBUG, "handler=%p", handler);
 
      /* Set up the alarm() callback */
      s.sa_handler = handler;
@@ -92,7 +92,7 @@ void sig_setexit(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%x", handler);
+     elog_printf(DEBUG, "handler=%p", handler);
 
      s.sa_handler = handler;
      s.sa_mask = blockalarm;	/* let SIGCHLD through as it represents 

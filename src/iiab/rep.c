@@ -160,7 +160,7 @@ int rep_action(ROUTE out,		/* route output */
 	   * io          - new remote data to append to local ring
 	   */
 
-	  /* elog_printf(DEBUG, "REP - search state=%x ringname=%s "
+	  /* elog_printf(DEBUG, "REP - search state=%p ringname=%s "
 	     "ncols=%d nrows=%d body=%s\n", 
 	     state, itree_get(out_rings), table_ncols(state), 
 	     table_nrows(state), table_print(state)); */
