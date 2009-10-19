@@ -589,7 +589,7 @@ Rb_node rb_insert(Rb_node tree, char *key, char *val)
 
 Rb_node rb_inserti(Rb_node tree, unsigned int ikey, char *val)
 {
-  rb_insert_b(rb_find_ikey(tree, ikey), (char *) ikey, val);
+  rb_insert_b(rb_find_ikey(tree, ikey), (char *) (long) ikey, val);
 }
 
 Rb_node rb_insertg(Rb_node tree, char *key, char *val,
