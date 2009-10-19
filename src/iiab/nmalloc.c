@@ -80,12 +80,13 @@ void nm_add(enum nm_origin meth, void *aloc, size_t sz, char *rfile,
      if ( nm_used ) {
           if ( (log = ptree_find(nm_used, aloc)) != PTREE_NOVAL)
 	       fprintf(stderr, "nm_add() allocation already in table\n"
-		       "   asked - %s %p %u %s:%d:%s\n"
-		       "  exists - %s %p %u %s:%d:%s (%ld)\n", 
-		       nm_names[meth], aloc, sz, rfile, rline, rfunc, 
-		       nm_names[log->method], log->addr, log->length, 
-		       log->reqfile, log->reqline, log->reqfunc, 
-		       (long) log->when);
+		       "   asked - %s %p %lu %s:%d:%s\n"
+		       "  exists - %s %p %lu %s:%d:%s (%ld)\n", 
+		       nm_names[meth], aloc, (unsigned long) sz, 
+		       		rfile, rline, rfunc, 
+		       nm_names[log->method], log->addr, 
+		       		(unsigned long) log->length, log->reqfile, 
+		       		log->reqline, log->reqfunc, (long) log->when);
      } else {
 	  /* create table */
           nm_used = ptree_createnocheck();
@@ -175,7 +176,7 @@ void nm_rpt() {
      ptree_traverse(nm_used) {
           log = ptree_get(nm_used);
           fprintf(stderr, "%ld %9s %10p %5d %8s:%5d:%s\n", (long) log->when, 
-		  nm_names[log->method], log->addr, log->length, 
+		  nm_names[log->method], log->addr, (int) log->length, 
 		  log->reqfile, log->reqline, log->reqfunc);
      }
 }

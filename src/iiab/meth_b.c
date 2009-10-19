@@ -469,7 +469,7 @@ int meth_builtin_pattern_action(char *command, ROUTE output, ROUTE error,
      }
 
      /* fetch watch entry */
-     watchinfo = itree_find(pattern_tab, rset);
+     watchinfo = ptree_find(pattern_tab, rset);
      if (watchinfo == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "pattern", command);
@@ -488,7 +488,7 @@ int meth_builtin_pattern_fini(char *command, ROUTE output, ROUTE error,
      	  return -1;
      
      /* fetch watch entry */
-     watchinfo = tree_find(pattern_tab, rset);
+     watchinfo = ptree_find(pattern_tab, rset);
      if (watchinfo == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "pattern", command);
