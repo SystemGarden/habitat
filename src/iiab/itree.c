@@ -49,7 +49,7 @@ void itree_destroy(ITREE *t) {
 
 /*
  * Add datum and key to tree. 
- * the dataum is not copied into the tree; just its reference
+ * The dataum is not copied into the tree; just its reference
  */
 void itree_add(ITREE *t, unsigned int ikey, void *datum) {
 	if (t == NULL) {

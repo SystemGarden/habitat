@@ -9,9 +9,15 @@ job 1
 # Line format is:-
 #   start   period   phase   count   name   requester   results   errors   nrings   method   command
 # Tokens replaced on startup are:-
-#	%j  job name, eg 'alive'
-#	%d  duration of job, eq 0
+#	%j  this job's name, eg 'alive'
+#	%d  duration of this job, eq 0
 #	%h  host name of this machine
+#	%f  fully qualified hostname
+#	%m  domain name
+#	%u  home directory of running user (possibly a daemon)
+#	%v  relative path to habitat's var
+#	%l  relative path to habitat's lib
+#	%e  relative path to habitat's etc
 # All files created relative to the data directory, typically <home>/var,
 # but can change depending on installation
 
@@ -68,7 +74,6 @@ job 1
 
 #
 # interrupt probes: 4h@1m, 1d@5m, 7d@15m, 1mo@1h
-# disabled as it is only rarely useful
 #
 0 60    0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 240 probe intr
 0 300   0 0 intr,%d sysgar rs:%h.rs,%j rs:%h.rs,err,0 288 sample "avg rs:%h.rs,intr,60"
@@ -77,11 +82,13 @@ job 1
 
 #
 # process probe: 1h@60s
-# data volume is high if unfiltered and the probe can be quite high on cpu
-# when it runs. The default set of filtering criteria collects only the 
-# biggest processes
 #
-#0 60    0 0 ps,%d   sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  probe ps
+# Usage: probe ps [file:filter]
+# Default filter collects only 'biggest' processes in order to keep 
+# collected data small. Change filter location to customise with new
+# parameters or remove filter argument to collect everything.
+# Uncomment if necessary
+0 60    0 0 ps,%d   sysgar rs:%h.rs,%j rs:%h.rs,err,0 60  probe "ps file:%l/ps.conf"
 
 #
 # ----- probes for watching data -----

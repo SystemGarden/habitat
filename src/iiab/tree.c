@@ -1,5 +1,5 @@
 /*
- * In memory, ordered integer tree abstraction layer
+ * In memory, ordered string tree abstraction layer
  * Uses strings for keys.
  *
  * Nigel Stuckey, August 1996

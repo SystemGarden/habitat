@@ -271,11 +271,11 @@ void httpd_stop()
 /*
  * Accept connections for an HTTP request.
  * The routine is written to handle events from the callback class (hence
- * the void* casts). The first argument is the file descriptor to read,
- * the remainder are unused.
+ * the void* casts as an argument when we really want an int). 
+ * The first argument is the file descriptor to read, the remainder are unused.
  * Returns nothing.
  */
-void httpd_accept(void *fd)
+void httpd_accept(void *fd /* would be an int */)
 {
      httpd_usockaddr usa;
      int conn_fd, sz, totbytes=0, bytes=0, method;
@@ -285,18 +285,18 @@ void httpd_accept(void *fd)
      int content_length, datalen, r;
 
      /* establish a connection to recieve data */
-     if ( (int) fd == -1 ) {
+     if ( (int) (long) fd == -1 ) {
 	  elog_send(ERROR, "unable to accept");
 	  return /*0*/;
      } else {
 	  sz = sizeof(usa);
-	  conn_fd = accept( (int) fd, &usa.sa, &sz );
+	  conn_fd = accept( (int) (long) fd, &usa.sa, &sz );
      }
 
      if (conn_fd < 0) {
 	  if (errno != EINTR) {
 	       elog_printf(ERROR, "stopping HTTP service - accept %d error: %s", 
-			   (int) fd, strerror(errno));
+			   (int) (long) fd, strerror(errno));
 	       httpd_stop();
 	  }
 	  return /*0*/;
@@ -304,7 +304,7 @@ void httpd_accept(void *fd)
 
      /* if we are in an inactive state, close the connection */
      if ( ! httpd_active ) {
-	  close((int) fd);
+	  close((int) (long) fd);
 	  return;
      }
 

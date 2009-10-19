@@ -20,13 +20,13 @@
 
 #include "callback.h"
 #include "tree.h"
-#include "itree.h"
+#include "ptree.h"
 #include "nmalloc.h"
 #include "elog.h"
 
-/* Data structure: the event string is the key, the value is an ITREE.
+/* Data structure: the event string is the key, the value is an PTREE.
  * This value holds the list of callback functions, with the key being
- * the function pointer cast to int, the value of the ITREE is NULL.
+ * the function pointer cast to int, the value of the PTREE is NULL.
  */
 TREE *callback_events=0;
 
@@ -45,10 +45,10 @@ void callback_fini()
      if ( ! callback_events )
 	  return;
 
-     /* itree_destroy casted as takes an (itree *) arg but tree_clearout()
+     /* ptree_destroy casted as takes an (ptree *) arg but tree_clearout()
       * wants (void *) */
      tree_clearout(callback_events, tree_infreemem, 
-		   (void (*)(void *)) itree_destroy);
+		   (void (*)(void *)) ptree_destroy);
      tree_destroy(callback_events);
 }
 
@@ -60,13 +60,15 @@ void callback_fini()
 void callback_mkevent(char *e_name)
 {
      char *name;
-     ITREE *cbs;
+     PTREE *cbs;
 
      if (tree_find(callback_events, e_name) != TREE_NOVAL)
 	  return;
 
      name = xnstrdup(e_name);
-     cbs = itree_create();
+     /* only need a linked list or dynamic array or addresses as the 
+      * structure. Dont have that atm, so we use a PTREE */
+     cbs = ptree_create();
      tree_add(callback_events, name, cbs);
 }
 
@@ -82,7 +84,7 @@ int  callback_rmevent(char *e_name)
 	  return 0;
 
      nfree( tree_getkey(callback_events) );
-     itree_destroy( (ITREE *) tree_get(callback_events) );
+     ptree_destroy( (PTREE *) tree_get(callback_events) );
      tree_rm(callback_events);
 
      return 1;
@@ -95,7 +97,7 @@ int  callback_rmevent(char *e_name)
  */
 void callback_regcb(char *e_name, void(*cb)(void*,void*,void*,void*))
 {
-     ITREE *cbs;
+     PTREE *cbs;
 
      if (tree_find(callback_events, e_name) == TREE_NOVAL) {
 	  callback_mkevent(e_name);
@@ -103,8 +105,8 @@ void callback_regcb(char *e_name, void(*cb)(void*,void*,void*,void*))
      }
 
      cbs = tree_get(callback_events);
-     if (itree_find(cbs, (int) cb) == ITREE_NOVAL)
-	  itree_add(cbs, (int) cb, NULL);
+     if (ptree_find(cbs, cb) == PTREE_NOVAL)
+	  ptree_add(cbs, cb, NULL);
 }
 
 
@@ -114,16 +116,16 @@ void callback_regcb(char *e_name, void(*cb)(void*,void*,void*,void*))
  */
 int  callback_unregcb(char *e_name, void(*cb)(void*,void*,void*,void*))
 {
-     ITREE *cbs;
+     PTREE *cbs;
 
      if (tree_find(callback_events, e_name) == TREE_NOVAL)
 	  return 0;
 
      cbs = tree_get(callback_events);
-     if (itree_find(cbs, (int) cb) == ITREE_NOVAL)
+     if (ptree_find(cbs, cb) == PTREE_NOVAL)
 	  return 0;
 
-     itree_rm(cbs);
+     ptree_rm(cbs);
 
      return 1;
 }
@@ -139,7 +141,7 @@ int  callback_unregcb(char *e_name, void(*cb)(void*,void*,void*,void*))
 int  callback_raise(char *e_name, void *arg1, void *arg2, void *arg3,
 		    void *arg4)
 {
-     ITREE *cbs;
+     PTREE *cbs;
      void (*cb)(void*,void*,void*,void*) = 0;
      int n=0;
 
@@ -149,8 +151,8 @@ int  callback_raise(char *e_name, void *arg1, void *arg2, void *arg3,
      }
 
      cbs = tree_get(callback_events);
-     itree_traverse(cbs) {
-	  cb = (void *) itree_getkey(cbs);
+     ptree_traverse(cbs) {
+	  cb = ptree_getkey(cbs);
 	  elog_printf(DEBUG, "event %s raised -> calling %p", 
 		      e_name, cb);
 	  (*cb)(arg1, arg2, arg3, arg4);

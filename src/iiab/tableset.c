@@ -404,7 +404,8 @@ TABLE   tableset_into   (TABSET tset)
      /* add the selected rows in the tset order to our target table */
      if (tset->rownums) {
           itree_traverse(tset->rownums) {
-	       row = table_getrow(tset->tab, (int) itree_get(tset->rownums));
+	       row = table_getrow(tset->tab, (int) (long) 
+				  itree_get(tset->rownums));
 	       table_addrow_noalloc(target, row);
 	       tree_destroy(row);
 	  }
@@ -478,8 +479,8 @@ char * tableset_print  (TABSET tset,
           /* add the selected rows in the tset order to our target table */
           if (tset->rownums) {
 	       itree_traverse(tset->rownums) {
-		    row = table_getrow(tset->tab, 
-				       (int) itree_get(tset->rownums));
+		 row = table_getrow(tset->tab, (int) (long)
+				    itree_get(tset->rownums));
 		    itree_traverse(colnames) {
 		         strbuf_append(buf, 
 				       tree_find(row, itree_get(colnames)));
@@ -635,7 +636,7 @@ void tableset_priv_execute_where(TABSET tset)
 	  }
 	  /* save the row number in our set */
 	  itree_append(tset->rownums, 
-		       (void *) table_getcurrentrowkey(tset->tab));
+		       (void *) (long) table_getcurrentrowkey(tset->tab));
   next_row:
   	;
      }
@@ -649,8 +650,8 @@ void tableset_priv_execute_where(TABSET tset)
 	      /* ascii sort */
 	       sorted = tree_create();
 	       itree_traverse(tset->rownums) {
-		    value = table_getcell(tset->tab, 
-					  (int) itree_get(tset->rownums), 
+		    value = table_getcell(tset->tab, (int) (long)
+					  itree_get(tset->rownums), 
 					  tset->sortby);
 		    tree_add(sorted, value, (void *) itree_get(tset->rownums));
 	       }
@@ -666,8 +667,8 @@ void tableset_priv_execute_where(TABSET tset)
 	  } else {
 	       /* numeric sort */
 	       itree_traverse(tset->rownums) {
-		    value = table_getcell(tset->tab, 
-					  (int) itree_get(tset->rownums), 
+		    value = table_getcell(tset->tab, (int) (long)
+					  itree_get(tset->rownums), 
 					  tset->sortby);
 		    itree_add(isorted, strtol(value, (char**)NULL, 10), 
 			      (void *) itree_get(tset->rownums));

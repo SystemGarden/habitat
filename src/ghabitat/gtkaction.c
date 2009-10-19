@@ -23,6 +23,7 @@
 #include "gmcgraph.h"
 #include "misc.h"
 #include "../iiab/itree.h"
+#include "../iiab/ptree.h"
 #include "../iiab/tree.h"
 #include "../iiab/elog.h"
 #include "../iiab/nmalloc.h"
@@ -671,7 +672,8 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
 			    GtkTooltips *tip)
 {
      struct uichoice_node *parent, *child;
-     ITREE *child_nodes, *current_children, *remove_children;
+     ITREE *child_nodes, *remove_children;
+     PTREE *current_children;
      GtkCTreeNode *guic;
      struct uichoice_node *testuic;
 
@@ -690,7 +692,7 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
       * children if not already done by the expand node */
      uichoice_expandnode(parent);
      /*uichoice_updatedynamic(parent);*/
-     current_children = itree_create();
+     current_children = ptree_create();
 
      gtk_clist_freeze (GTK_CLIST(tree));
 
@@ -699,7 +701,7 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
      if (child_nodes) {
 	  itree_traverse(child_nodes) {
 	       child = itree_get(child_nodes);
-	       itree_add(current_children, (int)child, NULL);
+	       ptree_add(current_children, child, NULL);
 
 	       if (uichoice_getnodearg (child, GTKACTION_GUIITEMKEY) != NULL)
 		    continue;	/* child already drawn */
@@ -712,7 +714,7 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
      if (child_nodes) {
 	  itree_traverse(child_nodes) {
 	       child = itree_get(child_nodes);
-	       itree_add(current_children, (int)child, NULL);
+	       ptree_add(current_children, child, NULL);
 
 	       if (uichoice_getnodearg (child, GTKACTION_GUIITEMKEY) != NULL)
 		    continue;	/* child already drawn */
@@ -728,7 +730,7 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
 
 	  testuic = gtk_ctree_node_get_row_data(GTK_CTREE(tree), guic);
 	  if (testuic == NULL || 
-	      itree_find(current_children, (int) testuic) == ITREE_NOVAL) {
+	      ptree_find(current_children, testuic) == ITREE_NOVAL) {
 
 	       itree_append(remove_children, guic);
 	  }
@@ -742,7 +744,7 @@ void gtkaction_expandchoice(GtkCTreeNode *treeitem, int nlayers,
      gtk_clist_thaw (GTK_CLIST(tree));
 
 
-     itree_destroy(current_children);
+     ptree_destroy(current_children);
      itree_destroy(remove_children);
 #if 0
 

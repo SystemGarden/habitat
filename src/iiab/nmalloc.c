@@ -18,11 +18,11 @@
 /* This code implements the definitions for leak checking in nmalloc.
  * WARNING! non-reenterent */
 #include <stdio.h>
-#include "itree.h"
+#include "ptree.h"
 #include "cf.h"
 #include "iiab.h"
 
-ITREE *nm_used = NULL;	/* journal table, indexed by allocated 
+PTREE *nm_used = NULL;	/* journal table, indexed by allocated 
 			 * address */
 /* corresponds with and indexed by enum nm_origin */
 char *nm_names[] = { "nmalloc", "xnmalloc", "nrealloc", "xnrealloc",
@@ -34,12 +34,13 @@ int nm_active = 1;	/* if nmalloc checking has been activated from
 			 * to initialise the class */
 
 
-/* special version of itree_create for nmalloc only. only the create is 
- * needed as free will never be called */
-ITREE *itree_createnocheck() {
-	ITREE *t;
+/* special version of ptree_create for nmalloc only that only uses malloc
+ * rather than our own nmalloc that causes dependency problems at run time.
+ * Only the create is needed as free will never be called */
+PTREE *ptree_createnocheck() {
+	PTREE *t;
 
-	t = malloc(sizeof(ITREE));
+	t = malloc(sizeof(PTREE));
 	t->node = t->root = make_rb();
 	if (t->node)
 		return t;
@@ -60,9 +61,9 @@ void nm_deactivate()
      nm_active = 0;		/* nmalloc is inactive */
      if (nm_used) {
 	  /* drop allocations if nmalloc is disabled */
-	  itree_traverse(nm_used) {
-	       log = itree_get(nm_used);
-	       itree_rm(nm_used);
+	  ptree_traverse(nm_used) {
+	       log = ptree_get(nm_used);
+	       ptree_rm(nm_used);
 	       free(log->reqfile);
 	       free(log->reqfunc);
 	       free(log);
@@ -77,17 +78,17 @@ void nm_add(enum nm_origin meth, void *aloc, size_t sz, char *rfile,
      struct nm_userec *log;
 
      if ( nm_used ) {
-          if ( (log = itree_find(nm_used, (unsigned int) aloc)) != ITREE_NOVAL)
+          if ( (log = ptree_find(nm_used, aloc)) != PTREE_NOVAL)
 	       fprintf(stderr, "nm_add() allocation already in table\n"
-		       "   asked - %s %p %d %s:%d:%s\n"
-		       "  exists - %s %p %d %s:%d:%s (%ld)\n", 
+		       "   asked - %s %p %u %s:%d:%s\n"
+		       "  exists - %s %p %u %s:%d:%s (%ld)\n", 
 		       nm_names[meth], aloc, sz, rfile, rline, rfunc, 
 		       nm_names[log->method], log->addr, log->length, 
 		       log->reqfile, log->reqline, log->reqfunc, 
 		       (long) log->when);
      } else {
 	  /* create table */
-          nm_used = itree_createnocheck();
+          nm_used = ptree_createnocheck();
 	  atexit(nm_rpt);
      }
 
@@ -101,7 +102,7 @@ void nm_add(enum nm_origin meth, void *aloc, size_t sz, char *rfile,
      log->reqfile = strdup(rfile);
      log->reqline = rline;
      log->reqfunc = strdup(rfunc);
-     itree_add(nm_used, (unsigned int) aloc, log);
+     ptree_add(nm_used, aloc, log);
 }
 
 /* remove an allocation entry from the table */
@@ -114,13 +115,13 @@ void nm_rm(enum nm_origin meth, void *aloc, char *rfile, int rline,
 		  nm_names[meth], aloc, rfile, rline, rfunc);
 	  abort();
      }
-     if ( (log = itree_find(nm_used, (unsigned int) aloc)) == ITREE_NOVAL ) {
+     if ( (log = ptree_find(nm_used, aloc)) == PTREE_NOVAL ) {
           fprintf(stderr, "nm_rm() allocation not in table - %s %p %s:%d:%s\n",
 		  nm_names[meth], aloc, rfile, rline, rfunc);
 	  abort();
      }
 
-     itree_rm(nm_used);
+     ptree_rm(nm_used);
      free(log->reqfile);
      free(log->reqfunc);
      free(log);
@@ -138,7 +139,7 @@ int nm_isalloc(void *aloc)
 	  return 0;
      }
 
-     if (itree_find(nm_used, (unsigned int) aloc) == ITREE_NOVAL)
+     if (ptree_find(nm_used, aloc) == PTREE_NOVAL)
 	  return 0;
      else
 	  return 1;
@@ -160,7 +161,7 @@ void nm_rpt() {
 	  return;
      }
 
-     nleak = itree_n(nm_used);
+     nleak = ptree_n(nm_used);
 
      fprintf(stderr, "nm_rpt() %d leaks detected\n", nleak);
 
@@ -171,8 +172,8 @@ void nm_rpt() {
 
      fprintf(stderr, "TIME         METHOD    ALLOTED  SIZE     "
 		     "FILE  LINE FUNCTION\n");
-     itree_traverse(nm_used) {
-          log = itree_get(nm_used);
+     ptree_traverse(nm_used) {
+          log = ptree_get(nm_used);
           fprintf(stderr, "%ld %9s %10p %5d %8s:%5d:%s\n", (long) log->when, 
 		  nm_names[log->method], log->addr, log->length, 
 		  log->reqfile, log->reqline, log->reqfunc);

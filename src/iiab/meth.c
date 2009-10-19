@@ -1130,7 +1130,7 @@ int meth_relay() {
 		    } else {
 			 /* externally notified file descriptor */
 			 callback_raise(itree_get(meth_cbbyfd), 
-					(void *) i, NULL, NULL, NULL);
+					(void *) (long) i, NULL, NULL, NULL);
 			 /* implementation note
 			  * Potentially return here, or count a few times
 			  * and return. We don't want to take time from

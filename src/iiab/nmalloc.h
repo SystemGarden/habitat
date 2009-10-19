@@ -16,7 +16,7 @@
 #if NMALLOC
 
 #include <time.h>
-#include "itree.h"
+#include "ptree.h"
 
 /* this code implements the definitions for leak checking in nmalloc */
 enum nm_origin {
@@ -46,7 +46,7 @@ struct nm_userec {
      char *reqfunc;
 };
 
-ITREE *itree_createnocheck();
+PTREE *ptree_createnocheck();
 void nm_deactivate();
 void nm_add(enum nm_origin meth, void *aloc, size_t sz, char *rfile, 
 	    int rline, const char *rfunc);

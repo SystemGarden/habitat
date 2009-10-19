@@ -689,8 +689,8 @@ void runq_dispatch() {
 		    nfree(w->argument);
 		    nfree(w);
 		    itree_rm(runq_tab);
-		    callback_raise(RUNQ_CB_EXPIRED, (void *) ikey, NULL, 
-				   NULL, NULL);
+		    callback_raise(RUNQ_CB_EXPIRED, (void *) (long) ikey, 
+				   NULL, NULL, NULL);
 	       }
 	  } else {
 	       itree_next(runq_tab);
@@ -745,7 +745,8 @@ void runq_methfinished(void *key)
 		    elog_printf(ERROR, "endofrun() failed for %s", 
 				w->desc);
 	       itree_rm(runq_tab);
-	       callback_raise(RUNQ_CB_EXPIRED, (void *) ikey, NULL, NULL, NULL);
+	       callback_raise(RUNQ_CB_EXPIRED, (void *) (long) ikey, NULL, 
+			      NULL, NULL);
 	       nfree(w->desc);
 	       nfree(w->argument);
 	       nfree(w);

@@ -789,9 +789,9 @@ int do_stat(int argc, char **argv) {
 	    "ring:     %s\n"
 	    "duration: %d\n"
 	    "nslots:   %d\n"
-            "oldest:   %d (time %s, header hash %d)\n"
+            "oldest:   %d (time %s, header hash %lu)\n"
 	    "current   %d\n"
-            "youngest: %d (time %s, header hash %d)\n"
+            "youngest: %d (time %s, header hash %lu)\n"
 	    "slots read: %d, slots available: %d\n",
 	    filename, ringname, dur, nslots, old, oldts, oldhash,
 	    cur, young, youngts, younghash, cur-old, young-cur+1);

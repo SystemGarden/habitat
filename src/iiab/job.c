@@ -236,7 +236,7 @@ void job_runqexpired(void *ikey)
      /* Find job details */
      itree_traverse(job_tab) {
 	  w = itree_get(job_tab);
-	  if (w->runq == (int) ikey) {
+	  if (w->runq == (int) (long) ikey) {
 	       /* found the finished work */
 	       elog_printf(DEBUG, "job %s finshed", w->runarg->key);
 	       itree_rm(job_tab);			/* Remove job record */

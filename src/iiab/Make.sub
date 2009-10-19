@@ -10,6 +10,7 @@ iiab/nmalloc.c		\
 iiab/strbuf.c		\
 iiab/tree.c		\
 iiab/itree.c		\
+iiab/ptree.c		\
 iiab/cf.c		\
 iiab/table.c		\
 iiab/route.c		\

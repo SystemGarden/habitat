@@ -1154,8 +1154,8 @@ void gmcgraph_usecolour(GMCGRAPH *g, char *curvename, GdkColor *col)
      char *colname;
      int colindex;
 
-     colindex = (int) tree_find(g->curvecol, curvename);
-     if ((void *) colindex == TREE_NOVAL) {
+     colindex = (int) (long) tree_find(g->curvecol, curvename);
+     if ((void *) (long) colindex == TREE_NOVAL) {
 	  /* new curve, allocate a new colour */
 	  if (itree_n(g->colunused) > 0) {
 	       /* allocate one from the unused pile */
@@ -1173,7 +1173,7 @@ void gmcgraph_usecolour(GMCGRAPH *g, char *curvename, GdkColor *col)
 	       colname = "black";
 	  }
 
-	  tree_add(g->curvecol, xnstrdup(curvename), (void *) colindex);
+	  tree_add(g->curvecol, xnstrdup(curvename), (void *) (long) colindex);
      } else {
 	  /* existing curve */
 	  if (colindex == -1)
@@ -1199,8 +1199,8 @@ void gmcgraph_recyclecolour(GMCGRAPH *g, char *curvename)
      struct gmcgraph_graph *gs;
      int colindex;
 
-     colindex = (int) tree_find(g->curvecol, curvename);
-     if ((void *) colindex == TREE_NOVAL)
+     colindex = (int) (long) tree_find(g->curvecol, curvename);
+     if ((void *) (long) colindex == TREE_NOVAL)
 	  return;	/* curve name not valid */
 
      /* check if the curve is used */

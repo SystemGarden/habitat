@@ -30,7 +30,7 @@ struct meth_info probe_cbinfo = {
 
 /* List of all probe data (struct probe_datainfo), keyed by
  * output route */
-ITREE *probe_data=NULL;
+PTREE *probe_data=NULL;
 
 /* initialise the table with headers for the specific probe and
  * include the info lines require for probe plotting */
@@ -215,8 +215,8 @@ int probe_init(char *command, 		/* command line */
 
      /* add to global list keyed by runset */
      if (probe_data == NULL)
-	  probe_data = itree_create();
-     itree_add(probe_data, (int) rset, dinfo);
+	  probe_data = ptree_create();
+     ptree_add(probe_data, rset, dinfo);
 
      nfree(probename);
      return 0;
@@ -255,8 +255,8 @@ int probe_action(char *command,  		/* command line */
      /* fetch probe data structure */
      if ( ! probe_data )
 	  elog_die(FATAL, "probe_data not initialised");
-     dinfo = itree_find(probe_data, (int) rset);
-     if (dinfo == ITREE_NOVAL) {
+     dinfo = ptree_find(probe_data, rset);
+     if (dinfo == PTREE_NOVAL) {
 	  elog_printf(ERROR, "can't find details - method: %s command: %s", 
 		      "probe", command);
 	  nfree(probename);
@@ -413,8 +413,8 @@ int probe_fini(char *command,  		/* command line */
      /* fetch probe data entry */
      if ( ! probe_data )
 	  elog_die(FATAL, "probe_data not initialised");
-     dinfo = itree_find(probe_data, (int) rset);
-     if (dinfo == ITREE_NOVAL) {
+     dinfo = ptree_find(probe_data, rset);
+     if (dinfo == PTREE_NOVAL) {
 	  elog_printf(ERROR, "can't find details - method: %s "
 		      "command: %s", "probe", command);
 	  nfree(probename);

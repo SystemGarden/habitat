@@ -725,7 +725,7 @@ ITREE *table_getsortedcol(TABLE t, char *colname)
      } else {
 	  newcolumn = itree_create();
 	  itree_traverse(t->roworder) {
-	       rowindex = (int) itree_get(t->roworder);
+	    rowindex = (int) (long) itree_get(t->roworder);
 	       itree_add(newcolumn, rowindex, itree_find(column, rowindex));
 	  }
      }
@@ -1208,7 +1208,7 @@ char *table_html(TABLE t, int fromrowkey, int torowkey, ITREE *colorder)
 	    if (col == TREE_NOVAL) {
 		 cell = "";
 	    } else {
-		 cell = itree_find(col, (int) tree_get(t->infolookup));
+	         cell = itree_find(col, (int) (long) tree_get(t->infolookup));
 		 if (cell == ITREE_NOVAL || cell == NULL) {
 		      cell = "";
 		 }
@@ -1314,7 +1314,7 @@ char *table_outinfo(TABLE t)
 	  itree_traverse(t->colorder) {
 	       tok = "";
 	       if (tree_find(t->info, itree_get(t->colorder)) != TREE_NOVAL)
-		    if (itree_find(tree_get(t->info), (int) 
+		    if (itree_find(tree_get(t->info), (int) (long)
 				   tree_get(t->infolookup)) != TREE_NOVAL)
 		         tok = util_quotestr( itree_get( tree_get(t->info) ), 
 					      "\t", strbuf, 8000 );
@@ -1906,7 +1906,7 @@ void table_first(TABLE t)
 
      if (t->roworder) {
        itree_first(t->roworder);
-       datakey = (int) itree_get(t->roworder);
+       datakey = (int) (long) itree_get(t->roworder);
        tree_traverse(t->data)
 	    itree_find( (ITREE *) tree_get(t->data), datakey );
      } else {
@@ -1921,7 +1921,7 @@ void table_next(TABLE t)
 
      if (t->roworder) {
        itree_next(t->roworder);
-       datakey = (int) itree_get(t->roworder);
+       datakey = (int) (long) itree_get(t->roworder);
        tree_traverse(t->data)
 	    itree_find( (ITREE *) tree_get(t->data), datakey );
      } else {
@@ -1936,7 +1936,7 @@ void table_prev(TABLE t)
 
      if (t->roworder) {
        itree_prev(t->roworder);
-       datakey = (int) itree_get(t->roworder);
+       datakey = (int) (long) itree_get(t->roworder);
        tree_traverse(t->data)
 	    itree_find( (ITREE *) tree_get(t->data), datakey );
      } else {
@@ -1951,7 +1951,7 @@ void table_last(TABLE t)
 
      if (t->roworder) {
        itree_last(t->roworder);
-       datakey = (int) itree_get(t->roworder);
+       datakey = (int) (long) itree_get(t->roworder);
        tree_traverse(t->data)
 	    itree_find( (ITREE *) tree_get(t->data), datakey );
      } else {
@@ -2192,7 +2192,7 @@ int table_replaceinfocell(TABLE t, char *infoname, char *colname, void *value)
 	  return 0;
 
      /* get column and row indexes/references */
-     infoindex = (int) tree_find(t->infolookup, infoname);
+     infoindex = (int) (long) tree_find(t->infolookup, infoname);
      col = tree_find(t->info, colname);
      if (col == TREE_NOVAL) {
 	  /* if column does not exist, make it */
@@ -2227,8 +2227,8 @@ int table_addemptyinfo(TABLE t, char *infoname)
      /* find higest index in use */
      i=0;
      tree_traverse(t->infolookup) {
-	  if ((int) tree_get(t->infolookup) > i)
-	       i = (int) tree_get(t->infolookup);
+	  if ((int) (long) tree_get(t->infolookup) > i)
+	       i = (int) (long) tree_get(t->infolookup);
      }
 
      /* set minimum index (no info rows exist) or next index */
@@ -2238,7 +2238,7 @@ int table_addemptyinfo(TABLE t, char *infoname)
 	  i++;
 
      /* now add */
-     tree_add(t->infolookup, infoname, (void *) i);
+     tree_add(t->infolookup, infoname, (void *) (long) i);
 
      return i;
 }
@@ -2312,7 +2312,7 @@ int  table_rminfo(TABLE t, char *infoname)
      infoptr = tree_find(t->infolookup, infoname);
      if (infoptr == TREE_NOVAL)
 	  return 0;
-     infoindex = (int) infoptr;
+     infoindex = (int) (long) infoptr;
 
      /* remove the info from the columns */
      tree_traverse(t->info) {
@@ -2354,7 +2354,7 @@ TREE *table_getinforow(TABLE t, char *infoname)
      infoptr = tree_find(t->infolookup, infoname);
      if (infoptr == TREE_NOVAL)
 	  return NULL;
-     infoindex = (int) infoptr;
+     infoindex = (int) (long) infoptr;
 
      /* extract the list */
      retrow = tree_create();
@@ -2382,8 +2382,8 @@ TREE *table_getinfocol(TABLE t, char *colname)
      retcol = tree_create();
      if (tree_find(t->info, colname) != TREE_NOVAL)
 	  tree_traverse(t->infolookup)
-	       if (itree_find(tree_get(t->info), 
-			      (int) tree_get(t->infolookup)) != ITREE_NOVAL)
+	       if (itree_find(tree_get(t->info), (int) (long) 
+			      tree_get(t->infolookup)) != ITREE_NOVAL)
 		    tree_add(retcol, tree_getkey(t->infolookup), 
 			     itree_get(tree_get(t->info)));
 
@@ -2407,7 +2407,7 @@ char *table_getinfocell(TABLE t, char *infoname, char *colname)
      infoptr = tree_find(t->infolookup, infoname);
      if (infoptr == TREE_NOVAL)
 	  return NULL;
-     infoindex = (int) infoptr;
+     infoindex = (int) (long) infoptr;
 
      /* look up column */
      col = tree_find(t->info, colname);
@@ -2536,7 +2536,7 @@ int   table_sort(TABLE t, char *primarykey, char *secondarykey)
      /* order */
      order = tree_create();
      itree_traverse(col)
-	  tree_add(order, itree_get(col), (void*) itree_getkey(col));
+	  tree_add(order, itree_get(col), (void*) (long) itree_getkey(col));
 
      /* attach row order and clear up */
      table_addroworder_t(t, order);
@@ -2574,7 +2574,7 @@ int   table_sortnumeric(TABLE t, char *primarykey, char *secondarykey)
      iorder = itree_create();
      itree_traverse(col)
           itree_add(iorder, strtol((char *) itree_get(col), NULL, 10), 
-		    (void*) itree_getkey(col));
+		    (void*) (long) itree_getkey(col));
 
 #if 0
      itree_traverse(iorder)
@@ -2735,8 +2735,8 @@ int    table_equals(TABLE t, TABLE other)
 	  /* compare info cols */
 	  tree_first(other->infolookup);
 	  tree_traverse(t->infolookup) {
-	       myidx    = (int) tree_get(t->infolookup);
-	       otheridx = (int) tree_get(other->infolookup);
+	       myidx    = (int) (long) tree_get(t->infolookup);
+	       otheridx = (int) (long) tree_get(other->infolookup);
 	       if (itree_find(myinfo, myidx) == ITREE_NOVAL)
 		    return 0;
 

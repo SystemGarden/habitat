@@ -228,7 +228,7 @@ int meth_builtin_tstamp_action(char *command, ROUTE output, ROUTE error) {
 
 
 /* ----- builtin sample method ----- */
-ITREE *cascade_tab=NULL;	/* table of CASCADE, keyed by output route */
+PTREE *cascade_tab=NULL;	/* table of CASCADE, keyed by output route */
 char *meth_builtin_sample_id() { return "sample"; }
 char *meth_builtin_sample_info() { return "Sample tables from a timestore "
 					"and produce a single table"; }
@@ -319,8 +319,8 @@ int meth_builtin_sample_init(char *command, ROUTE output, ROUTE error,
 
      /* save the returned details in cascade_tab */
      if (cascade_tab == NULL)
-	  cascade_tab = itree_create();
-     itree_add(cascade_tab, (int) rset, sampinfo);
+	  cascade_tab = ptree_create();
+     ptree_add(cascade_tab, rset, sampinfo);
 
      return 0;
 }
@@ -343,8 +343,8 @@ int meth_builtin_sample_action(char *command, ROUTE output, ROUTE error,
      }
 
      /* fetch sample entry */
-     sampent = itree_find(cascade_tab, (int) rset);
-     if (sampent == ITREE_NOVAL) {
+     sampent = ptree_find(cascade_tab, rset);
+     if (sampent == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s, "
 		      "command: %s\n", "sample", command);
 	  return -1;
@@ -362,7 +362,7 @@ int meth_builtin_sample_fini(char *command, ROUTE output, ROUTE error,
      	  return -1;
 
      /* fetch sample entry */
-     sampent = itree_find(cascade_tab, (int) rset);
+     sampent = ptree_find(cascade_tab, rset);
      if (sampent == ITREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s, "
 		      "command: %s\n", "sample", command);
@@ -371,14 +371,14 @@ int meth_builtin_sample_fini(char *command, ROUTE output, ROUTE error,
 
      /* close open resources and free storage */
      cascade_fini(sampent);
-     itree_rm(cascade_tab);
+     ptree_rm(cascade_tab);
 
      return 0;
 }
 
 
 /* ----- builtin pattern watching method ----- */
-ITREE *pattern_tab=NULL;	/* table of WATCHED, keyed by output route */
+PTREE *pattern_tab=NULL;	/* table of WATCHED, keyed by output route */
 char *meth_builtin_pattern_id()   { return "pattern"; }
 char *meth_builtin_pattern_info() { return "Match patterns on groups of "
 					   "routes to raise events"; }
@@ -445,8 +445,8 @@ int meth_builtin_pattern_init(char *command, ROUTE output, ROUTE error,
 
      /* save the returned details in pattern_tab */
      if (pattern_tab == NULL)
-	  pattern_tab = itree_create();
-     itree_add(pattern_tab, (int) rset, watchinfo);
+	  pattern_tab = ptree_create();
+     ptree_add(pattern_tab, rset, watchinfo);
 
      return 0;
 }
@@ -469,8 +469,8 @@ int meth_builtin_pattern_action(char *command, ROUTE output, ROUTE error,
      }
 
      /* fetch watch entry */
-     watchinfo = itree_find(pattern_tab, (int) rset);
-     if (watchinfo == ITREE_NOVAL) {
+     watchinfo = itree_find(pattern_tab, rset);
+     if (watchinfo == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "pattern", command);
 	  return -1;
@@ -488,8 +488,8 @@ int meth_builtin_pattern_fini(char *command, ROUTE output, ROUTE error,
      	  return -1;
      
      /* fetch watch entry */
-     watchinfo = itree_find(pattern_tab, (int) rset);
-     if (watchinfo == ITREE_NOVAL) {
+     watchinfo = tree_find(pattern_tab, rset);
+     if (watchinfo == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "pattern", command);
 	  return -1;
@@ -497,7 +497,7 @@ int meth_builtin_pattern_fini(char *command, ROUTE output, ROUTE error,
 
      /* close open resources and free storage */
      pattern_fini(watchinfo);
-     itree_rm(pattern_tab);
+     ptree_rm(pattern_tab);
 
      return 0;
 }
@@ -629,7 +629,7 @@ int meth_builtin_record_fini(char *command, ROUTE output, ROUTE error,
 
 
 /* ----- builtin event method ----- */
-ITREE *event_tab=NULL;	/* table of EVENTINFO, keyed by output route */
+PTREE *event_tab=NULL;	/* table of EVENTINFO, keyed by output route */
 char *meth_builtin_event_id()   { return "event"; }
 char *meth_builtin_event_info() { return "Process event queues to carry "
 				         "out instructions"; }
@@ -671,8 +671,8 @@ int meth_builtin_event_init(char *command, ROUTE output, ROUTE error,
 
      /* success, create another instance */
      if (event_tab == NULL)
-	  event_tab = itree_create();
-     itree_add(event_tab, (int) rset, einfo);
+	  event_tab = ptree_create();
+     ptree_add(event_tab, rset, einfo);
 
      return 0;
 }
@@ -689,8 +689,8 @@ int meth_builtin_event_action(char *command, ROUTE output, ROUTE error,
      }
 
      /* fetch record entry */
-     einfo = itree_find(event_tab, (int) rset);
-     if (einfo == ITREE_NOVAL) {
+     einfo = ptree_find(event_tab, rset);
+     if (einfo == PTREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "event", command);
 	  return -1;
@@ -708,7 +708,7 @@ int meth_builtin_event_fini(char *command, ROUTE output, ROUTE error,
      	  return -1;
 
      /* fetch record entry */
-     einfo = itree_find(event_tab, (int) rset);
+     einfo = ptree_find(event_tab, rset);
      if (einfo == ITREE_NOVAL) {
 	  route_printf(error, "can't find details - probe: %s "
 		      "command: %s\n", "event", command);
@@ -717,7 +717,7 @@ int meth_builtin_event_fini(char *command, ROUTE output, ROUTE error,
 
      /* close open resources and free storage */
      event_fini(einfo);
-     itree_rm(event_tab);
+     ptree_rm(event_tab);
 
      return 0;
 }
