@@ -179,8 +179,8 @@ int main(int argc, char **argv) {
 
 	  r = route_write(jobrt, jobtxt, joblen);
 	  if (r == -1) {
-	       elog_printf(FATAL, "unable to create initial job table "
-			   "to write defaults. Please make job table"
+	       elog_printf(FATAL, "unable to write initial job table "
+			   "with default jobs. Please make job table"
 			   "writable (%s) or create manually",
 			   jobpurl_t);
 	       route_close(jobrt);
@@ -189,17 +189,21 @@ int main(int argc, char **argv) {
 	       goto end_app;
 	  }
 
-	  elog_printf(INFO, "no jobs found in %s: created default", 
-		      jobpurl_t);
+	  elog_printf(INFO, "created job table from default configuration: "
+		      "copied %s into %s", defjobs, jobpurl_t);
 	  route_close(jobrt);
 	  nfree(jobtxt);
      }
 
      /* load jobs */
      r = job_loadroute( jobpurl_t );
-     if (r == -1)
-          elog_die(FATAL, "failed to load jobs from %s",
+     if (r == -1) {
+          elog_die(FATAL, "unable to start due to a failure to read jobs "
+		   "from %s. Please check that the file is readable and that "
+		   "the table location exists.",
 		   cf_getstr(iiab_cf, "jobs") );
+	  errorstatus = 5;
+	  goto end_app;
      else
           elog_printf(INFO, "loaded %d jobs", r);
 

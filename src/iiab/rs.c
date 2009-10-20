@@ -2564,8 +2564,8 @@ int    rs_priv_load_index(RS ring, TABLE *index)
 	  return 0;	/* failure */
      if (table_nrows(it)) {
 	  table_first(it);
-	  ring->oldest      = strtol(table_getcurrentcell(it, "seq")
-				     , (char**)NULL, 10);
+	  ring->oldest      = strtol(table_getcurrentcell(it, "seq"),
+				     (char**)NULL, 10);
 	  ring->oldest_t    = strtol(table_getcurrentcell(it, "time"), 
 				     (char**)NULL, 10);
 	  ring->oldest_hash = strtol(table_getcurrentcell(it, "hd_hash"), 

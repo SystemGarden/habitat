@@ -1761,8 +1761,8 @@ char *util_fqhostname() {
 
 /* Take an HTML string and remove the formatting elements is a simplistic
  * and half-arsed way. Removes removes text surrounded by < and >.
- * Modifies the string you pass as sugment, so make a copy before calling 
- * ths routine if you wish to preserve the HTML original.
+ * Modifies the string you pass as the argument, so make a copy before 
+ * calling this routine if you wish to preserve the HTML original.
  */
 void util_html2text(char *original) {
      char *span1, *span2;
