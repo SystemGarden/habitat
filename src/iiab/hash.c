@@ -124,7 +124,7 @@ unsigned long hash_block(char *k, 		/* key */
      }
      mix(a,b,c);
      /*-------------------------------------------- report the result */
-     elog_printf(DEBUG, "HASH %s => %lu", orig_k, c);
+     elog_printf(DEBUG, "HASH %s => %lu (%x)", orig_k, c, c);
      return c;
 }
 

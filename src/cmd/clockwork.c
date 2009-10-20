@@ -204,7 +204,7 @@ int main(int argc, char **argv) {
 		   cf_getstr(iiab_cf, "jobs") );
 	  errorstatus = 5;
 	  goto end_app;
-     else
+     } else
           elog_printf(INFO, "loaded %d jobs", r);
 
      /* run jobs in var if we have a public responsibility */
