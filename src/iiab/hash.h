@@ -4,5 +4,5 @@
  */
 
 /* functional prototypes */
-unsigned long hash_block(char *k, unsigned long length, unsigned long initval);
-unsigned long hash_str(char *str);
+unsigned int hash_block(char *k, unsigned int length, unsigned int initval);
+unsigned int hash_str(char *str);

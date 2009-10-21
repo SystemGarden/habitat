@@ -1554,10 +1554,10 @@ int   rs_stat(RS ring			/* ring descriptor */,
  * A TABLE is returned with the following columns
  *    name    name of the ring
  *    dur     duration of the ring
+ *    nslots  number of slots in ring
  *    id      id of ring
  *    long    long name of ring
  *    about   description of ring
- *    nslots  number of slots in ring
  * Returns NULL for an error.
  */
 TABLE rs_lsrings(RS_METHOD method	/* method vectors */,

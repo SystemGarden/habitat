@@ -7,8 +7,9 @@
 #include "hash.h"
 #include "elog.h"
 
-typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
-typedef  unsigned       char ub1;   /* unsigned 1-byte quantities */
+typedef  unsigned int  ub4;   /* unsigned 4-byte quantities in 32 & 64 bit 
+			       * systems */
+typedef  unsigned char ub1;   /* unsigned 1-byte quantities */
 
 #define hashsize(n) ((ub4)1<<(n))
 #define hashmask(n) (hashsize(n)-1)
@@ -80,12 +81,12 @@ acceptable.  Do NOT use for cryptographic purposes.
 --------------------------------------------------------------------
 */
 
-unsigned long hash_block(char *k, 		/* key */
-			 unsigned long length,	/* length of the key */
-			 unsigned long initval	/* previous hash or an 
+unsigned int hash_block(char *k, 		/* key */
+			unsigned int length,	/* length of the key */
+			unsigned int initval	/* previous hash or an 
 						 * arbitrary value */ )
 {
-     unsigned long a,b,c,len;
+     unsigned int a,b,c,len;
      char *orig_k;
 
      /* Set up the internal state */
@@ -124,13 +125,13 @@ unsigned long hash_block(char *k, 		/* key */
      }
      mix(a,b,c);
      /*-------------------------------------------- report the result */
-     elog_printf(DEBUG, "HASH %s => %lu (%x)", orig_k, c, c);
+     elog_printf(DEBUG, "HASH %s => %u (0x%x)", orig_k, c, c);
      return c;
 }
 
 
-unsigned long hash_str(char *str) {
-     return hash_block(str, strlen(str), 685570L);
+unsigned int hash_str(char *str) {
+     return hash_block(str, strlen(str), 685570);
 }
 
 
@@ -140,9 +141,9 @@ unsigned long hash_str(char *str) {
 #include <stdlib.h>
 
 int main() {
-     unsigned long l1, l2;
+     unsigned int l1, l2;
 
-     printf("%lu %lu %lu %lu\n", 
+     printf("%u %u %u %u\n", 
 	    hash_str("tom dick harry"), hash_str("tom harry dick"), 
 	    hash_str("dick tom harry"), hash_str("tom dick haryr"));
 
