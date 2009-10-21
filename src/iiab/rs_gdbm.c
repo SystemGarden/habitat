@@ -468,7 +468,7 @@ int    rs_gdbm_write_super_fd (GDBM_FILE fd,	/* GDBM file descriptor */
      char superblock[RS_GDBM_SUPERMAX];
      int r;
      datum k, d;
-     d.dsize = 1+sprintf(superblock, "%s|%d|%ld|%s|%s|%s|%s|%s|%s|%d|%d|%d", 
+     d.dsize = 1+sprintf(superblock, "%s|%d|%u|%s|%s|%s|%s|%s|%s|%d|%d|%d", 
 			 RS_GDBM_MAGIC, super->version, super->created,
 			 super->os_name, super->os_release, super->os_version,
 			 super->hostname, super->domainname, super->machine,
@@ -591,7 +591,7 @@ ITREE *rs_gdbm_read_headers (RS_LLD lld	/* RS generic low level descriptor */)
 {
      char *headstr, *hd_val, *tok;
      int length;
-     unsigned long hd_hash;
+     unsigned int hd_hash;
      ITREE *hds;
      RS_GDBMD rs;
 
@@ -830,8 +830,8 @@ int    rs_gdbm_append_dblock(RS_LLD lld,	/* low level descriptor */
 		   ringid, seq);
 	  length = strlen(d->data);
 	  value = xnmalloc(length + 25);	/* space for time & hd key */
-	  length = snprintf(value, length+25, "%ld|%lu|%s", (long) d->time, 
-			    d->hd_hashkey, d->data);
+	  length = snprintf(value, length+25, "%d|%u|%s", 
+			    (unsigned int) d->time, d->hd_hashkey, d->data);
 	  length++;	/* include \0 */
 
 	  /* write the composed block of data */
