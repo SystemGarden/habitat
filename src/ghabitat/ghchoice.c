@@ -1645,9 +1645,10 @@ ITREE *ghchoice_tree_group_tab(TREE *nodeargs)
 
      /* patch the leaf nodes with routines that fetch dynamic hosts */
      leafnodes = itree_create();
-     itree_traverse(nodelist)
-	  uichoice_findleafnodes((struct uichoice_node *) itree_get(nodelist),
-				 leafnodes);
+     if (nodelist)
+          itree_traverse(nodelist)
+	       uichoice_findleafnodes((struct uichoice_node *) 
+				      itree_get(nodelist), leafnodes);
      itree_traverse(leafnodes) {
 	  /* set features on node */
 	  walknode = node = itree_get(leafnodes);

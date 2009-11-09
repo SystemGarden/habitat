@@ -77,7 +77,7 @@ int rep_action(ROUTE out,		/* route output */
 	  return -1;
      }
 
-#if 0
+#if 1
      /* debug inputs, outputs and state */
      elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
      itree_strdump(in_rings,  " in-> ");
@@ -140,7 +140,7 @@ int rep_action(ROUTE out,		/* route output */
 	  if (!route_twrite(state_rt, state))
 	       elog_printf(ERROR,"unable to save state having read in %s", to);
 
-#if 0
+#if 1
 	  elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
 	  itree_strdump(in_rings,  " in-> ");
 	  itree_strdump(out_rings, " out-> ");
@@ -210,7 +210,7 @@ int rep_action(ROUTE out,		/* route output */
 	       elog_printf(ERROR,"unable to save state having written to %s",
 			   to);
 
-#if 0
+#if 1
 	  elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
 	  itree_strdump(in_rings,  " in-> ");
 	  itree_strdump(out_rings, " out-> ");
@@ -473,9 +473,9 @@ int  rep_remote_put(ROUTE rt, TABLE io, char **rtstatus, char **rtinfo) {
 	  if (rtstatus) {
 	       elog_printf(ERROR, "failed to replicate to repository "
 			   "address '%s': %s %s", route_getpurl(rt), 
-			   rtstatus, rtinfo);
-	       nfree(rtstatus);
-	       nfree(rtinfo);
+			   *rtstatus, *rtinfo);
+	       nfree(*rtstatus);
+	       nfree(*rtinfo);
 	  } else {
 	       elog_printf(ERROR, "failed to replicate to repository "
 			   "address '%s', no status", route_getpurl(rt));

@@ -4,10 +4,24 @@ SYSTEM GARDEN HABITAT
 Welcome to System Garden Habitat, the monitoring and visualisation tool for
 systems and applications.
 
-VERSION 1.1.1
--------------
+VERSION 1.2
+-----------
 
-Bug fixes for fonts, VM metrics and longer running under linux.
+Process monitoring by criteria, which limits excessive data capture.
+By default only the most busy processes are collected and only
+when they are busy. Easy to customise in the configuration with a simple
+set of directives, including floating point values. 
+
+When upgrading a default installation, remove the job table from the local 
+data store (use 'irs var/<host>.rs clockwork' from the command line, 
+then when in the tool type 'rm clockwork' and confirm to remove the table) 
+or start a new data store by renaming the file 
+(eg 'mv var/<host>.rs var/<host>.rs.old').
+When the clockwork daemon runs again, the new job table will be loaded into
+the ringstore from the distribution.
+
+Outbound replication to Harvest refactored and improved. 
+64 bit builds supported.
 
 LICENSE
 -------
@@ -20,10 +34,30 @@ and agree to the license.
 
 CHANGES
 -------
-	VERSION 1.1.2 (unreleased)
+	VERSION 1.2 (unreleased)
 	- Refactored replication code
 	- Improved replication and http errors
 	- Integration with harvest as repository for outbound replication
+	- Text configuration aded to tableset for non programatic parameters
+	- Added a filter to the process probe (ps) to reduce volume of
+	  returned information
+	- Table library bug for importing other tables found and fixed
+	- Tableset now works in floating potint or interger context, so
+	  the ps filter can have fp values in comparisons
+	- Habprobe command default logging level changed to diagnostic
+	- PS probe filter confguration added to lib
+	- Fixed a string buffer bug
+	- Fixed a 'no data' bug when extracting data for drawing
+	- changed cascade_execute() to return 0 for success to be consistent
+	- running clockwork -d reports 'success' or 'failure'
+	- removed deprecated code (meth and tablestat)
+	- upgraded probe row differencing to multi-instance
+	- Create PTREE, a pointer-key'ed tree store
+	- nmalloc, meth_b, meth_probe, gtkaction and callback refactored 
+	  to use PTREE, 64-bit clean
+	- 64-bit compliant type casting
+	- Fixed hashes to work in 64-bit environment
+	- Fixed occasional GUI bug when no hosts are returned from repository
 
 	VERSION 1.1.1
 	- Upgraded clock tick counters with 64 bit quantities for
