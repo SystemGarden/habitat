@@ -14,9 +14,13 @@
 #include "../iiab/elog.h"
 #include "../iiab/util.h"
 
-char usagetxt[]= "run the data collection probe stand alone\n"
-                 "probes are: intr, io, names, ps, sys, timer, up, down, net\n"
-                 "      -2          run probe again after 5 seconds";
+char usagetxt[]= IIAB_DEFUSAGE "[-i <interval> [-n <count>]] probe [probe-args]\n"
+                 "Clockwork's data collection probe on the command line\n"
+                 "where: probe         one of: intr, io, names, ps, sys, timer, up, down, net\n"
+                 "       probe-args    optional arguments needed by probes\n"
+                 "      -i <interval>  seconds between probe runs, infinite runs\n"
+                 "      -n <count>     limits number of times to run probe to <count>\n"
+  IIAB_DEFWHERE;
 
 char *cfdefaults = 
 "nmalloc            0\n"	/* don't check mem leaks (-1 turns on) */
@@ -31,11 +35,14 @@ char *cfdefaults =
 int main(int argc, char *argv[]) {
      ROUTE out, err;
      char *command;
+     int i, interval=0, count=0;
 
      /* start up and check arguments */
-     iiab_start("2", argc, argv, usagetxt, cfdefaults);
+     iiab_start("i:n:", argc, argv, usagetxt, cfdefaults);
      if ( ! cf_defined(iiab_cmdarg, "argv1")) {
-	  elog_printf(FATAL, "%s\nplease specify which probe to run", 
+	  elog_printf(FATAL, "*** Missing probe name: "
+		      "please specify which probe to run\n\n"
+		      "usage: %s %s", cf_getstr(iiab_cmdarg,"argv0"), 
 		      usagetxt);
 	  exit(1);
      }
@@ -46,6 +53,20 @@ int main(int argc, char *argv[]) {
 				 cf_getstr(iiab_cmdarg, "argv2"), " ",
 				 cf_getstr(iiab_cmdarg, "argv3"), NULL);
      }
+     if (cf_defined(iiab_cf, "i"))
+          interval = cf_getint(iiab_cf, "i");
+     if (cf_defined(iiab_cf, "n"))
+          count = cf_getint(iiab_cf, "n");
+
+     /* check count and interval permutations */
+     if (count >1 && !interval) {
+          elog_printf(FATAL, 
+		      "*** must set an interval (with -i) if count (-n) >1");
+	  exit (1);
+     } else if (!interval && !count)
+          count = 1;
+     else if (interval >= 1 && !count)
+          count = INT_MAX;
 
      /* run */
      out = route_open("stdout:", NULL, NULL, 0);
@@ -54,10 +75,12 @@ int main(int argc, char *argv[]) {
 	  elog_printf(FATAL, "%s\nPlease specify a valid probe name",
 		      usagetxt);
      } else {
-	  probe_action(command, out, err, NULL);
-	  if (cf_defined(iiab_cf, "2")) {
-	       sleep(5);
+          for (i=0; i < count; i++) {
 	       probe_action(command, out, err, NULL);
+	       if (interval && i < count-1) {
+		    /* interval sleep unless it is the last in the run */
+		    sleep(interval);
+	       }
 	  }
 	  probe_fini(command, out, err, NULL);
      }
