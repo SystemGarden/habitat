@@ -60,7 +60,7 @@ CHANGES
 	- Fixed occasional GUI bug when no hosts are returned from repository
 	- Changed habprobe to use count (-n) and interval (-i)
 	- Added a restart method to respawn applications
-	- Jobe to restart clockwork after 1day + 2seconds to save memory leaks
+	- New job to restart clockwork after 1d+2s to save memory leaks
 
 	VERSION 1.1.1
 	- Upgraded clock tick counters with 64 bit quantities for
