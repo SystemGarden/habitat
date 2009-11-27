@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <signal.h>
 #include "nmalloc.h"
 #include "cf.h"
 #include "iiab.h"
@@ -105,6 +106,15 @@ struct meth_info meth_builtins[]= {
        NULL,				/* start of run initialisation */
        NULL,				/* pre-action call */
        meth_builtin_rep_action,		/* action - JFDI!*/
+       NULL,				/* end of run finalisation */
+       NULL				/* name of shared library */ },
+     /* restart method */
+     { meth_builtin_restart_id,		/* method id */
+       meth_builtin_restart_info,	/* text description */
+       meth_builtin_restart_type,	/* one of METH_{SOURCE,FORK,THREAD} */
+       NULL,				/* start of run initialisation */
+       NULL,				/* pre-action call */
+       meth_builtin_restart_action,	/* action - JFDI!*/
        NULL,				/* end of run finalisation */
        NULL				/* name of shared library */ },
      {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}	/* End of builtins */
@@ -391,8 +401,8 @@ enum exectype meth_builtin_pattern_type() { return METH_SOURCE; }
  *     <pat-act route> <watch route>
  *
  * Where <pat-act route> is the name of the route that contains a list 
- * of pattern-action pairs. This route may be a file, version store, 
- * timestore or holstore, etc. See the pattern class for details of the
+ * of pattern-action pairs. This route may be any standard Habiat route
+ * in the p-url format. See the pattern class for details of the
  * pattern-action format.
  *
  * The <Watch-route> argument specifies the route that contains a list
@@ -741,8 +751,7 @@ enum exectype meth_builtin_rep_type() { return METH_FORK; }
  * refer to free text storage that defines the replication relationships.
  * The relationships are held in a semi-colon (;) separated list, with
  * each element describing a source and destination ring.
- * <state> is the name of a route (a holstore) where the state can 
- * be saved.
+ * <state> is the name of a route where the state can be saved.
  *
  * Returns -1 if there was an error, such as the external command
  * not existing or a failure to reach the reposiotry
@@ -840,3 +849,59 @@ int meth_builtin_rep_action(char *command,
      return r;
 }
 
+
+/* ----- builtin restart method ----- */
+char *meth_builtin_restart_id()   { return "restart"; }
+char *meth_builtin_restart_info() { return "Restart collection"; }
+enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
+
+/*
+ * This method attempts to restart clockwork with its original arguments
+ * and configuration location.
+ * We do this to free ourselves from any lingering memory or resource leaks
+ * or to restart a new job table.
+ * 
+ * There are currently no arguments and it only works with clockwork (as it
+ * uses stopclock() to halt itself).
+ *
+ * First we log, then we grab the command line arguments from iiab to ensure
+ * that we start in exactly the same way. Next, we register the start-up
+ * routine with atexit(2) and finally we run stopclock().
+ * Clockwork is shutdown as expected (and free all resources, files, 
+ * sockets etc), but before the final curtain, exit() will start a 
+ * new instance.
+ *
+ * Returns -1 if there was an error. If successful, this routine will not
+ * return and the caller will be terminated
+ */
+int meth_builtin_restart_action(char *command, 
+				ROUTE output, ROUTE error,
+				struct meth_runset *rset) {
+
+     /* log the fact that we are going down */
+     route_printf(output,"%s: ** shutting down at %s to start again\n", 
+		  "restart", util_decdatetime( time(NULL) ) );
+
+     /* register start-up routine */
+     atexit( meth_builtin_restart_atexit );
+
+     /* stop the calling process using SIGTERM */
+     /*stopclock();*/
+     kill(getpid(), SIGTERM);
+}
+
+extern char **iiab_argv;
+
+/* routine to register with atexit, which will start clockwork */
+void meth_builtin_restart_atexit() {
+     int r;
+
+     /* fork a new process */
+     if ( fork() == 0) {
+          /* child */
+          sleep(2);	/* wait a little while */
+          r = execv(iiab_argv[0], iiab_argv);
+     }
+
+     /* the parent ignores the child as we are in the process of exiting */
+}

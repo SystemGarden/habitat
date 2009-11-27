@@ -72,9 +72,14 @@ int           meth_builtin_event_fini(char *command, ROUTE out, ROUTE err,
 char         *meth_builtin_rep_id();
 char         *meth_builtin_rep_info();
 enum exectype meth_builtin_rep_type();
-int           meth_builtin_rep_action(char *command, ROUTE out, 
-				      ROUTE err,
+int           meth_builtin_rep_action(char *command, ROUTE out, ROUTE err,
 				      struct meth_runset *rset);
+char         *meth_builtin_restart_id();
+char         *meth_builtin_restart_info();
+enum exectype meth_builtin_restart_type();
+int           meth_builtin_restart_action(char *command, ROUTE out, ROUTE err,
+					  struct meth_runset *rset);
+void          meth_builtin_restart_atexit();
 
 /* Builtin referencies */
 extern struct meth_info meth_builtins[];

@@ -38,6 +38,8 @@
 #include "rt_rs.h"
 /*#include "rt_store.h"*/
 
+int     iiab_argc;		/* saved argc */
+char  **iiab_argv;		/* saved argv */
 CF_VALS iiab_cf;		/* configuration parameters */
 char   *iiab_cmdusage;		/* consoladated command line usage string */
 char   *iiab_cmdopts;		/* consoladated command line options */
@@ -84,6 +86,10 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 
      if ( !(opts && usage) )
 	  elog_die(FATAL, "opts or usage not set");
+
+     /* save argc & argv in a global for possible later restarting */
+     iiab_argc = argc;
+     iiab_argv = argv;
 
      /* save our launch directory & work out the standard places */
      getcwd(iiablaunchdir, PATH_MAX);
