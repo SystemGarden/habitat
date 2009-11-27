@@ -117,3 +117,6 @@ job 1
 # storage small
 #
 #0 3600  0 0 ckpt    sysgar rs:%h.rs,log,0 rs:%h.rs,log,0 1000 exec "bin/checkpoint %h.rs"
+#
+# restart clockwork just after 24 hours
+0 86402 0 0 restart,86402 sysgar rs:%h.rs,%j,86402 rs:%h.rs,err,0 60  restart ""

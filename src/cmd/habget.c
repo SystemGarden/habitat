@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
      /* Initialisation */
      iiab_start("ftlis:ayop:E", argc, argv, usagetxt, cfdefaults);
      if ( ! cf_defined(iiab_cmdarg, "argv1")) {
-          elog_printf(FATAL, "route not supplied\n"
+          elog_printf(FATAL, "*** route not supplied\n"
 		      "usage: %s %s\n", cf_getstr(iiab_cmdarg,"argv0"), 
 		      usagetxt);
 	  iiab_stop();
