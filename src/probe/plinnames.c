@@ -19,7 +19,7 @@
 #include <errno.h>
 #include <string.h>
 
-TREE *plinnames_sysfiles;
+TREE *plinnames_sysfiles = NULL;
 
 /* table constants for system probe */
 struct probe_sampletab plinnames_cols[] = {
@@ -71,7 +71,7 @@ void plinnames_collect(TABLE tab) {
 }
 
 
-void plinname_fini()
+void plinnames_fini()
 {
      tree_clearoutandfree(plinnames_sysfiles);
      tree_destroy(plinnames_sysfiles);

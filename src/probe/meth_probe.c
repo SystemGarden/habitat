@@ -432,14 +432,18 @@ int probe_fini(char *command,  		/* command line */
 #if __svr4__
      if (strstr(probename, "intr")) {
      } else if (strstr(probename, "io")) {
+          psolio_fini();
      } else if (strstr(probename, "names")) {
+          /*psolnames_fini();*/
      } else if (strstr(probename, "ps")) {
 	  psolps_fini();
      } else if (strstr(probename, "sys")) {
 	  psolsys_fini();
      } else if (strstr(probename, "timer")) {
+          psoltimer_fini();
      } else if (strstr(probename, "net")) {
      } else if (strstr(probename, "up")) {
+          psolup_fini();
      } else if (strstr(probename, "down")) {
 	  psoldown_fini();
      } else {
@@ -450,13 +454,16 @@ int probe_fini(char *command,  		/* command line */
 #elif linux
      if (strstr(probename, "intr")) {
      } else if (strstr(probename, "io")) {
+          plinio_fini();
      } else if (strstr(probename, "names")) {
+          /*plinnames_fini();*/
      } else if (strstr(probename, "ps")) {
 	  plinps_fini();
      } else if (strstr(probename, "sys")) {
 	  plinsys_fini();
      } else if (strstr(probename, "net")) {
      } else if (strstr(probename, "up")) {
+          plinup_fini();
      } else if (strstr(probename, "down")) {
 	  plindown_fini();
      } else {

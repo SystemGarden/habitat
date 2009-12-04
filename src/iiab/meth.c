@@ -989,15 +989,13 @@ int meth_relay() {
 	  rset = tree_find(meth_rsetbykey, rp->key);
 	  if (rset == ITREE_NOVAL)
 	       elog_die(FATAL, "key %s not in meth_rsetbykey", rp->key);
-	  if ( /*(rset->res->method == TIMESTORE || 
-		 rset->res->method == TABLESTORE) &&*/ rp->resfd != -1) {
+	  if (rp->resfd != -1) {
 	       blen += sprintf(buf+blen, "%d ", rp->resfd);
 	       FD_SET(rp->resfd, &fds);
 	       if (rp->resfd > highestfd)
 		    highestfd = rp->resfd;
 	  }
-	  if ( /*(rset->err->method == TIMESTORE || 
-		 rset->err->method == TABLESTORE) &&*/ rp->errfd != -1) {
+	  if (rp->errfd != -1) {
 	       blen += sprintf(buf+blen, "%d ", rp->errfd);
 	       FD_SET(rp->errfd, &fds);
 	       if (rp->errfd > highestfd)

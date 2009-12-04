@@ -59,8 +59,11 @@ CHANGES
 	- Fixed hashes to work in 64-bit environment
 	- Fixed occasional GUI bug when no hosts are returned from repository
 	- Changed habprobe to use count (-n) and interval (-i)
-	- Added a restart method to respawn applications
-	- New job to restart clockwork after 1d+2s to save memory leaks
+	- Added restart method to respawn clockwork and save memory/resource
+	  leaks, but disabled due to job table problems
+	- New (but disabled) job to restart clockwork after 1d+2s
+	- Daemons now double fork to rid themselves of controling terms
+	- New memory leaks fixed
 
 	VERSION 1.1.1
 	- Upgraded clock tick counters with 64 bit quantities for

@@ -44,7 +44,7 @@ char helptxt[] = "no help for the weary";
 char *cfdefaults = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
-     "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
+     "nmalloc    1\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
      /*"jobs       file:%l/clockwork.jobs\n"*/
      "jobs       rs:%v/%h.rs,clockwork,0\n"
@@ -53,7 +53,7 @@ char *cfdefaults =
 char *cfdefaults_userjobs = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
-     "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
+     "nmalloc    1\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
      "elog.all   none:\n"
      "elog.above warning stderr:\n";
@@ -207,7 +207,8 @@ int main(int argc, char **argv) {
      } else
           elog_printf(INFO, "loaded %d jobs", r);
 
-     /* run jobs in var if we have a public responsibility */
+     /* run jobs in var dir if we have a public responsibility to 
+      * server data over the hosts's socket */
      if ( ! cf_defined(iiab_cf, "j") )
 	  chdir(iiab_dir_var);
      while(1) {

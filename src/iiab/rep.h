@@ -48,7 +48,7 @@ void  rep_state_new_or_get(TABLE state, char *name,
 			   char **actual_remote, char **actual_local,
 			   int *remote_seq, int *local_seq);
 TABLE rep_remote_get(char *remote_ring, int remote_seq);
-TABLE rep_local_get(char *local_ring, int local_seq);
+TABLE rep_local_get(char *local_ring, int local_seq, int *local_max_seq);
 ROUTE rep_local_open_or_create(char *local_ring, char *remote_ring);
 void  rep_local_save(ROUTE rt, TABLE io);
 void  rep_state_update(TABLE state, char *name, int local_seq, 

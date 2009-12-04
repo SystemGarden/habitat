@@ -41,7 +41,7 @@ int rep_action(ROUTE out,		/* route output */
 {
      ROUTE state_rt, rt;
      TABLE state, io;
-     int r, local_seq, remote_seq, remote_youngest_s;
+     int r, local_seq, remote_seq, remote_youngest_s, local_max_seq;
      time_t youngest_t, remote_youngest_t;
      char *local_ring, *remote_ring, *buf, *from, *to;
      char *rtstatus, *rtinfo;
@@ -77,7 +77,7 @@ int rep_action(ROUTE out,		/* route output */
 	  return -1;
      }
 
-#if 1
+#if 0
      /* debug inputs, outputs and state */
      elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
      itree_strdump(in_rings,  " in-> ");
@@ -103,6 +103,9 @@ int rep_action(ROUTE out,		/* route output */
 	  rep_endpoints(itree_get(in_rings), &from, &to);
 	  rep_state_new_or_get(state, itree_get(in_rings), from, to, 
 			       &local_ring, &remote_ring, &remote_seq, NULL);
+
+	  elog_printf(INFO, "Receiving %d sequences from %s to %s",
+		      0, from, to);
 
 	  /* download remote data */
 	  io = rep_remote_get(remote_ring, remote_seq+1);
@@ -140,7 +143,7 @@ int rep_action(ROUTE out,		/* route output */
 	  if (!route_twrite(state_rt, state))
 	       elog_printf(ERROR,"unable to save state having read in %s", to);
 
-#if 1
+#if 0
 	  elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
 	  itree_strdump(in_rings,  " in-> ");
 	  itree_strdump(out_rings, " out-> ");
@@ -170,10 +173,15 @@ int rep_action(ROUTE out,		/* route output */
 	  rep_state_new_or_get(state, itree_get(out_rings), to, from, 
 			       &remote_ring, &local_ring, NULL, &local_seq);
 
-	  /* collect local data the needs to be sent */
-	  io = rep_local_get(local_ring, local_seq+1);
+	  /* collect local data that needs to be sent */
+	  io = rep_local_get(local_ring, local_seq+1, &local_max_seq);
 	  if ( ! io )
 	       continue;
+
+	  /* provide a simple log */
+	  elog_printf(INFO, "Sending %d sequences (%d rows) from %s to %s",
+		      local_max_seq-local_seq, table_nrows(io), remote_ring, 
+		      local_ring);
 
 	  /* open remote ring */
 	  rt = route_open(remote_ring, "", NULL, 0);
@@ -210,7 +218,7 @@ int rep_action(ROUTE out,		/* route output */
 	       elog_printf(ERROR,"unable to save state having written to %s",
 			   to);
 
-#if 1
+#if 0
 	  elog_printf(DIAG, "REPLICATE: state=%s", state_purl);
 	  itree_strdump(in_rings,  " in-> ");
 	  itree_strdump(out_rings, " out-> ");
@@ -301,13 +309,18 @@ TABLE rep_remote_get(char *remote_ring, int remote_seq) {
 
 
 /* Return a table containing all the new local data starting from
- * local_seq or NULL for error */
-TABLE rep_local_get(char *local_ring, int local_seq) {
+ * local_seq or NULL for error. Set the sequence number of the most recent
+ * data in local_max_seq or -1 if there is a problem or its empty */
+TABLE rep_local_get(char *local_ring, int local_seq, int *local_max_seq) {
      TABLE io;
      ROUTE rt;
+     int maxseq, rtsize;
+     time_t modt;
 
+#if 0 /* superseeded by caller message */
      elog_printf(DIAG, "replicating outbound local (upload) %s,s=%d- ",
 		 local_ring, local_seq);
+#endif
 
      /* open local route, non-creating */
      rt = route_open(local_ring, "", "", 0);
@@ -315,6 +328,15 @@ TABLE rep_local_get(char *local_ring, int local_seq) {
           elog_printf(ERROR, "unable to open local route %s as source;"
 		      "aborting, moving to next replication", local_ring);
 	  return NULL;	/* can't carry on with this ring */
+     }
+
+     /* grab last sequence status */
+     if (route_tell(rt, &maxseq, &rtsize, &modt)) {
+          *local_max_seq = maxseq-1;
+	  if (*local_max_seq < 0)
+	       *local_max_seq = -1;
+     } else {
+          *local_max_seq = -1;
      }
 
      /* select data to send */

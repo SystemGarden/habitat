@@ -183,6 +183,12 @@ void plinps_init(char *probeargs) {
 void plinps_fini() {
      itree_clearoutandfree(plinps_uidtoname);
      itree_destroy(plinps_uidtoname);
+     if (plinps_filter_purl)
+          nfree(plinps_filter_purl);
+     if (plinps_filter_cmds)
+          nfree(plinps_filter_cmds);
+     if (plinps_filter_tset)
+          tableset_destroy(plinps_filter_tset);
 }
 
 
@@ -484,6 +490,7 @@ void plinps_col_stat(TABLE tab, char *ps, ITREE *uidtoname)
      value2 = xnmalloc(strlen(value)+16);
      sprintf(value2, "%s (%d)", value, pid);
      table_replacecurrentcell(tab, "process",   value2);
+     table_freeondestroy(tab, value2);
 
      /* PROCESS STATE CODES
       *   D    Uninterruptible sleep (usually IO)

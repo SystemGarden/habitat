@@ -897,11 +897,12 @@ void meth_builtin_restart_atexit() {
      int r;
 
      /* fork a new process */
-     if ( fork() == 0) {
+     if (fork() == 0) {
           /* child */
           sleep(2);	/* wait a little while */
           r = execv(iiab_argv[0], iiab_argv);
      }
 
+     elog_printf(DIAG, "hello. i'm the parent and about to return TEMP");
      /* the parent ignores the child as we are in the process of exiting */
 }

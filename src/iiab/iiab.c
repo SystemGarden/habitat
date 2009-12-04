@@ -269,8 +269,21 @@ void iiab_daemonise()
 	  _exit(0);				/* parent */
      }
 
-     /* Child process (the novice daemon) continues */
-     setsid();					/* obtain new process group */
+     /* Child process (the novice daemon) continues.
+      * Become a session and process group leader */
+     setsid();
+
+     /* fork again to allow the session group leader to die. The child 
+      * is thus prevented from being a session group leader and acquiring
+      * a controlling terminal by mistake */
+     if (fork() > 0) {
+          _exit(0);				/* pg leader dies */
+     };
+
+     /* move to '/' so we don't hold any unnecessary directories.
+      * This would be harmful in the non-daemon invocation */
+     chdir('/');
+
 #if 0
      for (i = getdtablesize(); i >= 0; --i)
 	  close(i);				/* close all fds */
@@ -278,8 +291,9 @@ void iiab_daemonise()
      dup(i);
      dup(i);
 #endif
+
      umask(022);				/* security esp root */
-     sig_blocktty();
+     /*sig_blocktty();*/
 }
 
 
