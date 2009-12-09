@@ -49,7 +49,7 @@ CHANGES
 	- Fixed a string buffer bug
 	- Fixed a 'no data' bug when extracting data for drawing
 	- changed cascade_execute() to return 0 for success to be consistent
-	- running clockwork -d reports 'success' or 'failure'
+	- running clockwork -d reports simple 'success' or 'failure'
 	- removed deprecated code (meth and tablestat)
 	- upgraded probe row differencing to multi-instance
 	- Create PTREE, a pointer-key'ed tree store
