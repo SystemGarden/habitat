@@ -180,7 +180,7 @@ int rep_action(ROUTE out,		/* route output */
 
 	  /* provide a simple log */
 	  elog_printf(INFO, "Sending %d sequences (%d rows) from %s to %s",
-		      local_max_seq-local_seq, table_nrows(io), remote_ring, 
+		      local_max_seq-local_seq+1, table_nrows(io), remote_ring, 
 		      local_ring);
 
 	  /* open remote ring */
