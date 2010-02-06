@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <stdlib.h>
+#include <string.h>
 #include "../iiab/nmalloc.h"
 #include "../iiab/tree.h"
 #include "../iiab/itree.h"

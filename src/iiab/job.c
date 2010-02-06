@@ -280,7 +280,7 @@ void job_runqexpired(void *ikey)
  */
 int job_loadroute(char *purl 	/* p-url location of file */ )
 {
-     int start, interval, phase, count, keep;
+     long start, interval, phase, count, keep;
      char *key, *origin, *result, *error, *method, *command;
      char *endint;
      ITREE *jobdefs, *job;

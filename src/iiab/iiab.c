@@ -282,7 +282,7 @@ void iiab_daemonise()
 
      /* move to '/' so we don't hold any unnecessary directories.
       * This would be harmful in the non-daemon invocation */
-     chdir('/');
+     chdir("/");
 
 #if 0
      for (i = getdtablesize(); i >= 0; --i)
