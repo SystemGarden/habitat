@@ -2020,19 +2020,22 @@ on_repository_activate                 (GtkMenuItem     *menuitem,
      rt_sqlrs_get_credentials("ghabitat configuration", &auth, &cookies, 
 			      &cookiejar);
 
-     str = cf_getstr(cookies, "__username");
-     if (str)
-          gtk_entry_set_text(GTK_ENTRY(repos_harv_user_entry), str);
+     if (cookies) {
+          str = cf_getstr(cookies, "__username");
+	  if (str)
+	       gtk_entry_set_text(GTK_ENTRY(repos_harv_user_entry), str);
 
-     str = cf_getstr(cookies, "__password");
-     if (str)
-          gtk_entry_set_text(GTK_ENTRY(repos_harv_pw_entry), str);
+	  str = cf_getstr(cookies, "__password");
+	  if (str)
+	       gtk_entry_set_text(GTK_ENTRY(repos_harv_pw_entry), str);
 
-     str = cf_getstr(cookies, "__repository");
-     if (str)
-          gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
-     /* to be completed, the insertion of the SSL key */
-     /*gtk_text_insert(GTK_TEXT(repos_key_entry), NULL, NULL, NULL, sslkey, length(sslkey));*/
+	  str = cf_getstr(cookies, "__repository");
+	  if (str)
+	       gtk_entry_set_text(GTK_ENTRY(repos_harv_org_entry), str);
+
+	  /* to be completed, the insertion of the SSL key */
+	  /*gtk_text_insert(GTK_TEXT(repos_key_entry), NULL, NULL, NULL, sslkey, length(sslkey));*/
+     }
 
      /* --- authentication section --- */
 

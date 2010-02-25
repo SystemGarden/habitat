@@ -14,7 +14,7 @@
 #include "table.h"
 
 /* General definitions */
-#define ROUTE_BUFSZ PIPE_BUF
+#define ROUTE_BUFSZ 4096
 #define ROUTE_PURLLEN 1024
 #define ROUTE_HOSTNAMELEN 32
 #define ROUTE_READOK 1

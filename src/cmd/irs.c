@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <readline/readline.h>
 #include <ctype.h>
+#include <string.h>
 #include "../iiab/tree.h"
 #include "../iiab/itree.h"
 #include "../iiab/nmalloc.h"
