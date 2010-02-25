@@ -35,7 +35,7 @@ ghabitat/callbacks.o: VERSION
 
 # Declare the libraries I need and the link methods
 $(GHABBIN): $(GHABOBJ) -liiab -lgtk -lgdk -lgmodule -lglib -ldl -lXi \
-		-lXext -lX11 -lm #$(FATLIBS) $(THINLIBS)
+		-lXext -lX11 -lm -lintl #$(FATLIBS) $(THINLIBS)
 	$(LINK.c) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
 		$(call dep_libdir,$^) $(call dep_libname,$^)
 

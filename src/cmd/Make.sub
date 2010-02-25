@@ -48,5 +48,5 @@ ETC += cmd/habitat.conf
 
 # Manual dependency to link in with iiab, trm and probe libraries
 $(CMDBIN): -liiab
-$(CMDTBIN): -liiab -ltrm
+$(CMDTBIN): -liiab -ltrm -lreadline
 cmd/clockwork: -lprobe

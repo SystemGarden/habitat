@@ -102,7 +102,9 @@ LDLIBS += $(EXTRA_LIB) $(SYS_LIB)
 # Target & dependency section ----------------------------------------
 # Special targets used as commands: they do not create files, so we
 # use the GNU make .PHONY directive
-.PHONY: clean cleanall all really-all tag tags install
+.PHONY: clean cleanall all really-all test test-mkdir test-all tag tags \
+		install linuxinstall linuxinventory srctar gnubintar \
+		gnubintar bintar rpm ctest cleaninstall cleaninstonly testrun
 
 # Major target
 all: really-all
@@ -123,7 +125,7 @@ DEPFILES := $(OBJ:.o=.P)
 -include $(DEPFILES)
 
 # Continuation of major target
-really-all: $(TAGFILE) $(BIN) $(INITBIN) htmlman help-build
+really-all: $(TAGFILE) $(SOLIB) $(BIN) $(INITBIN) htmlman help-build
 
 # Calculate the c include dependencies (-MD flag) into .d file, then process
 # into .P file, making every dependency a 'no-action' target so make doesn't
@@ -145,10 +147,10 @@ really-all: $(TAGFILE) $(BIN) $(INITBIN) htmlman help-build
 # link .o and .c files 'correctly'. The libraries will be filtered so
 # that only the library name is stored in the binary, without directory.
 # This enables dynamic linking to continue with the normal behaviour.
-dep_nolib   = $(filter-out %.a,$(filter-out %.so,$(1)))
-dep_onlylib = $(filter %.so,$(1)) $(filter %.a,$(1))
-dep_libdir  = $(patsubst %/,-L%,$(dir $(call dep_onlylib,$(1))))
-dep_libname = $(patsubst lib%,-l%,$(basename $(notdir $(call dep_onlylib,$(1)))))
+dep_nolib   = $(filter-out %.a,$(filter-out %.so,$(filter-out %.dylib,$(filter-out %.lib,$(filter-out %.dll,$(1))))))
+dep_onlylib = $(filter %.so,$(1)) $(filter %.a,$(1)) $(filter %.dylib,$(1)) $(filter %.lib,$(1)) $(filter %.dll,$(1))
+dep_libdir  = $(patsubst %/,-L%,$(sort $(dir $(call dep_onlylib,$(1)))))
+dep_libname = $(patsubst lib%,-l%,$(sort $(basename $(notdir $(call dep_onlylib,$(1))))))
 
 %: %.o
 	$(LINK.o) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
@@ -292,7 +294,7 @@ clean_files =	$(wildcard $d/*[~%]) $(wildcard $d/*.bak) \
 		$(wildcard $d/t.*) $d/core \
 		$(wildcard $d/.[A-Za-rt-z0-9]*) \
 		$(wildcard $d/.[^s.][^v][^n]*) 
-cleanall_files= $(wildcard $d/*.so) $(wildcard $d/*.a) \
+cleanall_files= $(wildcard $d/*.so) $(wildcard $d/*.a) $(wildcard $d/*.dylib) \
 		$(wildcard $d/*.lib) $(wildcard $d/*.dll)
 cleaninst_files=$(DSTBIN)/wrapper.bin \
 		$(addprefix $(DSTBIN)/,$(notdir $(BIN))) \

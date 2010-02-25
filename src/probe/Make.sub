@@ -31,15 +31,28 @@ probe/plinio.h		\
 probe/psolsys.h		\
 
 BIN += probe/habprobe
-SOLIB += probe/libprobe.so
 LIB += probe/ps.conf
 
 # Binary dependencies
 probe/habprobe: -lprobe -liiab
 
 # Library product
-probe/libprobe.so: $(patsubst %.c, %.o, $(filter probe/%.c, $(PRLIBSRC)))
+ifeq ($(ARCH),Darwin)
+PROBESOLIB = probe/libprobe.dylib
+$(PROBESOLIB): $(patsubst %.c, %.o, $(filter probe/%.c, $(PRLIBSRC))) -liiab
+	$(LINK.o) -dynamiclib -install_name @rpath/$(notdir $@) -o $@ \
+		$(filter-out %.a,$(filter-out %.dylib,$^)) \
+		$(LOADLIBES) $(LDLIBS) \
+		$(patsubst %/,-L%,$(dir $(filter %.dylib,$^) $(filter %.a,$^))) \
+		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.dylib,$^) $(filter %.a,$^))))
+else
+PROBESOLIB = probe/libprobe.so
+$(PROBESOLIB): $(patsubst %.c, %.o, $(filter probe/%.c, $(PRLIBSRC)))
 	$(LINK.o) -shared -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
 		$(LOADLIBES) $(LDLIBS) \
 		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
 		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
+endif
+
+# Add to list of libraries
+SOLIB += $(PROBESOLIB)

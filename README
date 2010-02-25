@@ -64,6 +64,10 @@ CHANGES
 	- New (but disabled) job to restart clockwork after 1d+2s
 	- Daemons now double fork to rid themselves of controling terms
 	- New memory leaks fixed
+	- Makefiles tweeked to compile under Mac OS X and Mac Ports
+	- Fixed a GUI bug with repository screen
+	- ROUTE_BUFSZ set to 4096 as PIPE_BUF is small on MacOS X -- why?
+	- Linker fixes to make Mac OS X behave like unix and linux
 
 	VERSION 1.1.1
 	- Upgraded clock tick counters with 64 bit quantities for
