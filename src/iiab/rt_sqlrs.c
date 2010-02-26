@@ -21,6 +21,7 @@
 #include "route.h"
 #include "http.h"
 #include "rt_sqlrs.h"
+#include "iiab.h"
 
 /* private functional prototypes */
 RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld);
@@ -479,7 +480,8 @@ RT_SQLRSD rt_sqlrs_from_lld(RT_LLD lld	/* typeless low level data */)
  *
  * Cookie jar is a simple filename referring to local storage, not a purl route
  *
- * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY.
+ * The cookies are held in a route pointed to by RT_SQLRS_COOKIES_URLKEY
+ * and will be set in the default runtime config file lib/habitat.conf.
  * This should be free text in a configuration format, parasable by the
  * cf class. This config structure is then returned.
  * Again, it must not be sqlrs: or http:
@@ -495,7 +497,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 			      CF_VALS *cookies,	/* returned cookies */
 			      char **cookiejar	/* returned cookiejar fname */)
 {
-     char *auth_purl,    auth_expanded_purl[1024], *authtxt;
+  char *auth_purl, auth_expanded_purl[1024], *authtxt, *config_file;
      char *cookies_purl, cookies_expanded_purl[1024];
      char *cookiejar_unexpanded, *cookiejar_expanded;
      int len, r;
@@ -546,9 +548,13 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
           /* get cookies, containing Harvest credentials */
           cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
 	  if (cookies_purl == NULL) {
-	       elog_printf(DIAG, "cookie configuration not found: %s, "
-			   "proceeding without configuration for %s", 
-			   RT_SQLRS_COOKIES_URLKEY, purl);
+	       config_file = cf_getstr(rt_sqlrs_cf, IIAB_CFETCKEY);
+	       if ( ! config_file)
+		    config_file = "**undefined**";
+	       elog_printf(DIAG, "Cookie configuration not found: %s "
+			   "(default config file %s should exist). "
+			   "Proceeding without configuration for %s", 
+			   RT_SQLRS_COOKIES_URLKEY, config_file, purl);
 		    *cookies = NULL;
 	  } else {
 	       /* prevent loops with ourself */
@@ -619,7 +625,7 @@ void rt_sqlrs_get_credentials(char *purl,	/* route name for diag msg */
 int rt_sqlrs_put_cookies_cred(char *purl,	/* route name for diag msg */
 			     CF_VALS cookies	/* cookies */ )
 {
-     char *cookies_purl, cookies_expanded_purl[1024];
+     char *cookies_purl, cookies_expanded_purl[1024], *config_file;
      int r;
 
      /* check we have data to save */
@@ -636,9 +642,13 @@ int rt_sqlrs_put_cookies_cred(char *purl,	/* route name for diag msg */
 
      cookies_purl = cf_getstr(rt_sqlrs_cf, RT_SQLRS_COOKIES_URLKEY);
      if (cookies_purl == NULL) {
-          elog_printf(DIAG, "cookie configuration not found: %s, "
-		      "unable to continue without configuration for %s", 
-		      RT_SQLRS_COOKIES_URLKEY, purl);
+          config_file = cf_getstr(rt_sqlrs_cf, IIAB_CFETCKEY);
+	  if ( ! config_file)
+	       config_file = "**undefined**";
+	  elog_printf(DIAG, "Cookie configuration not found: %s "
+		      "(default config file %s should exist). "
+		      "Proceeding without configuration for %s", 
+		      RT_SQLRS_COOKIES_URLKEY, config_file, purl);
 	  return 0;	/* failure */
      }
 

@@ -5,7 +5,7 @@
  * Copyright System Garden Ltd 2010. All rights reserved.
  */
 
-#if MACOSX
+#if __APPLE_CC__DONTWORK
 
 #include <stdio.h>
 #include <stdlib.h>
