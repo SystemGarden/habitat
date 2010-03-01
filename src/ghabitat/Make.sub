@@ -33,6 +33,11 @@ FATLIBS    := -lgtk -lgdk -lgmodule -lglib
 # popup, which needs to have an up-to-date idea of version
 ghabitat/callbacks.o: VERSION
 
+# Platform specifics
+ifeq ($(ARCH),Darwin)
+$(GHABBIN): -lintl
+endif
+
 # Declare the libraries I need and the link methods
 $(GHABBIN): $(GHABOBJ) -liiab -lgtk -lgdk -lgmodule -lglib -ldl -lXi \
 		-lXext -lX11 -lm #-lintl #$(FATLIBS) $(THINLIBS)
@@ -45,7 +50,6 @@ $(GHABBIN): $(GHABOBJ) -liiab -lgtk -lgdk -lgmodule -lglib -ldl -lXi \
 #		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
 
 #	$(LINK.c) -o $@ $^ $(LOADLIBES) $(LDLIBS) -Liiab -liiab
-
 
 
 # Special 'fat' binary of ghabitat

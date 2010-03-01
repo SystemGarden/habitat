@@ -11,9 +11,10 @@
 
 #define CMDLN_OPTS           "s"
 #define CMDLN_USAGE          "[-s]\n"\
-"where -s          safe mode: don't autoload data"
-#define AUTOCLOCKWORK_CFNAME "clockwork.auto"
+                             "where -s          safe mode: don't autoload data"
+#define AUTOCLOCKWORK_CFNAME     "clockwork.auto"
 #define DONTASKCLOCKWORK_CFNAME  "clockwork.dontask"
+#define CLOCKWORKDISABLE_CFNAME  "clockwork.disable"
 #define HELP_BUILT_PATH  "/help/"
 #define HELP_DEV_PATH    "/../help/html/"
 #define HELP_IMPORT      "import.html"

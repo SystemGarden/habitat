@@ -3219,7 +3219,13 @@ void gtkaction_askclockwork()
 		      key, pid);
 	  return;
      }
-     
+
+#if __APPLE_CC__
+	  elog_printf(ERROR, 
+		      "Local collection is not supported on this platform");
+	  return;	  
+#endif
+
      autorun = cf_getint(iiab_cf, AUTOCLOCKWORK_CFNAME);
      if (autorun != CF_UNDEF && autorun != 0)
           gtkaction_startclockwork();

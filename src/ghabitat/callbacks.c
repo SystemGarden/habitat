@@ -676,7 +676,7 @@ on_local_collect_activate              (GtkMenuItem     *menuitem,
 {
   GtkWidget *w, *stop_bin, *stop_user, *stop_pid, *stop_run, *dontask_opt;
      char *key, *user, *tty, *datestr, pidstr[10];
-     int pid, dontask;
+     int pid, dontask, r;
 
      if ((pid = is_clockwork_running(&key, &user, &tty, &datestr))) {
           sprintf(pidstr, "%d", pid);;
@@ -691,6 +691,19 @@ on_local_collect_activate              (GtkMenuItem     *menuitem,
 	  gtk_label_set(GTK_LABEL(stop_pid), pidstr);
 	  gtk_label_set(GTK_LABEL(stop_run), datestr);
      } else {
+
+#if __APPLE_CC__
+	  elog_printf(ERROR, 
+		      "Local collection is not supported on this platform");
+	  return;	  
+#endif
+
+          r = cf_getint(iiab_cf, CLOCKWORKDISABLE_CFNAME);
+	  if (r != CF_UNDEF && r) {
+	       elog_printf(ERROR, "Local collection is disabled");
+	       return;
+	  }
+
           w = create_start_clockwork_window();
 	  gtk_widget_show (w);
 	  dontask_opt = lookup_widget(w, "start_clockwork_dontask_opt");
