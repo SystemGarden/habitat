@@ -41,8 +41,10 @@ CHMOD   = chmod
 GZIP    = gzip -cf
 BZIP    = bzip2
 MAN2HTML= man2html
+HDIUTIL = hdiutil		# mac dmg creation tool
 
 # Definitions
+PRODUCT := "System Garden Habitat"
 APP     := habitat
 VERSION := $(shell cat $(VERFILE))
 CFLAGS  += -DVERSION=\"$(VERSION)\"
@@ -228,7 +230,7 @@ linuxinventory:
 	  $(addprefix $(LINDSTDOC)/,$(notdir $(DOC) $(LININVENTORY))) \
 	  | tr ' ' '\n' >$(LININVENTORY);
 
-# Source distributions
+# Distribution packages: files and directories
 SRCTOP    := $(APP)-$(VERSION)-src
 GNUSRCTOP := $(APP)-$(VERSION)-gnusrc
 GNUBINTOP := $(APP)-$(VERSION)-$(shell uname -s)-$(shell uname -m)-gnubin
@@ -237,6 +239,8 @@ BINTARF   := $(subst ..,$(BINTOP),../README ../LICENSE $(DSTBIN) $(DSTLIB) \
 		$(DSTINC) $(DSTETC) $(DSTMAN) $(DSTHTML) $(DSTHELP) $(DSTVAR))
 RPMDIR    := $(APP)-$(VERSION)-rpm
 RPMSPEC   := util/lib/$(APP).spec
+DMGDIR    := $(APP)-$(VERSION)-dmg
+DMGFILE   := $(APP)-$(VERSION).dmg
 
 srctar:	cleanall
 	$(MKDIR) $(DSTDIST); cd $(DSTDIST); \
@@ -282,6 +286,10 @@ rpm:	srctar
 		$(APP) $(VERSION); \
 	mv $(DSTDIST)/$(RPMDIR)/* $(DSTDIST); \
 	rmdir $(DSTDIST)/$(RPMDIR);
+
+# Create Mac .dmg file, a disk image container
+dmg:	installmac
+	$(HDIUTIL) create $(DMGFILE) -volname "$(PRODUCT)" -fs HFS+ -srcfolder $(DMGDIR) -ov
 
 # Clean the source and build areas
 # There are four levels: 

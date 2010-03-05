@@ -23,6 +23,10 @@ the ringstore from the distribution.
 Outbound replication to Harvest refactored and improved. 
 64 bit builds supported.
 
+First version to run on Mac OS X under X11 but without working probes and a 
+disabled clockwork collection agent. Instead you can browse ringstores, 
+remote hosts running Habitat/clockwork and Harvest repositories.
+
 LICENSE
 -------
 
@@ -34,7 +38,7 @@ and agree to the license.
 
 CHANGES
 -------
-	VERSION 1.2 (unreleased)
+	VERSION 1.2
 	- Refactored replication code
 	- Improved replication and http errors
 	- Integration with harvest as repository for outbound replication
@@ -377,5 +381,5 @@ Take a look at http://www.systemgarden.com/harvest for more information.
 Nigel Stuckey
 
 System Garden Ltd
-March 2009
+March 2010
 nigel.stuckey@systemgarden.com
