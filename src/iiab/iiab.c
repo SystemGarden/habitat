@@ -620,7 +620,7 @@ char *iiab_getbinpath(char *argv0)
  */
 int    iiab_lockordie(char *key	/* identifier to make exclusive */ )
 {
-     char *keyfname;
+     char *keyfname, *pwuser;
      char rundetails[100], *tty, pwname[20], ttytxt[25], datestr[25];
      int fd, n, pid, ret;
      struct passwd *pw;
@@ -686,10 +686,14 @@ int    iiab_lockordie(char *key	/* identifier to make exclusive */ )
       * machine using the same key. write a summary of this instance to 
       * the newly acquired file */
      pw = getpwuid( getuid() );
+     if ( ! pw )
+          pw = "Unknown_user";
+     else 
+          pw = pw->pw_name;
      tty = ttyname(2);	/* stderr least likely to be redirected */
      if (tty == NULL)
 	  tty = "daemon";
-     n = snprintf(rundetails, 100, "%d %s %s %s\n", getpid(), pw->pw_name, 
+     n = snprintf(rundetails, 100, "%d %s %s %s\n", getpid(), pwname, 
 		  tty, util_decdatetime(time(NULL)) );
      write(fd, rundetails, n);
      close(fd);

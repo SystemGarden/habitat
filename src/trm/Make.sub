@@ -19,8 +19,7 @@ $(TRMSOLIB): $(patsubst %.c, %.o, $(filter trm/%.c, $(SRC))) \
 	$(LINK.o) -install_name @rpath/$(notdir $@) $^ -o $@ -dynamiclib
 else
 TRMSOLIB = trm/libtrm.so
-$(TRMSOLIB): $(patsubst %.c, %.o, $(filter trm/%.c, $(SRC))) \
-			-lreadline -lcurses -liiab -lreadline
+$(TRMSOLIB): $(patsubst %.c, %.o, $(filter trm/%.c, $(SRC)))
 	$(LINK.o) $^ -o $@ -shared #pg -a
 endif
 

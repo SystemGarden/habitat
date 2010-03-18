@@ -44,7 +44,7 @@ char helptxt[] = "no help for the weary";
 char *cfdefaults = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
-     "nmalloc    1\n"	/* 0: memory checking off, !0: memory checking on */
+     "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
      /*"jobs       file:%l/clockwork.jobs\n"*/
      "jobs       rs:%v/%h.rs,clockwork,0\n"
@@ -53,7 +53,7 @@ char *cfdefaults =
 char *cfdefaults_userjobs = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
-     "nmalloc    1\n"	/* 0: memory checking off, !0: memory checking on */
+     "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
      "elog.all   none:\n"
      "elog.above warning stderr:\n";
