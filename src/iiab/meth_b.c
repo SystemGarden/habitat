@@ -856,20 +856,18 @@ char *meth_builtin_restart_info() { return "Restart collection"; }
 enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
 
 /*
- * This method attempts to restart clockwork with its original arguments
- * and configuration location.
- * We do this to free ourselves from any lingering memory or resource leaks
- * or to restart a new job table.
- * 
- * There are currently no arguments and it only works with clockwork (as it
- * uses stopclock() to halt itself).
+ * This method attempts to restart the executable with its original arguments
+ * and launch directory.
+ * It is useful to free ourselves from any lingering memory or resource leaks
+ * in a long running process. Its also one way, albeit expensive, of 
+ * restarting with new configuration.
  *
- * First we log, then we grab the command line arguments from iiab to ensure
- * that we start in exactly the same way. Next, we register the start-up
- * routine with atexit(2) and finally we run stopclock().
- * Clockwork is shutdown as expected (and free all resources, files, 
- * sockets etc), but before the final curtain, exit() will start a 
- * new instance.
+ * How it works:-
+ * 1. We log
+ * 2. We register an exit routine that actually does the start-up (see 
+ *    meth_builtin_restart_atexit()) using atexit(2).
+ * 3. We signal ourselves with SIGTERM, which should carry out the exit().
+ * 4. We yeild and die if needs be.
  *
  * Returns -1 if there was an error. If successful, this routine will not
  * return and the caller will be terminated
@@ -877,6 +875,7 @@ enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
 int meth_builtin_restart_action(char *command, 
 				ROUTE output, ROUTE error,
 				struct meth_runset *rset) {
+     int child_ret;
 
      /* log the fact that we are going down */
      route_printf(output,"%s: ** shutting down at %s to start again\n", 
@@ -886,23 +885,31 @@ int meth_builtin_restart_action(char *command,
      atexit( meth_builtin_restart_atexit );
 
      /* stop the calling process using SIGTERM */
-     /*stopclock();*/
      kill(getpid(), SIGTERM);
+
+     /* No point in doing anything new now, wait for my doom! */
+     wait(&child_ret);
+     fprintf(stderr, "Saftey exit. Shouldn't reach here!!\n");
+     _Exit(10);
 }
 
-extern char **iiab_argv;
 
-/* routine to register with atexit, which will start clockwork */
+/* routine to register with atexit(), which will fork() and exec()
+ * the same arguments as the parent, the net result being to restart.
+ * Relies on iiab_start() being called and populating iiab_argv. */
+extern char **iiab_argv;
 void meth_builtin_restart_atexit() {
      int r;
 
+     fprintf(stderr, "atexit routine, before fork\n");
      /* fork a new process */
      if (fork() == 0) {
           /* child */
+          fprintf(stderr, "atexit routine, after fork in child\n");
           sleep(2);	/* wait a little while */
           r = execv(iiab_argv[0], iiab_argv);
      }
 
-     elog_printf(DIAG, "hello. i'm the parent and about to return TEMP");
+     fprintf(stderr, "atexit routine, after fork in parent\n");
      /* the parent ignores the child as we are in the process of exiting */
 }
