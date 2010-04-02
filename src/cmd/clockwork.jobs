@@ -119,4 +119,4 @@ job 1
 #0 3600  0 0 ckpt    habitat@systemgarden.com rs:%h.rs,log,0 rs:%h.rs,log,0 1000 exec "bin/checkpoint %h.rs"
 #
 # restart clockwork 2 seconds after 24 hours
-#86402 0 0 1 restart,86402 habitat@systemgarden.com rs:%h.rs,%j rs:%h.rs,err,0 60  restart ""
+86402 0 0 1 restart,86402 habitat@systemgarden.com rs:%h.rs,%j rs:%h.rs,err,0 60  restart ""

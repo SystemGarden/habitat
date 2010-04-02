@@ -4,28 +4,13 @@ SYSTEM GARDEN HABITAT
 Welcome to System Garden Habitat, the monitoring and visualisation tool for
 systems and applications.
 
-VERSION 1.2
------------
+VERSION 1.2.1
+-------------
 
-Process monitoring by criteria, which limits excessive data capture.
-By default only the most busy processes are collected and only
-when they are busy. Easy to customise in the configuration with a simple
-set of directives, including floating point values. 
-
-When upgrading a default installation, remove the job table from the local 
-data store (use 'irs var/<host>.rs clockwork' from the command line, 
-then when in the tool type 'rm clockwork' and confirm to remove the table) 
-or start a new data store by renaming the file 
-(eg 'mv var/<host>.rs var/<host>.rs.old').
-When the clockwork daemon runs again, the new job table will be loaded into
-the ringstore from the distribution.
-
-Outbound replication to Harvest refactored and improved. 
-64 bit builds supported.
-
-First version to run on Mac OS X under X11 but without working probes and a 
-disabled clockwork collection agent. Instead you can browse ringstores, 
-remote hosts running Habitat/clockwork and Harvest repositories.
+Restarting of daemon fixed and re-enabled in the job table every 24 hours.
+Whilst we attempt to purge all memory and resource leaks, sometimes we 
+need a little help :-). (Don't put forks() in atexits()!!) 
+Reload the job table to take effect.
 
 LICENSE
 -------
@@ -38,6 +23,9 @@ and agree to the license.
 
 CHANGES
 -------
+	VERSION 1.2.1
+	- Restart fixed and re-enabled
+
 	VERSION 1.2
 	- Refactored replication code
 	- Improved replication and http errors

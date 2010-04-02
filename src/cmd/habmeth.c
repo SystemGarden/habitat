@@ -27,6 +27,7 @@ char *usagetxt;
 
 char *mkusage();
 int listmeths(char *buf, int buflen);
+void exit_handler(int sig);
 
 /*
  * Main function
@@ -35,6 +36,8 @@ int main(int argc, char *argv[]) {
      char *method, command[1024], argstr[8];
      int i, r, limit, clen=0;
      METHID methid;
+
+     fprintf(stderr, "pid %d: welcome, starting up\n", getpid());
 
      /* start up and check arguments */
      usagetxt = mkusage();
@@ -70,6 +73,11 @@ int main(int argc, char *argv[]) {
 	  exit(1);
      }
      
+     /* set up signal handlers */
+     sig_init();
+     sig_on();
+     sig_setexit(exit_handler);
+
      if ((r = meth_actiononly(methid, command, "stdout:", "stderr:", 0)))
        elog_printf(FATAL, "Method %s failed, returning %d", 
 		   cf_getstr(iiab_cmdarg, "argv1"), r);
@@ -107,3 +115,14 @@ int listmeths(char *buf, int buflen) {
      return curlen;
 }
 
+
+/* exit handler */
+void exit_handler(int sig /* signal vector */) {
+     sig_off();
+     elog_printf(INFO, "Shutting down from signal %d", sig);
+     fprintf(stderr, "pid %d: Shutting down from signal %d\n", getpid(), sig);
+     meth_fini();
+     iiab_stop();
+     fprintf(stderr, "pid %d: exit now\n", getpid());
+     exit(0);
+}

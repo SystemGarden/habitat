@@ -13,6 +13,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <signal.h>
+#include <errno.h>
 #include "nmalloc.h"
 #include "cf.h"
 #include "iiab.h"
@@ -22,6 +23,7 @@
 #include "record.h"
 #include "event.h"
 #include "rep.h"
+#include "util.h"
 
 /* Manual link to builtin methods */
 struct meth_info meth_builtins[]= { 
@@ -858,58 +860,56 @@ enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
 /*
  * This method attempts to restart the executable with its original arguments
  * and launch directory.
- * It is useful to free ourselves from any lingering memory or resource leaks
- * in a long running process. Its also one way, albeit expensive, of 
- * restarting with new configuration.
+ * It is useful to free an application from any lingering memory or 
+ * resource leaks in a long running process. Its also one way, albeit
+ * expensive, of restarting with new configuration.
+ * This will not return and will exit this instance of the application
  *
  * How it works:-
  * 1. We log
  * 2. We register an exit routine that actually does the start-up (see 
  *    meth_builtin_restart_atexit()) using atexit(2).
  * 3. We signal ourselves with SIGTERM, which should carry out the exit().
- * 4. We yeild and die if needs be.
+ * 4. We yield and die
  *
  * Returns -1 if there was an error. If successful, this routine will not
  * return and the caller will be terminated
  */
+/* static globals from iiab.c file */
+extern int     iiab_argc;		/* saved argc */
+extern char  **iiab_argv;		/* saved argv */
 int meth_builtin_restart_action(char *command, 
 				ROUTE output, ROUTE error,
 				struct meth_runset *rset) {
      int child_ret;
 
-     /* log the fact that we are going down */
-     route_printf(output,"%s: ** shutting down at %s to start again\n", 
-		  "restart", util_decdatetime( time(NULL) ) );
+     route_printf(output,"%s (%d child of %d): ** shutting down at %s to "
+		  "start again\n", "restart", getpid(), getppid(), 
+		  util_decdatetime( time(NULL) ) );
 
-     /* register start-up routine */
-     atexit( meth_builtin_restart_atexit );
+     /* normally the routes are closed in the caller, but as we don't return
+      * we should close them now are revert to stdio */
+     route_close(output);
+     route_close(error);
 
-     /* stop the calling process using SIGTERM */
-     kill(getpid(), SIGTERM);
-
-     /* No point in doing anything new now, wait for my doom! */
-     wait(&child_ret);
-     fprintf(stderr, "Saftey exit. Shouldn't reach here!!\n");
-     _Exit(10);
-}
-
-
-/* routine to register with atexit(), which will fork() and exec()
- * the same arguments as the parent, the net result being to restart.
- * Relies on iiab_start() being called and populating iiab_argv. */
-extern char **iiab_argv;
-void meth_builtin_restart_atexit() {
-     int r;
-
-     fprintf(stderr, "atexit routine, before fork\n");
+     /* Before we terminate, fork()-exec() our next generation */
      /* fork a new process */
      if (fork() == 0) {
           /* child */
-          fprintf(stderr, "atexit routine, after fork in child\n");
           sleep(2);	/* wait a little while */
-          r = execv(iiab_argv[0], iiab_argv);
+          execv(iiab_argv[0], iiab_argv);
      }
 
-     fprintf(stderr, "atexit routine, after fork in parent\n");
-     /* the parent ignores the child as we are in the process of exiting */
+     /* send a SIGTERM to myself, which will tell the app to close 
+      * anything it needs to and probably exit. */
+     if (kill(getpid(), SIGTERM) < 0) {
+       fprintf(stderr, "pid %d: Unable to kill myself: %d - %s\n",
+	       getpid(), errno, strerror(errno));       
+     }
+
+     /* just in case there was no exit in the SIGTERM handler, carry
+      * out an exit */
+     fprintf(stderr, "Sent SIGTERM to myself (%d), handler did not exit "
+	     "so I will. Finished now _Exit(10)\n", getpid());
+     _Exit(10);
 }
