@@ -24,7 +24,9 @@ and agree to the license.
 CHANGES
 -------
 	VERSION 1.2.1
-	- Restart fixed and re-enabled
+	- Restart method fixed and re-enabled
+	- Signals now specifically unblocked on initialisation
+	- Added a shutdown method
 
 	VERSION 1.2
 	- Refactored replication code
