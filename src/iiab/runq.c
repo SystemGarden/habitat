@@ -427,8 +427,8 @@ int  runq_schedw(struct runq_work *w,	/* work structure */
      /* insert work as an event and log it */
      if (next) {
 	  /* work is current */
-          elog_printf(DEBUG, "%s next run at %s (%d)", w->desc, 
-		      util_decdatetime(next), next);
+          elog_printf(DEBUG, "%s next run at %s (in %ds)", w->desc, 
+		      util_decdatetime(next), next-now);
 
 	  /* DEBUG: check for duplicates */
 	  itree_traverse(runq_event)

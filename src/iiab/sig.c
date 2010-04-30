@@ -18,8 +18,9 @@ sigset_t blocktty;	/* signal set to block SIGTSTP, SIGTTOU, SIGTTIN */
 sigset_t blockwork;	/* signal set to block all catachable signals */
 sigset_t blocknothing;	/* no signals set */
 sigset_t blockprev;	/* holds disabled signal set from sig_off() */
+int      sig_didinit=0;	/* if the sig class has been initialised */
 
-/* Initialise the signals */
+/* Initialise the class and unblock everything */
 void sig_init()
 {
      /* Prepare a block nothing set */
@@ -47,6 +48,12 @@ void sig_init()
      /* Prepare all signal blocking mask */
      if (sigfillset(&blockall))
 	  elog_die(FATAL, "unable to prepare blockall");
+
+     sig_didinit++;	/* class initialised */
+
+     elog_send(DEBUG, "enable signals");
+     if (sigprocmask(SIG_SETMASK, &blocknothing, NULL) == -1)
+          elog_die(FATAL, "unable to BLOCK");
 }
 
 /* Install a SIGCHLD signal handler */
@@ -55,7 +62,7 @@ void sig_setchild(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%p", handler);
+     elog_printf(DEBUG, "set SIGCHILD handler=%p", handler);
 
      /* Set up child event handler */
      s.sa_handler = handler;
@@ -63,7 +70,7 @@ void sig_setchild(void (*handler)(int))
      s.sa_flags = SA_RESTART;	/* Linux likes! -may be non portable */
      r = sigaction(SIGCHLD, &s, NULL);
      if (r == -1)
-	  elog_die(FATAL, "unable to install signal handler");
+	  elog_die(FATAL, "unable to install SIGCHILD signal handler");
 }
 
 
@@ -73,7 +80,7 @@ void sig_setalarm(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%p", handler);
+     elog_printf(DEBUG, "set SIGALRM handler=%p", handler);
 
      /* Set up the alarm() callback */
      s.sa_handler = handler;
@@ -81,7 +88,7 @@ void sig_setalarm(void (*handler)(int))
      s.sa_flags = SA_RESTART;	/* Linux likes! - may be non portable */
      r = sigaction(SIGALRM, &s, NULL);
      if (r == -1)
-	  elog_die(FATAL, "unable to install signal handler");
+	  elog_die(FATAL, "unable to install SIGALRM signal handler");
 }
 
 
@@ -92,12 +99,14 @@ void sig_setexit(void (*handler)(int))
      struct sigaction s;
      int r;
 
-     elog_printf(DEBUG, "handler=%p", handler);
+     elog_printf(DEBUG, "set exit handler=%p for SIGHUP, SIGINT, SIGQUIT & "
+		 "SIGTERM", handler);
 
      s.sa_handler = handler;
-     s.sa_mask = blockalarm;	/* let SIGCHLD through as it represents 
-				 * the draining down of work, but dont allow
-				 * SIGALRM as means more work!! */
+     s.sa_mask = blockalarm;	/* let SIGCHLD through for the duration of the
+				 * handler as it represents the draining down 
+				 * of work, but dont allow SIGALRM as means 
+				 * more work!! */
      s.sa_flags = SA_RESTART;	/* linux likes! - may be non portable */
      r = sigaction(SIGHUP, &s, NULL);
      if (r == -1)
@@ -123,7 +132,8 @@ void sig_blocktty()
 }
 
 
-/* Disable all preventable signals and save the previous signal set */
+/* Disable all preventable signals (SIGALRM & SIGCHLD) and save the previous 
+ * signal set */
 void sig_off()
 {
      elog_send(DEBUG, "disable signals");
@@ -132,10 +142,16 @@ void sig_off()
 	  elog_die(FATAL, "unable to BLOCK");
 }
 
-/* Restore signal set */
+/* Restore signal set previously diabled by sig_off() */
 void sig_on()
 {
-     elog_send(DEBUG, "restore signals");
+     if (sig_didinit) {
+          elog_send(DEBUG, "restore signals");
+     } else {
+          elog_send(ERROR, "ask to restore signals but sig not init; "
+		    "do nothing");
+	  return;
+     }
 
      if (sigprocmask(SIG_SETMASK, &blockprev, NULL) == -1)
 	  elog_die(FATAL, "unable to UNBLOCK");

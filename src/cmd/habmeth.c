@@ -28,6 +28,7 @@ char *usagetxt;
 char *mkusage();
 int listmeths(char *buf, int buflen);
 void exit_handler(int sig);
+void exit_method();
 
 /*
  * Main function
@@ -36,8 +37,6 @@ int main(int argc, char *argv[]) {
      char *method, command[1024], argstr[8];
      int i, r, limit, clen=0;
      METHID methid;
-
-     fprintf(stderr, "pid %d: welcome, starting up\n", getpid());
 
      /* start up and check arguments */
      usagetxt = mkusage();
@@ -65,7 +64,7 @@ int main(int argc, char *argv[]) {
      /* run the method without invoking meth_execute(), which will honour
       * FORK types of method. We want to wait for the command to finish
       * as it is a simple command */
-     meth_init();
+     meth_init(argc, argv, exit_method);
      methid = meth_lookup(method);
      if (methid == TREE_NOVAL) {
 	  elog_printf(FATAL, "%s\nmethod %s not recognised", 
@@ -94,7 +93,7 @@ char *mkusage() {
      static char usage[2000];
      int i, j;
 
-     strcpy(usage, "run a habitat method stand alone, where methods are:-\n");
+     strcpy(usage, "Run a habitat method stand alone, where methods are:-\n");
      i=strlen(usage);
      i+=listmeths(usage+i, 2000-i);
      strncpy(usage+i, "excludes probe method, see habprobe(1)\n", 2000-i);
@@ -116,13 +115,20 @@ int listmeths(char *buf, int buflen) {
 }
 
 
-/* exit handler */
+/* exit handler for signal */
 void exit_handler(int sig /* signal vector */) {
      sig_off();
-     elog_printf(INFO, "Shutting down from signal %d", sig);
-     fprintf(stderr, "pid %d: Shutting down from signal %d\n", getpid(), sig);
+     elog_printf(INFO, "Shutting down from signal %d (pid %d)", sig, getpid());
      meth_fini();
      iiab_stop();
-     fprintf(stderr, "pid %d: exit now\n", getpid());
+     exit(0);
+}
+
+/* exit from a method */
+void exit_method(int sig /* signal vector */) {
+     sig_off();
+     elog_printf(INFO, "Shutting down from a method (pid %d)", getpid());
+     meth_fini();
+     iiab_stop();
      exit(0);
 }

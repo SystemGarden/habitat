@@ -79,7 +79,11 @@ char         *meth_builtin_restart_info();
 enum exectype meth_builtin_restart_type();
 int           meth_builtin_restart_action(char *command, ROUTE out, ROUTE err,
 					  struct meth_runset *rset);
-void          meth_builtin_restart_atexit();
+char         *meth_builtin_shutdown_id();
+char         *meth_builtin_shutdown_info();
+enum exectype meth_builtin_shutdown_type();
+int           meth_builtin_shutdown_action(char *command, ROUTE out, ROUTE err,
+					   struct meth_runset *rset);
 
 /* Builtin referencies */
 extern struct meth_info meth_builtins[];

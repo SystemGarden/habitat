@@ -250,15 +250,21 @@ RT_STDD rt_std_from_lld(RT_LLD lld	/* typeless low level data */)
 	  elog_die(FATAL, "passed NULL low level descriptor");
      if ( (((RT_STDD)lld)->magic != RT_STDIN_LLD_MAGIC) &&
 	  (((RT_STDD)lld)->magic != RT_STDOUT_LLD_MAGIC) &&
-	  (((RT_STDD)lld)->magic != RT_STDERR_LLD_MAGIC) )
+	  (((RT_STDD)lld)->magic != RT_STDERR_LLD_MAGIC) ) {
+
+          if (((RT_STDD)lld)->magic == 0)
+	       elog_printf(FATAL, "magic type of 0 encountered, possibly "
+			   "previously deleted\n");
 	  elog_die(FATAL, "magic type mismatch: we were given "
-		   "%s (%s) but can only handle either %s (%s) or %s (%s)"
-		   "of %s (%s)", 
+		   "%s (%s [magic %d]) but can only handle either %s (%s) "
+		   "or %s (%s) or %s (%s)", 
 		   ((RT_STDD)lld)->prefix, 
 		   ((RT_STDD)lld)->description,
+		   ((RT_STDD)lld)->magic,
 		   rt_stdin_prefix(),  rt_stdin_description(),
 		   rt_stdout_prefix(), rt_stdout_description(),
 		   rt_stderr_prefix(), rt_stderr_description());
+     }
 
      return (RT_STDD) lld;
 }

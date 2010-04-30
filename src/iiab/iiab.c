@@ -38,8 +38,6 @@
 #include "rt_rs.h"
 /*#include "rt_store.h"*/
 
-int     iiab_argc;		/* saved argc */
-char  **iiab_argv;		/* saved argv */
 CF_VALS iiab_cf;		/* configuration parameters */
 char   *iiab_cmdusage;		/* consoladated command line usage string */
 char   *iiab_cmdopts;		/* consoladated command line options */
@@ -86,10 +84,6 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 
      if ( !(opts && usage) )
 	  elog_die(FATAL, "opts or usage not set");
-
-     /* save argc & argv in a global for possible later restarting */
-     iiab_argc = argc;
-     iiab_argv = argv;
 
      /* save our launch directory & work out the standard places */
      getcwd(iiablaunchdir, PATH_MAX);
@@ -202,9 +196,10 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
      http_init();
 
 #if 0
-     /* (d6) self destruction due to snapshot time out, licenses etc */
+     /* self destruction due to snapshot time out, licenses etc
+      * disabled, but kept here just in case we want to do it again */
      if ( ! cf_defined(iiab_cf, IIAB_LICNAME) )
-	  if (time(NULL) > 993884454)	/* HACK ALERT, some time in jul 2001 */
+	  if (time(NULL) > IIAB_EXPIRE)
 	       elog_printf(FATAL, "This is development software "
 			   "and almost certainly out of date.\n"
 			   "You should arrange an update from system garden "
@@ -687,13 +682,13 @@ int    iiab_lockordie(char *key	/* identifier to make exclusive */ )
       * the newly acquired file */
      pw = getpwuid( getuid() );
      if ( ! pw )
-          pw = "Unknown_user";
+          pwuser = "Unknown_user";
      else 
-          pw = pw->pw_name;
+          pwuser = pw->pw_name;
      tty = ttyname(2);	/* stderr least likely to be redirected */
      if (tty == NULL)
 	  tty = "daemon";
-     n = snprintf(rundetails, 100, "%d %s %s %s\n", getpid(), pwname, 
+     n = snprintf(rundetails, 100, "%d %s %s %s\n", getpid(), pwuser, 
 		  tty, util_decdatetime(time(NULL)) );
      write(fd, rundetails, n);
      close(fd);

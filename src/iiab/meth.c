@@ -76,21 +76,35 @@ TREE    *meth_rsetbykey;/* open routes indexed by work key */
 ITREE   *meth_procbypid;/* running method processes; 
 			 * tree of meth_runprocinfo index by pid */
 ITREE   *meth_cbbyfd;	/* callback by file descriptor */
-int meth_restartselect;	/* set by meth_child() for meth_relay() to restart
-			 * its select() as the results may not be correct */
+int   meth_restartselect; /* set by meth_child() for meth_relay() to restart
+			   * its select() as the results may not be correct */
+int    meth_argc;	  /* saved argc used by restart */
+char **meth_argv;	  /* saved argv used by restart */
+void *meth_shutdown_func; /* shutdown function used by restart and shutdown
+			   * built-in methods */
 
-/* Initialise method structures */
-void meth_init()
+/* Initialise method structures
+ * Arguments are argc and argv to recreate the process on restart and
+ * a pointer to a shutdown function for the application or NULL
+ * for no argument. Used by 'restart' and 'shutdown' built-in methods 
+ * (see meth_b.c)
+ */
+void meth_init(int argc, char *argv[],		/* used for restart built-in */
+	       void *(this_shutdown_func)()	/* used for restart+shutdown */
+	       )
 {
      int i;
 
      sig_setchild(meth_child);
      sig_off();		/* normally unaccepted - use preemption points */
-     meth_methods = tree_create();
-     meth_rsetbykey = tree_create();
-     meth_procbypid = itree_create();
-     meth_cbbyfd = itree_create();
+     meth_methods       = tree_create();
+     meth_rsetbykey     = tree_create();
+     meth_procbypid     = itree_create();
+     meth_cbbyfd        = itree_create();
      meth_restartselect = 0;
+     meth_shutdown_func = this_shutdown_func;
+     meth_argc          = argc;
+     meth_argv          = argv;
 
      for (i=0; meth_builtins[i].name; i++)
 	  /* Add to tree with the method's id name as key */

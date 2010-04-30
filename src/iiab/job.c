@@ -25,7 +25,7 @@ char *job_cols[] =   {"start", "interval", "phase", "count", "key", \
 		      "origin", "result", "errors", "keep", "method",
 		      "command", NULL};
 
-ITREE *job_tab;		/* tree list of jobs */
+ITREE *job_tab=NULL;	/* tree list of jobs */
 int job_debug=0;	/* debug flag */
 time_t job_start_t;	/* job class start time */
 
@@ -216,8 +216,9 @@ void job_clear()
      /* Traverse the job_tab list and delete the associated storage */
      /* The loop below always resets to a known state */
      elog_printf(DEBUG, "removing %d jobs", itree_n(job_tab));
-     itree_traverse(keys)
-	  job_rm( itree_getkey(keys) );
+    itree_traverse(keys) {
+         job_rm( itree_getkey(keys) );
+    }
 
      itree_destroy(keys);
 }

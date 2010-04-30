@@ -31,6 +31,7 @@
 #define IIAB_DOMAIN     IIAB_CFNAME "domainname"
 #define IIAB_FQHOST     IIAB_CFNAME "fqhostname"
 #define IIAB_HOSTLEN    100
+#define IIAB_EXPIRE     123456789
 #define IIAB_DEFOPTS	":c:C:dDe:hv"
 #define IIAB_DEFUSAGE   "[-c <purl>] [-C <cfcmd>] [-e <fmt>] [-dDhv] "
 #define IIAB_DEFWHERE \

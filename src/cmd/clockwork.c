@@ -33,7 +33,9 @@
 
 int main(int, char **);
 int load_jobs(char *purl);
-void stopclock(int sig /* signal vector */);
+void stopclock_meth();
+void stopclock_sig(int sig /* signal vector */);
+void stopclock();
 
 /* initialise globals */
 char usagetxt[] = "[-j <jobs>] [-sf]\n" \
@@ -97,7 +99,7 @@ int main(int argc, char **argv) {
       * iiab_start(); mostly these are for job & dispatching.
       */
      sig_init();
-     meth_init();
+     meth_init(argc, argv, stopclock_meth);
      meth_add(&probe_cbinfo);
      runq_init(time(NULL));
      job_init();
@@ -127,7 +129,7 @@ int main(int argc, char **argv) {
      }
 
      /* set up signal handlers */
-     sig_setexit(stopclock);
+     sig_setexit(stopclock_sig);
 
      /* check 'jobs' variable exists, if not we can't set one up */
      jobpurl = cf_getstr(iiab_cf, "jobs");
@@ -231,24 +233,34 @@ int main(int argc, char **argv) {
 }
 
 
+/* shutdown clockwork by a method */
+void stopclock_meth() {
+     elog_printf(INFO, "clockwork shutting down from a method");
+     stopclock();
+}
+
+/* shutdown clockwork by a signal */
+void stopclock_sig(int sig /* signal vector */) {
+     sig_off();
+     elog_printf(INFO, "clockwork shutting down from signal %d", sig);
+     stopclock();
+}
+
 /* shutdown clockwork */
-void stopclock(int sig /* signal vector */) {
+void stopclock() {
      int r;
      time_t clock;
 
      if (!clock_done_init)
           _exit(r);
 
-     sig_off();
-     elog_printf(INFO, "clockwork shutting down from signal %d", sig);
-
      runq_disable();
      r = meth_shutdown();
      if (r) {
 	  clock = time(NULL);
           elog_printf(WARNING, "%d jobs did not shutdown normally", r);
-	  fprintf(stderr, "%s: shutdown from signal %d, meth_shutdown() %d "
-		  "at %s", cf_getstr(iiab_cmdarg, "argv0"), sig, 
+	  fprintf(stderr, "%s: shutdown, meth_shutdown() %d "
+		  "at %s", cf_getstr(iiab_cmdarg, "argv0"), 
 		  r, ctime(&clock));
      } else
           elog_printf(INFO, "%s successfully shutdown", 

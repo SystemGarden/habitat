@@ -119,6 +119,15 @@ struct meth_info meth_builtins[]= {
        meth_builtin_restart_action,	/* action - JFDI!*/
        NULL,				/* end of run finalisation */
        NULL				/* name of shared library */ },
+     /* shutdown method */
+     { meth_builtin_shutdown_id,	/* method id */
+       meth_builtin_shutdown_info,	/* text description */
+       meth_builtin_shutdown_type,	/* one of METH_{SOURCE,FORK,THREAD} */
+       NULL,				/* start of run initialisation */
+       NULL,				/* pre-action call */
+       meth_builtin_shutdown_action,	/* action - JFDI!*/
+       NULL,				/* end of run finalisation */
+       NULL				/* name of shared library */ },
      {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL}	/* End of builtins */
 };
 
@@ -864,52 +873,73 @@ enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
  * resource leaks in a long running process. Its also one way, albeit
  * expensive, of restarting with new configuration.
  * This will not return and will exit this instance of the application
- *
- * How it works:-
- * 1. We log
- * 2. We register an exit routine that actually does the start-up (see 
- *    meth_builtin_restart_atexit()) using atexit(2).
- * 3. We signal ourselves with SIGTERM, which should carry out the exit().
- * 4. We yield and die
- *
- * Returns -1 if there was an error. If successful, this routine will not
- * return and the caller will be terminated
  */
-/* static globals from iiab.c file */
-extern int     iiab_argc;		/* saved argc */
-extern char  **iiab_argv;		/* saved argv */
+/* static globals from meth.c file */
+extern int     meth_argc;		/* saved argc */
+extern char  **meth_argv;		/* saved argv */
+extern void  (*meth_shutdown_func)();   /* saved shutdown function used by 
+					 * restart and shutdown */
+
 int meth_builtin_restart_action(char *command, 
 				ROUTE output, ROUTE error,
 				struct meth_runset *rset) {
      int child_ret;
 
-     route_printf(output,"%s (%d child of %d): ** shutting down at %s to "
+     route_printf(output,"%s (%d child of %d): **** shutting down at %s to "
 		  "start again\n", "restart", getpid(), getppid(), 
 		  util_decdatetime( time(NULL) ) );
 
-     /* normally the routes are closed in the caller, but as we don't return
-      * we should close them now are revert to stdio */
-     route_close(output);
-     route_close(error);
-
      /* Before we terminate, fork()-exec() our next generation */
-     /* fork a new process */
      if (fork() == 0) {
           /* child */
+          route_printf(output,"%s (%d child of %d): ==== after fork at %s "
+		       "waiting 10 to start again\n", "restart", getpid(), 
+		       getppid(), 
+		       util_decdatetime( time(NULL) ) );
+
           sleep(2);	/* wait a little while */
-          execv(iiab_argv[0], iiab_argv);
+          route_printf(output,"%s (%d child of %d): ==== before exec at %s "
+		       "to start again\n", "restart", getpid(), 
+		       getppid(), 
+		       util_decdatetime( time(NULL) ) );
+          execv(meth_argv[0], meth_argv);
      }
 
-     /* send a SIGTERM to myself, which will tell the app to close 
-      * anything it needs to and probably exit. */
-     if (kill(getpid(), SIGTERM) < 0) {
-       fprintf(stderr, "pid %d: Unable to kill myself: %d - %s\n",
-	       getpid(), errno, strerror(errno));       
-     }
+     /* now exit, using the routine supplied to meth.c in meth_init() */
+     (meth_shutdown_func)();
 
      /* just in case there was no exit in the SIGTERM handler, carry
       * out an exit */
-     fprintf(stderr, "Sent SIGTERM to myself (%d), handler did not exit "
-	     "so I will. Finished now _Exit(10)\n", getpid());
+     fprintf(stderr, "Attempted to shutdown (pid %d) after a fork, but have "
+	     "not exited\n", getpid());
+     _Exit(10);
+}
+
+
+/* ----- builtin shutdown method ----- */
+char *meth_builtin_shutdown_id()   { return "shutdown"; }
+char *meth_builtin_shutdown_info() { return "Shutdown collection"; }
+enum exectype meth_builtin_shutdown_type() { return METH_SOURCE; }
+
+/*
+ * This method attempts to shutdown the executable.
+ * This will not return and will exit this instance of the application
+ */
+int meth_builtin_shutdown_action(char *command, 
+				ROUTE output, ROUTE error,
+				struct meth_runset *rset) {
+     int child_ret;
+
+     route_printf(output,"%s (%d child of %d): **** shutting down at %s\n",
+		  "shutdown", getpid(), getppid(), 
+		  util_decdatetime( time(NULL) ) );
+
+     /* now exit, using the routine supplied to meth.c in meth_init() */
+     (meth_shutdown_func)();
+
+     /* just in case there was no exit in the SIGTERM handler, carry
+      * out an exit */
+     fprintf(stderr, "Attempted to shutdown (pid %d) but have not exited\n",
+	     getpid());
      _Exit(10);
 }

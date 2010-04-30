@@ -1859,8 +1859,8 @@ main(int argc, char **argv)
 
      /* Write the buffer out to a route, so that we may read it back in */
      unlink(TEST_FILE1);
-     route_init("stderr", 0, NULL);
-     err = route_open("stderr", NULL, NULL, 10);
+     route_init("stderr:", 0, NULL);
+     err = route_open("stderr:", NULL, NULL, 10);
      elog_init(err, 0, "util test", NULL);
      rt = route_open(TEST_PURL1, NULL, NULL, 10);
      route_printf(rt, TEST_TEXT1);
