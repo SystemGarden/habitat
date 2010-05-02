@@ -758,8 +758,8 @@ int  iiab_ispidrunning(int pid) {
 
 
 /*
- * Check to see if the options are all present on a command line,  
- * returning 1 for yes, 0 for no.
+ * Check to see if the given options in opts are all present on a command
+ * line, returning 1 for yes, 0 for no.
  */
 int   iiab_iscmdopt(char *opts, int argc, char **argv)
 {
