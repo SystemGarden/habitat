@@ -27,6 +27,8 @@ CHANGES
 	- Restart method fixed and re-enabled
 	- Signals now specifically unblocked on initialisation
 	- Added a shutdown method
+	- Clockwork command introduces -j and -J for jobs
+	- Clockwork jobs now read from files not DB
 
 	VERSION 1.2
 	- Refactored replication code
