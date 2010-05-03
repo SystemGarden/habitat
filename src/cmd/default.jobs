@@ -4,7 +4,9 @@ job 1
 # Contains the timings for probes to gather data and to process it 
 # afterwards.
 # 
-# Copyright System Garden Ltd 1996-2009, All rights reserved.
+# Default job table
+# 
+# Copyright System Garden Ltd 1996-2010, All rights reserved.
 #
 # Line format is:-
 #   start   period   phase   count   name   requester   results   errors   nrings   method   command

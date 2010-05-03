@@ -38,62 +38,60 @@ void stopclock_sig(int sig /* signal vector */);
 void stopclock();
 
 /* initialise globals */
-char usagetxt[] = "[-j <jobs>] [-sf]\n" \
-     "where -j <jobs>   use jobs from route <jobs>; don't daemonise (imply -s)\n"
-     "      -f          run in foreground, don't daemonise\n"
-     "      -s          server off: do not listen for data requests from network";
+char usagetxt[] = "[-j stdjob | -J jobfile] [-sf]
+where -j stdjob   select from standard job tables
+      -J jobfile  use jobs from route <jobfile> but don't daemonise (imply -s)
+      -f          run in foreground, don't daemonise
+      -s          server off: do not listen for data requests from network";
 char helptxt[] = "no help for the weary";
 char *cfdefaults = 
      "iiab.debug -1\n"
      "job.debug  -1\n"
      "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
-     /*"jobs       file:%l/clockwork.jobs\n"*/
-     "jobs       rs:%v/%h.rs,clockwork,0\n"
+     "jobs       file:%l/default.jobs\n"
      "elog.all   none:\n"
      "elog.above warning rs:%v/%h.rs,log\n";
-char *cfdefaults_userjobs = 
-     "iiab.debug -1\n"
-     "job.debug  -1\n"
-     "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
-     "log        stderr:\n"
-     "elog.all   none:\n"
-     "elog.above warning stderr:\n";
+
 int   debug=0;			/* Debug state */
 int   clock_done_init=0;
 
 #define CLOCKWORK_KEYNAME "clockwork"
 #define DEFJOBS_TYPE "file:"
 #define DEFJOBS_FILE "clockwork.jobs"
+#define SYSJOB_CFLINE  "jobs file:%l/"
+#define USERJOB_CFLINE  "jobs "
 
 int main(int argc, char **argv) {
      int r, joblen, errorstatus=0;
-     char *jobpurl, jobpurl_t[1024], *jobtxt, *defjobs, buf[1024];
+     char *jobpurl, jobpurl_t[1024], *jobtxt, *defjobs, buf[1024], *jobcf=NULL;
      time_t clock;
      ROUTE jobrt;
 
-     /* initialise, fetching the directory locations & expanding them before 
-      * hand, then ensure we are the only clockwork running on this box.
-      * By default send errors to the default data store, unless 
-      * errors are overridden or -j switch is given. */
-#if 0
-     iiab_dir_locations(argv[0]);
-     if (iiab_iscmdopt("j", argc, argv))
-          route_expand(buf, cfdefaults_userjobs, NULL, NULL);
+     /* start up with default options */
+     iiab_start("sfj:J:", argc, argv, usagetxt, cfdefaults);
+     if (iiab_iscmdopt("j:J:", argc, argv))
+          iiab_start("sfj:J:", argc, argv, usagetxt, cfdefaults_userjobs);
      else
-          route_expand(buf, cfdefaults, NULL, NULL);
-     iiab_start("sj:", argc, argv, usagetxt, buf);
-#endif
-     if (iiab_iscmdopt("j", argc, argv))
-          iiab_start("sfj:", argc, argv, usagetxt, cfdefaults_userjobs);
-     else
-          iiab_start("sfj:", argc, argv, usagetxt, cfdefaults);
-
 
      /* process switches and arguments */
-     /* debug flag */
      if (cf_defined(iiab_cf, "d") && cf_getint(iiab_cf, "d") == -1)
-	  debug++;
+	  debug++;     /* debug flag */
+     if (cf_defined(iiab_cf, "j") && cf_defined(iiab_cf, "J")) {
+          elog_printf(FATAL, "Can't specify -j and -J, please pick one only\n"
+		      "%s %s", argv[0], usagetxt);
+	  iiab_stop();
+	  exit(10);	/* dont allow -j and -J */
+     }
+     if (cf_defined(iiab_cf, "j")) {
+          /* replace job config with different standard table */
+          jobcf = util_strjoin("file:%l/", cf_getstr(iiab_cf, "j"), ".jobs");
+          cf_putstr(iiab_cf, "jobs", jobcf);
+     }
+     if (cf_defined(iiab_cf, "J")) {
+          /* replace jobs with user supplied route */
+          cf_putstr(iiab_cf, "jobs", cf_getstr(iiab_cf, "j"));
+     }
 
      /* initialise the classes needed in addition to those started by 
       * iiab_start(); mostly these are for job & dispatching.
@@ -104,10 +102,7 @@ int main(int argc, char **argv) {
      runq_init(time(NULL));
      job_init();
      clock_done_init++;
-     if (cf_defined(iiab_cf, "j")) {
-          /* replacement jobs and private mode */
-          cf_putstr(iiab_cf, "jobs", cf_getstr(iiab_cf, "j"));
-     } else {
+     if ( ! cf_defined(iiab_cf, "J")) {
           if ( ! cf_defined(iiab_cf, "f"))
 	       /* default running: we want to be a daemon! */
 	       iiab_daemonise();
@@ -131,70 +126,28 @@ int main(int argc, char **argv) {
      /* set up signal handlers */
      sig_setexit(stopclock_sig);
 
-     /* check 'jobs' variable exists, if not we can't set one up */
+     /* check 'jobs' directive exists, and expand it if so */
      jobpurl = cf_getstr(iiab_cf, "jobs");
      route_expand(jobpurl_t, jobpurl, "NOJOB", 0);
      if (jobpurl_t == NULL || jobpurl_t == '\0') {
-	  elog_printf(FATAL, "unable to load jobs, as the "
-		      "configuration directive was not set. Please set "
-		      "the directive `jobs' in the configuration file "
-		      "to the route containing jobs. For example, "
+	  elog_printf(FATAL, "Unable to load jobs, as there was no valid "
+		      "configuration directive. Please specify -j, -J or set "
+		      "the directive `jobs' in the configuration file to the "
+		      "route containing a job table. For example, "
 		      "`jobs=file:/etc/clockwork.jobs' will look for the "
-		      "file /etc/clockwork.jobs. If the route is set but "
-		      "does not exist, then it will be created using the "
-		      "default job definitions");
+		      "file /etc/clockwork.jobs.");
 	  errorstatus = 1;
 	  goto end_app;
      }
 
-     /* Access the job table to see if it exists. If it does not, then
-      * assume that thats were we want the default job config created */
+     /* Access the expanded route location to see if it exists. If it does not, then
+      * then error and stop further operation. */
      if ( route_access(jobpurl_t, NULL, ROUTE_READOK) != 1 ) {
-	  /* jobs directive set but no file there => create it */
-
-	  /* read the default jobs file and save them in the standard
-	   * place. This is normally the data store, but could be 
-	   * a file */
-	  defjobs = util_strjoin(DEFJOBS_TYPE, iiab_dir_lib, "/",
-				 DEFJOBS_FILE, NULL);
-	  jobtxt = route_read(defjobs, NULL, &joblen);
-	  if (jobtxt == NULL) {
-	       elog_printf(FATAL, "unable to read default job table. "
-			   "Either (1) create job table in expected place "
-			   "(%s) so avoiding use of defaults or (2) make "
-			   "default jobs readable/available (%s)",
-			   jobpurl_t, defjobs);
-	       errorstatus = 2;
-	       goto end_app;
-	  }
-
-	  jobrt = route_open(jobpurl_t, "Job table for clockwork", NULL, 10);
-	  if (jobrt == NULL) {
-	       elog_printf(FATAL, "unable to create initial job table "
-			   "to write defaults. Please make job table "
-			   "writable (%s) or create manually",
-			   jobpurl_t);
-	       nfree(jobtxt);
-	       errorstatus = 3;
-	       goto end_app;
-	  }
-
-	  r = route_write(jobrt, jobtxt, joblen);
-	  if (r == -1) {
-	       elog_printf(FATAL, "unable to write initial job table "
-			   "with default jobs. Please make job table"
-			   "writable (%s) or create manually",
-			   jobpurl_t);
-	       route_close(jobrt);
-	       nfree(jobtxt);
-	       errorstatus = 4;
-	       goto end_app;
-	  }
-
-	  elog_printf(INFO, "created job table from default configuration: "
-		      "copied %s into %s", defjobs, jobpurl_t);
-	  route_close(jobrt);
-	  nfree(jobtxt);
+	  /* jobs directive set but no file there => error */
+          elog_printf(FATAL, "Unable to read jobs from %s, please check the name & "
+		      "location and start again.", jobpurl_t);
+	  errorstatus = 2;
+	  goto end_app;
      }
 
      /* load jobs */
@@ -202,16 +155,15 @@ int main(int argc, char **argv) {
      if (r == -1) {
           elog_die(FATAL, "unable to start due to a failure to read jobs "
 		   "from %s. Please check that the file is readable and that "
-		   "the table location exists.",
-		   cf_getstr(iiab_cf, "jobs") );
+		   "the table location exists.", jobpurl_t);
 	  errorstatus = 5;
 	  goto end_app;
      } else
           elog_printf(INFO, "loaded %d jobs", r);
 
      /* run jobs in var dir if we have a public responsibility to 
-      * server data over the hosts's socket */
-     if ( ! cf_defined(iiab_cf, "j") )
+      * be the data server for the host, otherwise stay in the launch dir */
+     if ( ! cf_defined(iiab_cf, "J") )
 	  chdir(iiab_dir_var);
      while(1) {
           elog_printf(DEBUG, "relay returns %d", meth_relay());
