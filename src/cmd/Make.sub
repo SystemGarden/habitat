@@ -41,9 +41,10 @@ cmd/irs		\
 INITBIN =	\
 cmd/habitat	\
 
+# Jobs for clockwork
+LIB += cmd/default.jobs
 
 BIN += $(CMDBIN) $(CMDTBIN)
-LIB += cmd/clockwork.jobs
 ETC += cmd/habitat.conf
 
 # Manual dependency to link in with iiab, trm and probe libraries
