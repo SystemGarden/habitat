@@ -38,11 +38,12 @@ void stopclock_sig(int sig /* signal vector */);
 void stopclock();
 
 /* initialise globals */
-char usagetxt[] = "[-j stdjob | -J jobfile] [-sf]
-where -j stdjob   select from standard job tables
-      -J jobfile  use jobs from route <jobfile> but don't daemonise (imply -s)
-      -f          run in foreground, don't daemonise
-      -s          server off: do not listen for data requests from network";
+char usagetxt[] = "\n                  [-j <stdjob> | -J <jobrt>] [-sf]\n"
+     "where -j <stdjob> select from standard job tables\n"
+     "      -J <jobrt>  use jobs from route <jobrt> in foreground not as \n"
+     "                  a daemon (imply -sf options)\n"
+     "      -f          run in foreground, don't daemonise\n"
+     "      -s          server off: do not listen for data requests from network";
 char helptxt[] = "no help for the weary";
 char *cfdefaults = 
      "iiab.debug -1\n"
@@ -63,38 +64,88 @@ int   clock_done_init=0;
 #define USERJOB_CFLINE  "jobs "
 
 int main(int argc, char **argv) {
-     int r, joblen, errorstatus=0;
-     char *jobpurl, jobpurl_t[1024], *jobtxt, *defjobs, buf[1024], *jobcf=NULL;
+     int njobs, opt_s=0, opt_f=0, opt_j=0, opt_J=0, errorstatus=0;
+     char *jobpurl, jobpurl_t[1024], *jobcf=NULL;
      time_t clock;
      ROUTE jobrt;
 
      /* start up with default options */
      iiab_start("sfj:J:", argc, argv, usagetxt, cfdefaults);
-     if (iiab_iscmdopt("j:J:", argc, argv))
-          iiab_start("sfj:J:", argc, argv, usagetxt, cfdefaults_userjobs);
-     else
+     clock = time(NULL);
 
      /* process switches and arguments */
      if (cf_defined(iiab_cf, "d") && cf_getint(iiab_cf, "d") == -1)
 	  debug++;     /* debug flag */
-     if (cf_defined(iiab_cf, "j") && cf_defined(iiab_cf, "J")) {
+     if (cf_defined(iiab_cf, "j"))
+	  opt_j++;     /* standard job flag */
+     if (cf_defined(iiab_cf, "J"))
+	  opt_J++;     /* route job flag */
+     if (cf_defined(iiab_cf, "s"))
+	  opt_s++;     /* no server flag */
+     if (cf_defined(iiab_cf, "f"))
+	  opt_f++;     /* foreground flag */
+
+     if (opt_j && opt_J) {
           elog_printf(FATAL, "Can't specify -j and -J, please pick one only\n"
 		      "%s %s", argv[0], usagetxt);
 	  iiab_stop();
 	  exit(10);	/* dont allow -j and -J */
      }
-     if (cf_defined(iiab_cf, "j")) {
+     if (opt_j) {
           /* replace job config with different standard table */
           jobcf = util_strjoin("file:%l/", cf_getstr(iiab_cf, "j"), ".jobs");
           cf_putstr(iiab_cf, "jobs", jobcf);
      }
-     if (cf_defined(iiab_cf, "J")) {
+     if (opt_J) {
           /* replace jobs with user supplied route */
-          cf_putstr(iiab_cf, "jobs", cf_getstr(iiab_cf, "j"));
+          cf_putstr(iiab_cf, "jobs", cf_getstr(iiab_cf, "J"));
+     }
+
+     /* check 'jobs' directive exists, and expand it if so */
+     jobpurl = cf_getstr(iiab_cf, "jobs");
+     route_expand(jobpurl_t, jobpurl, "NOJOB", 0);
+     if (jobpurl_t == NULL || jobpurl_t == '\0') {
+	  fprintf(stderr, "Unable to load jobs, as there was no valid "
+		  "configuration directive. Please specify -j, -J or set "
+		  "the directive `jobs' in the configuration file to the "
+		  "route containing a job table. For example, "
+		  "`jobs=file:/etc/clockwork.jobs' will look for the "
+		  "file /etc/clockwork.jobs");
+	  elog_printf(FATAL, "Unable to load jobs without valid config "
+		      "directive (looking for 'jobs' in cf)");
+	  iiab_stop();
+	  exit(1);
+     }
+
+     /* Access the expanded route location to see if it exists. If it does not,
+      * then error and stop further operation */
+     if ( route_access(jobpurl_t, NULL, ROUTE_READOK) != 1 ) {
+	  /* jobs directive set but no file there => error */
+          elog_printf(FATAL, "Unable to access %s to read jobs", jobpurl_t);
+	  if (opt_J) {
+	       fprintf(stderr, "Unable to access route '%s' to read jobs\n"
+		       "Please check the name & location and start again\n",
+		       jobpurl_t);
+	  } else if (opt_j) {
+	       fprintf(stderr, "Unable to read standard jobs '%s'\n"
+		       "  (looking for %s)\n"
+		       "  Please check the name of the job file and start "
+		       "again\n", cf_getstr(iiab_cf, "j"), jobpurl_t);
+	  } else {
+	       fprintf(stderr, "Unable to read default jobs\n"
+		       "  (looking for %s)\n"
+		       "  Please check the installation to ensure all support "
+		       "files are in place\n", jobpurl_t);
+	  }
+	  iiab_stop();
+	  exit(2);
      }
 
      /* initialise the classes needed in addition to those started by 
-      * iiab_start(); mostly these are for job & dispatching.
+      * iiab_start(): signals, methods, runq and jobs. Method class is a 
+      * library of action code (including probes), jobs is a record of 
+      * work activities against time and runq combines the previous two 
+      * by actually doing the dispatching.
       */
      sig_init();
      meth_init(argc, argv, stopclock_meth);
@@ -102,15 +153,15 @@ int main(int argc, char **argv) {
      runq_init(time(NULL));
      job_init();
      clock_done_init++;
-     if ( ! cf_defined(iiab_cf, "J")) {
-          if ( ! cf_defined(iiab_cf, "f"))
+     if ( ! opt_J ) {
+          if ( ! opt_f )
 	       /* default running: we want to be a daemon! */
 	       iiab_daemonise();
 	  iiab_lockordie(CLOCKWORK_KEYNAME);
 
 	  /* only in daemon mode can we provide the server unless its 
 	   * turned off */
-	  if ( ! cf_defined(iiab_cf, "s") ) {
+	  if ( ! opt_s ) {
 	       /* start http server with the following services */
 	       httpd_init();
 	       httpd_addpath("/ping",     httpd_builtin_ping);
@@ -126,44 +177,28 @@ int main(int argc, char **argv) {
      /* set up signal handlers */
      sig_setexit(stopclock_sig);
 
-     /* check 'jobs' directive exists, and expand it if so */
-     jobpurl = cf_getstr(iiab_cf, "jobs");
-     route_expand(jobpurl_t, jobpurl, "NOJOB", 0);
-     if (jobpurl_t == NULL || jobpurl_t == '\0') {
-	  elog_printf(FATAL, "Unable to load jobs, as there was no valid "
-		      "configuration directive. Please specify -j, -J or set "
-		      "the directive `jobs' in the configuration file to the "
-		      "route containing a job table. For example, "
-		      "`jobs=file:/etc/clockwork.jobs' will look for the "
-		      "file /etc/clockwork.jobs.");
-	  errorstatus = 1;
-	  goto end_app;
-     }
-
-     /* Access the expanded route location to see if it exists. If it does not, then
-      * then error and stop further operation. */
-     if ( route_access(jobpurl_t, NULL, ROUTE_READOK) != 1 ) {
-	  /* jobs directive set but no file there => error */
-          elog_printf(FATAL, "Unable to read jobs from %s, please check the name & "
-		      "location and start again.", jobpurl_t);
-	  errorstatus = 2;
-	  goto end_app;
-     }
-
      /* load jobs */
-     r = job_loadroute( jobpurl_t );
-     if (r == -1) {
+     njobs = job_loadroute( jobpurl_t );
+     if (njobs == -1) {
           elog_die(FATAL, "unable to start due to a failure to read jobs "
 		   "from %s. Please check that the file is readable and that "
 		   "the table location exists.", jobpurl_t);
 	  errorstatus = 5;
 	  goto end_app;
      } else
-          elog_printf(INFO, "loaded %d jobs", r);
+          elog_printf(INFO, "loaded %d jobs", njobs);
+
+     elog_printf(INFO, "Running %s in %s,%s listening, jobs from '%s', "
+		 "started at %s", argv[0],
+		 opt_f ? "foreground" : "background",
+		 opt_s ? " not" : "",
+		 (opt_J ? cf_getstr(iiab_cf, "J") : 
+		    (opt_j ? cf_getstr(iiab_cf, "j") : "default") ),
+		 ctime(&clock) );
 
      /* run jobs in var dir if we have a public responsibility to 
       * be the data server for the host, otherwise stay in the launch dir */
-     if ( ! cf_defined(iiab_cf, "J") )
+     if ( ! opt_j )
 	  chdir(iiab_dir_var);
      while(1) {
           elog_printf(DEBUG, "relay returns %d", meth_relay());
@@ -177,7 +212,6 @@ int main(int argc, char **argv) {
      meth_fini();
      iiab_stop();
      if (errorstatus) {
-	  clock = time(NULL);
 	  fprintf(stderr, "%s: exit with errorstatus %d at %s", argv[0], 
 		  errorstatus, ctime(&clock));
      }
