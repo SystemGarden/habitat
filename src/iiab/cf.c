@@ -293,7 +293,10 @@ int cf_cmd(CF_VALS cf,	/* configuration list */
 
      /* Do a winge summary */
      if (error) {
-          elog_printf(INFO, "there were %d errors", error);
+          if (error == 1)
+	       elog_printf(INFO, "there was a single error");
+	  else
+	       elog_printf(INFO, "there were %d errors", error);
 	  if (usage)
 	       elog_printf(INFO, "usage %s %s", argv[0], usage);
 	  tree_clearoutandfree(cf);

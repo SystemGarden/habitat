@@ -110,7 +110,7 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
      r = cf_cmd(iiab_cmdarg, iiab_cmdopts, argc, argv, iiab_cmdusage);
      if ( ! r ) {
           nm_deactivate();
-	  elog_send(FATAL, "incorrect command line");
+	  elog_send(FATAL, "incorrect command line, can't continue further");
 	  exit(1);
      }
 
