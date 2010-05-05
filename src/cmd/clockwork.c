@@ -58,10 +58,6 @@ int   debug=0;			/* Debug state */
 int   clock_done_init=0;
 
 #define CLOCKWORK_KEYNAME "clockwork"
-#define DEFJOBS_TYPE "file:"
-#define DEFJOBS_FILE "clockwork.jobs"
-#define SYSJOB_CFLINE  "jobs file:%l/"
-#define USERJOB_CFLINE  "jobs "
 
 int main(int argc, char **argv) {
      int njobs, opt_s=0, opt_f=0, opt_j=0, opt_J=0, errorstatus=0;
@@ -76,24 +72,29 @@ int main(int argc, char **argv) {
      /* process switches and arguments */
      if (cf_defined(iiab_cf, "d") && cf_getint(iiab_cf, "d") == -1)
 	  debug++;     /* debug flag */
-     if (cf_defined(iiab_cf, "j"))
-	  opt_j++;     /* standard job flag */
-     if (cf_defined(iiab_cf, "J"))
-	  opt_J++;     /* route job flag */
      if (cf_defined(iiab_cf, "s"))
 	  opt_s++;     /* no server flag */
      if (cf_defined(iiab_cf, "f"))
 	  opt_f++;     /* foreground flag */
+     if (cf_defined(iiab_cf, "j"))
+	  opt_j++;     /* standard job flag */
+     if (cf_defined(iiab_cf, "J")) {
+	  opt_J++;     /* route job flag */
+	  opt_s++;     /* don't implement server daemon */
+	  opt_f++;     /* don't background */
+     }
 
      if (opt_j && opt_J) {
-          elog_printf(FATAL, "Can't specify -j and -J, please pick one only\n"
+          elog_printf(FATAL, "Can't specify -j and -J together, please pick "
+		      "one only\n"
 		      "%s %s", argv[0], usagetxt);
 	  iiab_stop();
 	  exit(10);	/* dont allow -j and -J */
      }
      if (opt_j) {
           /* replace job config with different standard table */
-          jobcf = util_strjoin("file:%l/", cf_getstr(iiab_cf, "j"), ".jobs");
+          jobcf = util_strjoin("file:%l/", cf_getstr(iiab_cf, "j"), ".jobs",
+			       NULL);
           cf_putstr(iiab_cf, "jobs", jobcf);
      }
      if (opt_J) {
@@ -188,8 +189,9 @@ int main(int argc, char **argv) {
      } else
           elog_printf(INFO, "loaded %d jobs", njobs);
 
-     elog_printf(INFO, "Running %s in %s,%s listening, jobs from '%s', "
-		 "started at %s", argv[0],
+     elog_printf(INFO, "Running %s in %s,%s listening to network, "
+		 "jobs from '%s', started at %s", 
+		 argv[0],
 		 opt_f ? "foreground" : "background",
 		 opt_s ? " not" : "",
 		 (opt_J ? cf_getstr(iiab_cf, "J") : 
