@@ -31,6 +31,7 @@ CHANGES
 	- Clockwork jobs now read from files not DB
 	- Additional user error messages in clockwork
 	- Launch directory now tracked and restored in restart method
+	- Added statclock script to give information about clockwork
 
 	VERSION 1.2
 	- Refactored replication code

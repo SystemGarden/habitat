@@ -10,6 +10,7 @@ cmd/irs.c		\
 cmd/habmeth.c		\
 cmd/clockwork.c 	\
 cmd/killclock.sh	\
+cmd/statclock.sh	\
 cmd/habedit.sh		\
 cmd/habrep.sh		\
 cmd/habitat.sh		\
@@ -25,6 +26,7 @@ cmd/habget 	\
 cmd/habmeth	\
 cmd/clockwork 	\
 cmd/killclock	\
+cmd/statclock	\
 cmd/habedit	\
 cmd/habrep	\
 #cmd/checkpoint 	\
