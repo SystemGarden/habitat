@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "nmalloc.h"
 #include "cf.h"
 #include "iiab.h"
@@ -897,12 +898,20 @@ int meth_builtin_restart_action(char *command,
 		       getppid(), 
 		       util_decdatetime( time(NULL) ) );
 
-          sleep(2);	/* wait a little while */
+          sleep(10);	/* wait a little while */
           route_printf(output,"%s (%d child of %d): ==== before exec at %s "
 		       "to start again\n", "restart", getpid(), 
 		       getppid(), 
 		       util_decdatetime( time(NULL) ) );
+
+	  /* change to the original launch directory */
+	  if (chdir(cf_getstr(iiab_cf, "iiab.dir.launch")) == -1) {
+	    fprintf(stderr, "Unable to change to launch directory\n");
+	  }
+
           execv(meth_argv[0], meth_argv);
+	  fprintf(stderr, "*** pid %d meth_builtin_restart_action() after exec but shouldn't be here due to %s, aborting now\n", getpid(), strerror(errno));
+	  abort();
      }
 
      /* now exit, using the routine supplied to meth.c in meth_init() */

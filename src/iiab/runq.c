@@ -762,9 +762,9 @@ void runq_methfinished(void *key)
  * start work again
  */
 void runq_disable() {
-  elog_send(DEBUG, "draining runq_event");
-  runq_drain = 1;	/* allow to drain */
-  runq_schedrmall();
+     elog_send(DEBUG, "draining runq_event");
+     runq_drain = 1;	/* allow to drain */
+     runq_schedrmall();
 }
 
 /*
@@ -772,9 +772,9 @@ void runq_disable() {
  * new work
  */
 void runq_enable() {
-  elog_send(DEBUG, "enabled runq_event, setting up new work");
-  runq_drain = 0;	/* stop draining */
-  runq_schedall();
+     elog_send(DEBUG, "enabled runq_event, setting up new work");
+     runq_drain = 0;	/* stop draining */
+     runq_schedall();
 }
 
 #if TEST

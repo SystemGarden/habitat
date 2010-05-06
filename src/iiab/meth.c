@@ -113,7 +113,7 @@ void meth_init(int argc, char *argv[],		/* used for restart built-in */
      return;
 }
 
-/* Shutdown the method class */
+/* Shutdown the method class without waiting for jobs */
 void meth_fini()
 {
      struct meth_info *m;
@@ -121,7 +121,7 @@ void meth_fini()
      struct meth_runprocinfo *rp;
 
      /* All plain sailing apart from running processes which potentially 
-      * have outstanding I/O, but we dont care about them. So the only
+      * have outstanding I/O, but we don't care about them. So the only
       * thing we want to do is to prevent ourselves from being interrupted
       * then tear down the structures */
      /* close open routes & destroy its tree */
@@ -1182,7 +1182,10 @@ void meth_butcher(struct meth_runprocinfo *rp) {
 }
 
 /*
- * Shutdown all methods that are currently running.
+ * Send signals to all running proceses associcated with methods.
+ * This does not remove methods, which is done with meth_fini().
+ * The first cycle kills, after a timeout the second cycle sends an 
+ * uninterruptable kill (meth_butcher()).
  * Conceivably, there will be methods that will not be shut down
  * as meth_ does not know about them.
  * Returns 0 if successful or the number of jobs that had to be shutdown
@@ -1194,7 +1197,7 @@ int meth_shutdown() {
      struct timespec remain;
      int r, carnage=-1;
 
-     elog_send(INFO, "starting shutdown");
+     elog_send(INFO, "Starting shutdown");
 
      if ( itree_n(meth_procbypid) == 0 )
           return 0;		/* no work to do */

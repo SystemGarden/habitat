@@ -42,12 +42,13 @@ CF_VALS iiab_cf;		/* configuration parameters */
 char   *iiab_cmdusage;		/* consoladated command line usage string */
 char   *iiab_cmdopts;		/* consoladated command line options */
 CF_VALS iiab_cmdarg;		/* command line arguments */
-char   *iiab_havelock=NULL;	/* non-NULL if we have an exclusive lock */
 char   *iiab_dir_etc=NULL;	/* config file directory */
 char   *iiab_dir_bin=NULL;	/* executable directory */
 char   *iiab_dir_lib=NULL;	/* library directory */
 char   *iiab_dir_var=NULL;	/* data directory */
+char   *iiab_dir_launch=NULL;	/* launch directory */
 char   *iiab_dir_lock=NULL;	/* lock directory */
+char   *iiab_havelock=NULL;	/* non-NULL if we have an exclusive lock */
 char   *iiab_std_bin_dirs[] = {"/usr/local/bin", "/bin", "/usr/bin", 
 			       "/sbin", "/usr/sbin", NULL};
 
@@ -79,14 +80,13 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 		char *appcf	/* Application configuration string */ )
 {
      int r;
-     char iiablaunchdir[PATH_MAX], *appcf_expanded;
+     char *appcf_expanded;
      int elogfmt;
 
      if ( !(opts && usage) )
 	  elog_die(FATAL, "opts or usage not set");
 
      /* save our launch directory & work out the standard places */
-     getcwd(iiablaunchdir, PATH_MAX);
      iiab_dir_locations(argv[0]);
 
      /* consolidated command line options and usage */
@@ -212,7 +212,7 @@ void iiab_start(char *opts,	/* Command line option string as getopts(3) */
 
 #if 0
      /* return to the launch dir */
-     chdir(iiablaunchdir);
+     chdir(iiab_dir_launch);
 #endif
 }
 
@@ -318,10 +318,11 @@ void iiab_init_routes() {
  * As iiab based apps can be tree based or linux location based 
  * (RPM standards), this routine finds where the important locations
  * are. Sets the following globals:-
- *   iiab_dir_etc - config directory
- *   iiab_dir_bin - executables
- *   iiab_dir_lib - library files
- *   iiab_dir_var - data files
+ *   iiab_dir_etc    - config directory
+ *   iiab_dir_bin    - executables
+ *   iiab_dir_lib    - library files
+ *   iiab_dir_var    - data files
+ *   iiab_dir_launch - launch directory
  * Called by iiab_start(), this finction can also be called 
  * explicitly, before iiab_start(), to find the values of directories early.
  * when called for the second or subsequent time, the values will not 
@@ -336,7 +337,7 @@ void iiab_dir_locations(char *argv0)
      if (iiab_dir_bin)		/* don't reinitialise */
 	  return;
 
-     /* get cwd as default */
+     /* get cwd as launch directory */
      getcwd(cwd, PATH_MAX);
 
      /* find absolute location of executable */
@@ -354,6 +355,7 @@ void iiab_dir_locations(char *argv0)
 	       break;
 	  }
      }
+     iiab_dir_launch = xnstrdup(cwd);
      if (stdplaces) {
 	  /*elog_printf(DIAG, "system installation detected: argv0 %s, %s", 
 	    argv0, iiab_dir_bin);*/
@@ -389,11 +391,12 @@ void iiab_dir_locations(char *argv0)
 void  iiab_dir_dump()
 {
      elog_startsend(DIAG, "Dump of directory locations ---------");
-     elog_contprintf(DIAG, "\nbin  = %s\n", iiab_dir_bin);
-     elog_contprintf(DIAG, "var  = %s\n", iiab_dir_var);
-     elog_contprintf(DIAG, "lib  = %s\n", iiab_dir_lib);
-     elog_contprintf(DIAG, "etc  = %s\n", iiab_dir_etc);
-     elog_contprintf(DIAG, "lock = %s\n", iiab_dir_lock);
+     elog_contprintf(DIAG, "\nbin    = %s\n", iiab_dir_bin);
+     elog_contprintf(DIAG, "var    = %s\n", iiab_dir_var);
+     elog_contprintf(DIAG, "lib    = %s\n", iiab_dir_lib);
+     elog_contprintf(DIAG, "etc    = %s\n", iiab_dir_etc);
+     elog_contprintf(DIAG, "launch = %s\n", iiab_dir_launch);
+     elog_contprintf(DIAG, "lock   = %s\n", iiab_dir_lock);
      elog_endprintf(DIAG, "End of directory locations ----------");
 }
 
@@ -402,18 +405,20 @@ void  iiab_dir_dump()
  * Takes the current settings for the application's directory locations
  * have saves them in the given config class
  * Sets the following globals:-
- *   iiab.dir.etc - config directory
- *   iiab.dir.bin - executables
- *   iiab.dir.lib - library files
- *   iiab.dir.var - data files
+ *   iiab.dir.etc    - config directory
+ *   iiab.dir.bin    - executables
+ *   iiab.dir.lib    - library files
+ *   iiab.dir.var    - data files
+ *   iiab.dir.launch - launch dir
  */
 void iiab_dir_setcf(CF_VALS cf		/* destination config */ )
 {
-     cf_addstr(cf, "iiab.dir.etc",  iiab_dir_etc);
-     cf_addstr(cf, "iiab.dir.bin",  iiab_dir_bin);
-     cf_addstr(cf, "iiab.dir.lib",  iiab_dir_lib);
-     cf_addstr(cf, "iiab.dir.var",  iiab_dir_var);
-     cf_addstr(cf, "iiab.dir.lock", iiab_dir_lock);
+     cf_addstr(cf, "iiab.dir.etc",    iiab_dir_etc);
+     cf_addstr(cf, "iiab.dir.bin",    iiab_dir_bin);
+     cf_addstr(cf, "iiab.dir.lib",    iiab_dir_lib);
+     cf_addstr(cf, "iiab.dir.var",    iiab_dir_var);
+     cf_addstr(cf, "iiab.dir.launch", iiab_dir_launch);
+     cf_addstr(cf, "iiab.dir.lock",   iiab_dir_lock);
 }
 
 
@@ -423,6 +428,7 @@ void iiab_free_dir_locations()
      nfree(iiab_dir_etc);
      nfree(iiab_dir_lib);
      nfree(iiab_dir_var);
+     nfree(iiab_dir_launch);
      nfree(iiab_dir_lock);
 }
 

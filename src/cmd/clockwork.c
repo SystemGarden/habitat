@@ -242,17 +242,18 @@ void stopclock() {
      if (!clock_done_init)
           _exit(r);
 
-     runq_disable();
-     r = meth_shutdown();
+     runq_disable();		/* prevents further work */
+     r = meth_shutdown();	/* kills running processes */
      if (r) {
 	  clock = time(NULL);
           elog_printf(WARNING, "%d jobs did not shutdown normally", r);
 	  fprintf(stderr, "%s: shutdown, meth_shutdown() %d "
 		  "at %s", cf_getstr(iiab_cmdarg, "argv0"), 
 		  r, ctime(&clock));
-     } else
+     } else {
           elog_printf(INFO, "%s successfully shutdown", 
 		      cf_getstr(iiab_cmdarg, "argv0"));
+     }
      /*job_clear();*/
 
      /* shut down and clear up */

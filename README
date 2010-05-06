@@ -29,7 +29,8 @@ CHANGES
 	- Added a shutdown method
 	- Clockwork command introduces -j and -J for jobs
 	- Clockwork jobs now read from files not DB
-	- Additional user error messages
+	- Additional user error messages in clockwork
+	- Launch directory now tracked and restored in restart method
 
 	VERSION 1.2
 	- Refactored replication code
