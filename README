@@ -8,9 +8,9 @@ VERSION 1.2.1
 -------------
 
 Restarting of daemon fixed and re-enabled in the job table every 24 hours.
-Whilst we attempt to purge all memory and resource leaks, sometimes we 
-need a little help :-). (Don't put forks() in atexits()!!) 
-Reload the job table to take effect.
+Job tables now run from file system by default, with multiple tables for 
+different modes of operation. New script for daemon status, new job method
+to shutdown completely and more error messages.
 
 LICENSE
 -------
@@ -340,6 +340,7 @@ OTHER COMMANDS
 Other commands exists to complement the GUI and data collector.
 
 	killclock - stop the clockwork daemon
+	statclock - status of the clockwork daemon
 	irs       - command line interface to ringstore storage & admin
 	habget    - get data from a route
 	habput    - send data to a route
@@ -376,5 +377,5 @@ Take a look at http://www.systemgarden.com/harvest for more information.
 Nigel Stuckey
 
 System Garden Ltd
-March 2010
+May 2010
 nigel.stuckey@systemgarden.com
