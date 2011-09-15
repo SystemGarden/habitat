@@ -1,0 +1,55 @@
+.TH "habrep" "8" "2.0" "Nigel Stuckey" "Habitat"
+.SH "NAME"
+.LP 
+habrep \- Replicate data between Habitat and System Garden's repository
+.SH "SYNTAX"
+.LP 
+habrep
+.SH "DESCRIPTION"
+.LP 
+Replicates data from the running public instance of clockwork on the 
+local machine with System Garden's repository.
+
+This shell script is equivalent to a replication command in Clockwork's 
+job table, but rather than waiting for its scheduled time, replication will
+start at once. The job line (starting with method) is
+
+replicate replicate.in replicate.out "grs:%v/%h.grs,rstate,0"
+
+The replicate method is run with the inbound replication contained in 
+the 'replicate.in' configuration value, outbound replication driven from
+the 'replicate.out' configuration value. 
+State is recoded in the GRS driven ringstore $HAB/var/<hostname>.grs,rstate,0.
+
+As data is protected by sequences, habrep can be run any number of times 
+without duplicates and corruption. Thus, the scheduled replication in 
+the job table will be unaffected and its time does not need to change.
+
+Replication is the process of sending new data from local rings to 
+a repository and the same for remote to local. The state is recorded
+in a table in the central instance's ringstore.
+.SH "FILES"
+.LP 
+\fI$HAB/var/<hostname>.grs\fP 
+.SH "EXAMPLES"
+.LP 
+Typing the following:\-
+.LP 
+habrep
+.LP 
+will result in the following if successful
+.LP 
+Replicating to repository now...
+.LP
+or the folowing on a failure
+.LP
+habrep: replication failed
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+clockwork(8), killclock(8), statclock(8), habedit(8),
+habconf(5),
+myhabitat(1), habget(1), habput(1), irs(1), habprobe(1), habmeth(1)
+

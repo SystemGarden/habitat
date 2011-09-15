@@ -1,0 +1,22 @@
+# Module for unix style manual pages
+# Nigel Stuckey, May 2004, April 2011
+#
+# Copyright System Garden Ltd 1996-2011. All rights reserved.
+
+MAN1 +=			\
+man/myhabitat.1		\
+man/habget.1		\
+man/habput.1		\
+man/habmeth.1		\
+man/habprobe.1		\
+man/irs.1
+
+MAN5 +=			\
+man/habconf.5
+
+MAN8 +=			\
+man/clockwork.8		\
+man/killclock.8		\
+man/statclock.8		\
+man/habedit.8		\
+man/habrep.8		\

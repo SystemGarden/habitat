@@ -1,0 +1,38 @@
+#
+# System Garden MyHabitat
+# Style customisations
+#
+# Copyright System Garden Limited 1999-20010. All rights reserved.
+# Nigel Stuckey, revised May 2000, March 2009, November 2010
+#
+
+style "graph"
+{
+	font_name = "6"
+	bg[NORMAL] = "#ffffff"
+	bg[PRELIGHT] = "#ffffff"
+	bg[ACTIVE] = "#ffffff"
+	bg[SELECTED] = "#ffffff"
+	fg[NORMAL] = "#003366"
+	fg[PRELIGHT] = "#003366"
+	fg[ACTIVE] = "#003366"
+	fg[SELECTED] = "#003366"
+}
+
+style "whitebg"
+{
+	bg[NORMAL] = "#ffffff"
+}
+
+style "picker"
+{
+	# this is applied to the picker, although I can see a way of 
+	# removing the active highlight
+}
+
+widget "*GtkDatabox" style "graph"
+widget "*GtkDataboxRuler" style "graph"
+widget "*GtkDataboxTRuler" style "graph"
+widget "*curves_list" style "picker"
+
+

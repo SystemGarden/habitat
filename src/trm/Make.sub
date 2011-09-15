@@ -1,0 +1,27 @@
+# Module for term library, the terminal oriented library for habitat
+# Nigel Stuckey, July 2002
+#
+# Copyright System Garden Ltd 1996-2002, 2010. All rights reserved.
+
+SRC += 			\
+trm/cmdln.c		\
+trm/cursvu.c
+
+INC += 			\
+trm/cmdln.h		\
+trm/cursvu.h
+
+# Library product
+ifeq ($(ARCH),Darwin)
+TRMSOLIB = trm/libtrm.dylib
+$(TRMSOLIB): $(patsubst %.c, %.o, $(filter trm/%.c, $(SRC))) \
+			-lreadline -lcurses -lreadline
+	$(LINK.o) -install_name @rpath/$(notdir $@) $^ -o $@ -dynamiclib
+else
+TRMSOLIB = trm/libtrm.so
+$(TRMSOLIB): $(patsubst %.c, %.o, $(filter trm/%.c, $(SRC))) \
+			-lreadline -lcurses -lreadline
+	$(LINK.o) $^ -o $@ -shared #pg -a
+endif
+
+SOLIB += $(TRMSOLIB)

@@ -1,0 +1,102 @@
+.TH "habconf" "5" "2.0" "Nigel Stuckey" "Habitat configuration"
+.SH "NAME"
+.LP 
+\fBhabconf\fR \- Habitat configuration
+.SH "DESCRIPTION"
+.LP 
+Every major \fBhabitat\fR utility and program gathers its configuration from
+external sources in the same way. The formats are shown below, but this 
+section details how the data is gathered.
+
+Firstly, each program can have individual directives specified on the command
+line with multiple '\-C' flags. 
+
+A whole file of replacement directives can be used by using the '\-c' flag.
+As this can be a route address, the data can originate from a web server.
+This feature allows one to keep the application and user defaults for 
+mainstream use, and also allows special instances to be used simultaneously.
+
+The user file \fI~/.habrc\fR is read next (although the location 
+can be overridden), generally used for specific customisations. 
+For example, the data files held in user interface history.
+
+Then the application config is read from \fB$HAB/etc/habitat.conf\fR 
+or \fB/etc/habitat.conf\fR (either of which again can be overridden). 
+This contains the default supplied by the developers
+and may be ammended by the local administrators.
+
+Further configuration sources are possible, to allow for administrators
+to configure on a regional or global basis.
+Thus, the application configuration file does not have to be altered
+or making regional varients built.
+These sources may be web servers or other directory locations.
+.SH "PARAMETERS"
+.LP 
+To customise at a user level, the file \fB~/.habrc\fR should contain directives in
+the following format.
+
+[\-]directive [[=] value]
+
+Directive may appear on its own, or have a value associated with it.
+Values may be arrays, by separating their elements with whitespace.
+Each directive must appear on a new line.
+Comments may appear on any line, including ones with directives.
+They start with the '#' character and end with the newline character.
+The file must start with the magic string 'habitat 1', which confirms
+the contents and intent of the file to the configuration system.
+
+Common directives include:\-
+
+elog.above <sev> <route>
+.br 
+elog.below <sev> <route>
+.br 
+elog.set   <sev> <route>
+.br 
+elog.all  <route>
+.br 
+send errors and other messages above (or below) level <sev> to the route 
+<route>. The .set form configures just that severity level and the .all form
+sends messages from all severities to <route>.
+<sev> can be 'fatal', 'error', 'warning', 'info', 'diag' and 'debug'.
+
+elog.format    <sev> <format>
+.br 
+elog.allformat <format>
+.br 
+The specified severity level should print using <format>.
+The .allformat form sets <format> to all message sevelities.
+See the full manuals for more details of the format.
+
+hab.cfetc  <route>
+.br 
+hab.cfuser <route>
+.br 
+Locations of the user configuration file (\fI~/.habrc\fR) in route format
+and the application wide file (\fI$HAB/etc/habitat.conf\fR).
+Because they are read early in the process of starting an application, 
+these have to be specifed on the command line using \-c or \-C flags.
+
+nmalloc
+.br 
+Turn on the memory checking, which will identify memory leaks.
+Normally this is off on stable releases, but developer releases may
+have it activated within the code.
+
+replicate.out <links>
+.br 
+replicate.in  <links>
+.br 
+Specifies a list of replication links, used by the replication job.
+The purpose is to associate a local storage ring with a remote one on
+a repository.
+See the replication method's manual for information on its format.
+.SH "FILES"
+.LP 
+~/.habrc
+.br 
+$HAB/etc/habitat.conf or /etc/habitat.conf
+.SH "SEE ALSO"
+.LP 
+clockwork(8), killclock(8), statclock(8), habedit(8), habrep(8),
+myhabitat(1), habget(1), habput(1), irs(1), habprobe(1), habmeth(1)

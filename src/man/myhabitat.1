@@ -1,0 +1,314 @@
+.TH "myhabitat" "1" "2.0" "Nigel Stuckey" "Habitat"
+.SH "NAME"
+.LP 
+myhabitat \- Gtk+ Graphical interface to Habitat
+.SH "SYNTAX"
+.LP 
+myhabitat [\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
+[\fI\-e <fmt>\fP] [\fI\-dDhsv\fP]
+.SH "DESCRIPTION"
+.LP 
+The standard graphical interface for Habitat, able to
+view locally captured data, remote Habitat instances and 
+repository data provided by Harvest.
+
+When the tool starts, a check is made for the existence of the local 
+collection agent, clockwork(8). 
+If it is not running, the user is asked if they wish to run it and
+if it should autostarted as a daemon in the future.
+
+In appearance, clockwork resembles that of a file manager, with choices 
+on the left and visualisation on the right.
+If files or other data sources have been opened before, then their 
+re\-opening is attempted by \fBMyHabitat\fR and will be placed under 
+the \fBFILES\fR and \fBHOSTS\fR nodes in the choice tree.
+
+See the DATA SOURCES section for details of the data that can be
+viewed, NAVIGATION for how to interpret the data structures
+and VISUALISATION for how to examine the data once displayed.
+
+On Linux, the GUI requires Xwindows; use other front ends or command line tools
+if you do not have that facility.
+.SH "OPTIONS"
+.LP 
+.TP 
+\fB\-c\fR \fI<purl>\fP
+Append user configuration data from the route <purl>, rather than 
+the default file ~/.habrc.
+.TP 
+\fB\-C\fR \fI<cfcmd>\fP
+Append a list of configuration directives from <cfcmd>, separated 
+by semicolons.
+.TP 
+\fB\-d\fR
+Place \fBMyHabitat\fR in diagnositc mode, giving an additional 
+level of logging and sending the text to stderr rather than the 
+default or configured destinations.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-D\fR
+Place \fBMyHabitat\fR in debug mode. 
+As \-d above but generating a great deal more information, designed to be 
+used in conjunction with the source code. 
+Also overrides normal outputs and will send the text to stderr.
+In daemon mode, will send output to the controlling terminal.
+.TP 
+\fB\-e\fR \fI<fmt>\fP
+Change the logging output to one of eight preset alternative formats, 
+some showing additional information.
+<fmt> must be 0\-7.
+See LOGGING below.
+.TP 
+\fB\-h\fR
+Print a help message to stdout and exit
+.TP 
+\fB\-v\fR
+Print the version to stdout and exit
+.TP 
+\fB\-s\fR
+Run in safe mode, which prevents myhabitat automatically loading data 
+from files or over the network from peer machines or the repository.
+Use if myhabitat start up time is excessively long.
+Once started, all data resourcese can be loaded manually.
+.SH "DATA SOURCES"
+.LP 
+Currently, data can be obtained from four types of sources:\-
+.TP 
+Local Host
+Data collected from same machine running \fBMyHabitat\fR appears
+under \fBHABITAT\fR in the choice tree as 'This Host: \fIhostname\fR'.
+If data is not being collected locally, you will be asked if you wish to 
+start on initiation.
+It is not essential to collect data, however, and the requests to do so 
+can be repressed, making \fBMyHabitat\fR a viewer for the data of others.
+.TP 
+File
+Rich data is stored in format known as a \fIringstore\fR, which
+is a structured format using GDBM. It allows multiple rings to be stored in
+single container and can contain live or historic data.
+Other formats include CSV files and an enhanced version known as 'Fat 
+Headed Array' (FHA).
+Open them with \fIFile\->Open\fR or \fI^O\fR and use the file chooser.
+The file will appear under \fBFILES\fR in the choice tree.
+.TP 
+Repository
+Replicated data once centralised will appear under the 
+\fBREPOSITORY\fR node in the choice tree if configured with account details.
+Select \fIEdit\->Harvest...\fR or \fIEdit\->Repository...\fR to configure.
+The Habitat Administration Guide discusses how to handle repository
+accounts in larger installations.
+.TP 
+Network Data
+Data for an individual machine can be read from the repository or a 
+peer Habitat instance on another host (using the peer's clockwork daemon).
+Select \fIFile\->Host\fR or \fI^H\fR, type in the hostname and 
+pick repository or host as a source.
+Your selection will appear under \fBHOSTS\fR in the choice tree.
+.LP 
+Files and hosts can be removed by using the menu item \fIFile\->Close...\fR
+(\fI^C\fR) and selecting from a list or by clicking the right mouse 
+button over the tree entry.
+.SH "NAVIGATION"
+.LP
+The choice pane on the left holds actively attached or remembered valid 
+data sources, similar to a file browser.
+It is divided in to a number of sections to categorise the sources and 
+help  in navigation.
+.TP
+\fBHABITAT\fR
+Data from the local machine or the operation of the collection agent
+.TP
+\fBFILES\fR
+Files that have been opened by you and if they exist, files that have 
+been remembered from previous sessions
+.TP
+\fBHOSTS\fR
+Remote Habitat hosts attached now or in the past, providing that they are still running the collection agent (clockwork). Can be peer instances of Habitat or
+be attached directly from a repository (see below)
+.TP
+\fBREPOSITORY\fR
+A central collection of performance and statistical data, able to be 
+browsed in a hierarchical organisation tree.
+To get to a specific machine, one needs to know its organisational 
+location and traverse to it in the tree.
+Whilst this aids browsing, one may wish to use the \fIFile\->Host\fR 
+option to go directly to a machine.
+
+Habitat's collction agent will typically send local collection data to
+a repository for long term storage and analysis, saving excessive
+load on machines that collect data. Harvest 
+( http://www.systemgarden.com/harvest ) is typically used as a repository.
+.LP 
+Opening the data source trees will display a default view or a summary and
+various controls to navigate the view as needed.
+.SH "VISUALISATION"
+.LP 
+The right hand section of the window is used for visualisation.
+Its major uses are for charting and displaying tables.
+
+.LP
+Once the data source is selected from the choice pane, the source is
+queried to see what data it has to chart. In Habitat, these sets of data
+within a source are called a 'ring' (after the term ring buffer) and
+each is assigned a button which is displayed in the visualisation pane.:-
+.TP 
+\fBCPU\fR
+Processor data and other system wide information. Habitat stores these 
+in the ring \fIsys\fR.
+.TP
+\fBStorage\fR
+Disk, network (NAS) and block (SAN) storage are keyed by the device name
+and held in the ring \fIio\fR. Habitat shows the performance, capacity 
+and mount point of file systems where applicable in a single collection
+.TP 
+\fBNetwork\fR
+Statistics from the network devices, keyed by the device name; Habitat
+stores these in the \fInet\fR ring.
+.TP 
+\fBProcesses\fR
+Full details available from your operating system about 'interesting' 
+processes. By default, these are ones that exceed a low threshold of 
+utilisation, which indicates that they are more than trivially active. 
+Habitat stores this data in the ring \fIps\fR, 
+indexed by the process ID and the thresholds are conventionally stored 
+in the file \fI$HAB/lib/ps.conf\fR.
+A threshold is applied to reduce the amount of data from processes but 
+at the risk of losing a complete picture. 
+This can be customised by changing the \fIps.conf\fR configuration file
+.TP 
+\fBUptime\fR
+Accumulated up and down time of the system, stored in the ring \fIup\fR
+.TP 
+\fBEvents\fR
+Events raised by Habitat when executing local pattern matching are 
+stored in the ring \fIevent\fR.
+.TP 
+\fBOther\fR
+Other is a menu button that holds all other rings in a pull down menu. 
+Selecting one of these will change the display to that data, but the 
+ring names are not changed: a ring name of \rIfred\fR will have an entry 
+called fred.
+.LP 
+The standard sets of data, such as CPU (\fIsys\fR) and Storage (\fIio\fR)
+have default curves that are displayed when the graph is first drawn.
+The list of curves down the right hand side are buttons used to draw
+or remove data on the graph.
+When drawn, the button changes colour to that of of the curve displayed.
+
+A set of buttons change how the seleted data is seen. 
+Options are:-
+.TP 
+\fBText\fR
+Data is treated as text rather than structured tabular data. This is useful
+when the data is unstructured, not suitable to chart and does not parse.
+.TP 
+\fBTable\fR
+Data is shown as a structured table, suitable for \fICSV\fR for \fIFHA\fR 
+files in addition to Habitat's \fIringstores\fR
+.TP 
+\fBChart\fR
+Data is displayed as a line chart with a curve selection check list to the side.
+Clicking the check list will draw and remove curves from the shared
+charting space. All data is shown in a line chart style with 
+a set of buttons below to zooms in and out of the displayed chart, 
+and a set of scroll bars which can be used to panned the data
+.LP
+When charting, the visualisation section is divided into additional parts.
+The greatest is used for the graph itself, with other areas being
+used for visualisation type, curve selection, zooming and data held.
+If the data is multi\-instance, such as with multiple disks, 
+then a further area is added to control the number of instance
+graphs being displayed.
+.LP
+A time slider shows the data that is available for this ring at the source
+and how much of it is currently displayed. Moving the slider will load 
+additional data and redraw more data in the display. Data is cached in
+MyHabitat to minimise the number of fetches to the data source.
+When data is fetched, whole records are collected (row oriented rather 
+than column oriented) which means curve selection is fast at the expense
+of larger data fetches.
+
+Whilst the largest amount of data displayed is selected from the 
+choice tree, it is possible to 'zoom\-in' to particular times very 
+easily using the graph.
+There are two methods: either drag the mouse of the area of interest,
+creating a rectangle and click the left button inside or use the x 
+and y axis zoom buttons from the \fBZoom & Scale\fR area.
+The display shows the enlarged view and changes the scale
+the x & y rulers.
+The time ruler is changes mode to show the most useful feedback of
+time at that scale.
+To move back and forth along time, move the horizontal scrollbar.
+To zoom out, either click the right mouse button over the graph or
+use the zoom\-out button in the \fBZoom & Scale\fR area.
+
+.SH "MENU"
+.LP 
+The File menu adds and removes file and other data sources to 
+the choice tree.
+It also contains import and export routines to convert between
+native datastores and plain text, such as csv and tsv files.
+
+The View menu controls the display and refresh of choice and
+visualisation.
+It also give the ability to save or send data being displayed to
+e\-mail, applications or a file.
+
+The Collect menu controls data collection, if you own the collection
+process.
+
+The Graph menu changes the appearance of the chart and is only 
+displayed when the graph appears.
+
+Finally, the Help menu gives access to spot help, documentation 
+and links to the \fBsystem garden\fR web site for product 
+information. 
+Most help menu items need a common browser on the users path
+to show help information.
+.SH "LOGGING"
+.LP 
+\fBMyHabitat\fR generates information and error messages. 
+By default, errors are captured internally and can be displayed
+in the visualisation area by clicking on the \fBlogs\fR
+node under \fBthis client\fR.
+
+Also available in this area are the \fBlog routes\fR, which shows
+the how information of different severity is dealt with
+and \fBconfiguration\fR, which shows the values of all the current
+configuration directives in effect.
+
+See \fBhabconf\fR(5) for more information.
+.SH "FILES"
+.LP 
+Locations alter depending on how the application is installed.
+.TP 
+For the habitat configuration
+\fI~/.habrc\fP
+.br 
+\fI$HAB/etc/habitat.conf\fP or \fI/etc/habitat.conf\fR
+.TP 
+For graphical appearence: fonts, colours, styles, etc
+\fI$HAB/lib/myhabitat.rc\fR or \fI/usr/lib/habitat/myhabitat.rc\fR
+.TP 
+For the help information
+\fI$HAB/lib/help/\fR or \fI/usr/lib/habitat/help/\fR
+.SH "ENVIRONMENT VARIABLES"
+.TP 
+\fBDISPLAY\fP
+The X\-Windows display to use
+.TP 
+\fBPATH\fP
+Used to locate a browser to display help information.
+Typical browsers looked for are Mozilla, Netscape, Konqueror, 
+Opera, Chimera
+.TP 
+\fBHOME\fP
+User's home directory
+.SH "AUTHORS"
+.LP 
+Nigel Stuckey <nigel.stuckey@systemgarden.com>
+.SH "SEE ALSO"
+.LP 
+clockwork(8), killclock(8), statclock(8), habedit(8), habrep(8),
+habconf(5),
+myhabitat(1), habget(1), habput(1), irs(1), habprobe(1), habmeth(1)

@@ -1,0 +1,23 @@
+/* XPM */
+static char*bottleneck2[]={
+"16 16 4 1",
+"b c #00ffff",
+"# c #000000",
+"a c #ff8000",
+". c None",
+"................",
+"....#abbb#a.....",
+"....#abbb#a.....",
+"....#abbb#a.....",
+"....#abbb#a.....",
+"....#abbb#a.....",
+"...#abbbbb#a....",
+"...#abbbbb#a....",
+"..#abbbbbbb#a...",
+".#abbbbbbbbb#a..",
+".#abbbbbbbbb#a..",
+".#abbbbbbbbb#a..",
+".#abbbbbbbbb#a..",
+".#abbbbbbbbb#a..",
+".#abbbbbbbbb#a..",
+"................"};

@@ -1,0 +1,130 @@
+# Module for MyHabitat, the gui in Habitat using gtk-2.0
+# Nigel Stuckey, July 2002,2009-10
+#
+# Copyright System Garden Ltd 1996-2002, 2009-10. All rights reserved.
+
+MYHABSRC =	 	\
+myhabitat/main.c	\
+myhabitat/callbacks.c	\
+myhabitat/rt_gtkgui.c	\
+myhabitat/uilog.c	\
+myhabitat/uicollect.c	\
+myhabitat/uichoice.c	\
+myhabitat/uiharvest.c	\
+myhabitat/uiabout.c	\
+myhabitat/uidata.c	\
+myhabitat/uitime.c	\
+myhabitat/uivis.c	\
+myhabitat/uiedit.c	\
+myhabitat/uitable.c	\
+myhabitat/uigraph.c	\
+myhabitat/uiprint.c	\
+myhabitat/uidialog.c	\
+myhabitat/uicopy.c	\
+myhabitat/uiemail.c	\
+myhabitat/uiconv.c	\
+myhabitat/rcache.c	\
+myhabitat/graphdbox.c	\
+myhabitat/gconv.c	\
+myhabitat/dyndata.c	\
+myhabitat/fileroute.c	\
+myhabitat/gtkdatabox_truler.c	\
+
+
+MYHABPIXMAPS =				\
+myhabitat/pixmaps/habitat_139.xpm	\
+myhabitat/pixmaps/habitat_flower_16.xpm	\
+myhabitat/pixmaps/habitat_flower_16.png	\
+myhabitat/pixmaps/habitat_flower_24.png	\
+myhabitat/pixmaps/habitat_flower_32.png	\
+myhabitat/pixmaps/harvest_flower_16.png	\
+myhabitat/pixmaps/harvest_flower_24.png	\
+myhabitat/pixmaps/harvest_flower_32.png	\
+myhabitat/pixmaps/hunter_flower_16.png	\
+myhabitat/pixmaps/hunter_flower_24.png	\
+myhabitat/pixmaps/hunter_flower_32.png	\
+myhabitat/pixmaps/home-16.png		\
+myhabitat/pixmaps/home-32.png		\
+myhabitat/pixmaps/file-16.png		\
+myhabitat/pixmaps/file-32.png		\
+myhabitat/pixmaps/file-csv-16.png	\
+myhabitat/pixmaps/file-table-22.png	\
+myhabitat/pixmaps/server-16.png		\
+myhabitat/pixmaps/server-22.png		\
+myhabitat/pixmaps/server-32.png		\
+myhabitat/pixmaps/replicate2-16.png	\
+myhabitat/pixmaps/replicate2-32.png	\
+myhabitat/pixmaps/screen-16.png		\
+myhabitat/pixmaps/screen-32.png		\
+myhabitat/pixmaps/network-22.png	\
+myhabitat/pixmaps/network2-32.png	\
+myhabitat/pixmaps/uptime-24.png		\
+myhabitat/pixmaps/chart-24.png		\
+myhabitat/pixmaps/bell-24.png		\
+myhabitat/pixmaps/book-24.png		\
+myhabitat/pixmaps/paper-24.png		\
+myhabitat/pixmaps/paper+pencil-16.png	\
+myhabitat/pixmaps/paper+pencil-24.png	\
+myhabitat/pixmaps/clock-16.png		\
+myhabitat/pixmaps/barchart-24.png	\
+myhabitat/pixmaps/expandleft-24.png	\
+myhabitat/pixmaps/expandright-24.png	\
+myhabitat/pixmaps/star-24.png		\
+myhabitat/pixmaps/download-32.png	\
+myhabitat/pixmaps/chip-32.png		\
+myhabitat/pixmaps/disk-32.png		\
+myhabitat/pixmaps/arrow-btn-up-12.png   \
+myhabitat/pixmaps/arrow-btn-down-12.png \
+myhabitat/pixmaps/arrow-btn-left-12.png \
+myhabitat/pixmaps/arrow-btn-right-12.png \
+myhabitat/pixmaps/spinner-greenflower-15.gif		\
+myhabitat/pixmaps/spinner-greenflower-35.gif		\
+myhabitat/pixmaps/filecab-32.png	\
+myhabitat/pixmaps/font-32.png		\
+myhabitat/pixmaps/spreadsheet-32.png	\
+myhabitat/pixmaps/barchart-32.png	\
+myhabitat/pixmaps/process-32.png	\
+
+
+MYHABOBJ    := $(patsubst %.c, %.o, $(MYHABSRC))
+MYHABBIN    := myhabitat/myhabitat
+MYHABFATBIN := myhabitat/myhabitat-fat
+SRC        += $(MYHABSRC)
+BIN        += $(MYHABBIN)
+LIB        += myhabitat/myhabitat.rc myhabitat/myhabitat.glade
+PIXMAPS    += $(MYHABPIXMAPS)
+GTKLIBS    := $(shell pkg-config --libs-only-l gtk+-2.0 gmodule-2.0 gtkdatabox)
+GTKFLAGS   := $(shell pkg-config --libs-only-other gtk+-2.0 gmodule-2.0 gtkdatabox)
+THINLIBS   := -liiab -ldl -lm -lgdbm -lcurl -lXi -lXext -lX11
+FATLIBS    := -lgtk -lgdk -lgmodule -lglib 
+
+# Special dependency on version number: callbacks contain the about...
+# popup, which needs to have an up-to-date idea of version
+myhabitat/callbacks.o: VERSION
+
+# Declare the libraries I need and the link methods
+$(MYHABBIN): $(MYHABOBJ) -liiab $(GTKLIBS)
+	$(LINK.c) -o $@ $(GTKFLAGS) $(call dep_nolib,$^) $(LOADLIBES) \
+		$(LDLIBS) $(call dep_libdir,$^) $(call dep_libname,$^)
+
+#$(MYHABBIN): $(MYHABOBJ) -liiab -lgtk -lgdk -lgmodule -lglib -ldl -lXi \
+#		-lXext -lX11 -lm #$(FATLIBS) $(THINLIBS)
+#	$(LINK.c) -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
+#		$(call dep_libdir,$^) $(call dep_libname,$^)
+
+#	$(LINK.c) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+#		$(LOADLIBES) $(LDLIBS) \
+#		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+#		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))
+
+#	$(LINK.c) -o $@ $^ $(LOADLIBES) $(LDLIBS) -Liiab -liiab
+
+
+
+# Special 'fat' binary of myhabitat
+$(MYHABFATBIN): $(MYHABOBJ) $(THINLIBS)
+	$(LINK.c) -o $@ $(filter-out %.a,$(filter-out %.so,$^)) \
+		-Wl,-Bstatic $(FATLIBS) \
+		-Wl,-Bdynamic $(LOADLIBES) $(LDLIBS) \
+		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
+		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^))))

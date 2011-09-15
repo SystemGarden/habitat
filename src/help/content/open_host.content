@@ -1,0 +1,19 @@
+%title%
+open data from a host
+%body%
+<img src=open_host.png align=left> 
+This simple pop-up form asks for a host name of a machine that is collecting
+data which can be read by habitat.
+Hit return when finished or click <b>open</b> and <b>ghabitat</b> will contact
+the repository to ask for data from that machine.
+If successful, then available data will be placed in the choice tree 
+for you to click, otherwise a message will will be posted inthe status 
+line if the host or its data does not exist.
+<p>
+Changing the source button from <b>Repository</b> to <b>Direct</b>, will
+cause <b>ghabitat</b> to get its data directly from the specified host.
+Generally, it is more considerate to source data from the repository as it
+removes load from the monitored system.
+However, if you need the most current data, there is no choice but to 
+connect from the target system.
+
