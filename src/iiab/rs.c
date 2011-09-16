@@ -1373,7 +1373,7 @@ int   rs_resize(RS ring		/* ring descriptor */,
 
      if (newslots < 0) {
 	  elog_printf(ERROR, "number of new slots for ring %d,%d must be "
-		      "positive", ring->ringname, rung->duration);
+		      "positive", ring->ringname, ring->duration);
 	  return 0;
      }
 
