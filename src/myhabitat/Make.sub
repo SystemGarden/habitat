@@ -48,6 +48,7 @@ myhabitat/pixmaps/home-32.png		\
 myhabitat/pixmaps/file-16.png		\
 myhabitat/pixmaps/file-32.png		\
 myhabitat/pixmaps/file-csv-16.png	\
+myhabitat/pixmaps/file-csv-32.png	\
 myhabitat/pixmaps/file-table-22.png	\
 myhabitat/pixmaps/server-16.png		\
 myhabitat/pixmaps/server-22.png		\
@@ -66,7 +67,9 @@ myhabitat/pixmaps/paper-24.png		\
 myhabitat/pixmaps/paper+pencil-16.png	\
 myhabitat/pixmaps/paper+pencil-24.png	\
 myhabitat/pixmaps/clock-16.png		\
+myhabitat/pixmaps/barchart-16.png	\
 myhabitat/pixmaps/barchart-24.png	\
+myhabitat/pixmaps/barchart-32.png	\
 myhabitat/pixmaps/expandleft-24.png	\
 myhabitat/pixmaps/expandright-24.png	\
 myhabitat/pixmaps/star-24.png		\
@@ -80,9 +83,10 @@ myhabitat/pixmaps/arrow-btn-right-12.png \
 myhabitat/pixmaps/spinner-greenflower-15.gif		\
 myhabitat/pixmaps/spinner-greenflower-35.gif		\
 myhabitat/pixmaps/filecab-32.png	\
+myhabitat/pixmaps/font-16.png		\
 myhabitat/pixmaps/font-32.png		\
+myhabitat/pixmaps/spreadsheet-16.png	\
 myhabitat/pixmaps/spreadsheet-32.png	\
-myhabitat/pixmaps/barchart-32.png	\
 myhabitat/pixmaps/process-32.png	\
 
 
