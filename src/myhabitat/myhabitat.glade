@@ -5134,7 +5134,7 @@ Start collection now or connect to remote sources</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">About Habitat</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon">pixmaps/habitat_flower_16.xpm</property>
+    <property name="icon">pixmaps/habitat_flower_16.png</property>
     <property name="type_hint">normal</property>
     <property name="program_name">MyHabitat</property>
     <property name="copyright" translatable="yes">Copyright System Garden Limited 1996-2011. All rights reserved</property>
