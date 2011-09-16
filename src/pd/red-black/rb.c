@@ -232,7 +232,7 @@ Rb_node rb_find_gkey(Rb_node n, char *key, int (*fxn)(char *, char *))
  
 Rb_node rb_insert_b(Rb_node n, char *key, char *val)
 {
-  Rb_node newleft, newright, newnode, list, p;
+  Rb_node newleft, newright, newnode, p;
  
   if (ishead(n)) {
     if (n->p.root == n) {         /* Tree is empty */
@@ -312,7 +312,6 @@ static void single_rotate(Rb_node y, int l)
 {
   int rl, ir;
   Rb_node x, yp;
-  char *tmp;
  
   ir = isroot(y);
   yp = y->p.parent;
@@ -585,23 +584,23 @@ char *rb_val(Rb_node n)
  
 Rb_node rb_insert_a(Rb_node nd, char *key, char *val)
 {
-  rb_insert_b(nd->c.list.flink, key, val);
+  return rb_insert_b(nd->c.list.flink, key, val);
 }
 
 Rb_node rb_insert(Rb_node tree, char *key, char *val)
 {
-  rb_insert_b(rb_find_key(tree, key), key, val);
+  return rb_insert_b(rb_find_key(tree, key), key, val);
 }
 
 Rb_node rb_inserti(Rb_node tree, unsigned int ikey, char *val)
 {
-  rb_insert_b(rb_find_ikey(tree, ikey), (char *) ikey, val);
+  return rb_insert_b(rb_find_ikey(tree, ikey), (char *) ikey, val);
 }
 
 Rb_node rb_insertg(Rb_node tree, char *key, char *val,
                           int (*func)(char *, char *))
 {
-  rb_insert_b(rb_find_gkey(tree, key, func), key, val);
+  return rb_insert_b(rb_find_gkey(tree, key, func), key, val);
 }
 
 

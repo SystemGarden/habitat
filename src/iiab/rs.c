@@ -437,13 +437,9 @@ int   rs_put(RS    ring	/* ring descriptor */,
 
      /* get write lock & load ring's index */
      if ( ! ring->method->ll_lock(ring->handle, RS_WRLOCK, "rs_put") ) {
-	  rs_free_dblock(dblock);
-	  nfree(headtxt);
 	  return 0;
      }
      if ( ! rs_priv_load_index(ring, &index) ) {
-	  rs_free_dblock(dblock);
-	  nfree(headtxt);
 	  return 0;
      }
 
@@ -1377,7 +1373,7 @@ int   rs_resize(RS ring		/* ring descriptor */,
 
      if (newslots < 0) {
 	  elog_printf(ERROR, "number of new slots for ring %d,%d must be "
-		      "positive", ring->ringname, duration);
+		      "positive", ring->ringname, rung->duration);
 	  return 0;
      }
 

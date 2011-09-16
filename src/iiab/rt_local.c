@@ -90,7 +90,7 @@ RT_LLD rt_local_open (char *p_url,	/* address valid until ..close() */
      /* Names passed to HTTP need to exist during the life of the instance */
      localpurl = util_strjoin("http://localhost:", HTTPD_PORT_HTTP_STR,
 			      "/localtsv/", basename, NULL);
-     localbase = localbase+5;
+     localbase = localpurl+5;
 
      rt = nmalloc(sizeof(struct rt_local_desc));
      rt->magic = rt_local_magic();
@@ -120,7 +120,7 @@ RT_LLD rt_localmeta_open(char *p_url,	/* address valid until ..close() */
      /* Names passed to HTTP need to exist during the life of the instance */
      localpurl = util_strjoin("http://localhost:", HTTPD_PORT_HTTP_STR,
 			      "/", basename, NULL);
-     localbase = localbase+5;
+     localbase = localpurl+5;
 
      rt = nmalloc(sizeof(struct rt_local_desc));
      rt->magic = rt_localmeta_magic();
@@ -197,12 +197,12 @@ int    rt_local_tell  (RT_LLD lld, int *seq, int *size, time_t *modt)
 ITREE *rt_local_read  (RT_LLD lld, int seq, int offset)
 {
      RT_LOCALD rt;
-     int r;
+     ITREE *it;
 
      rt = rt_local_from_lld(lld);
-     r = rt_http_read(rt->hrt, seq, offset);
+     it = rt_http_read(rt->hrt, seq, offset);
 
-     return r;
+     return it;
 }
 
 

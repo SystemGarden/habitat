@@ -278,7 +278,8 @@ void httpd_stop()
 void httpd_accept(void *fd /* would be an int */)
 {
      httpd_usockaddr usa;
-     int conn_fd, sz, totbytes=0, bytes=0, method;
+     int conn_fd, totbytes=0, bytes=0, method;
+     socklen_t sz;
      char buf[10000], *request=NULL;
      char *path, *reqdata=NULL, *datablock=NULL;
      TREE *headers;
@@ -588,7 +589,7 @@ int httpd_header_send(int fd, TREE *headers, int user_status, char *mime_type,
 		      int content_length, time_t last_modified)
 {
      time_t now;
-     int status, n, i;
+     int status, n;
      char buf[2048], nowstr[50], modstr[50], *title;
      char *rfc1123_fmt = "%a, %d %b %Y %H:%M:%S GMT";
 
@@ -636,7 +637,7 @@ int httpd_header_send(int fd, TREE *headers, int user_status, char *mime_type,
 
      write(fd, buf, strlen(buf));
 
-     return i;
+     return status;
 }
 
 

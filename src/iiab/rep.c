@@ -366,7 +366,7 @@ TABLE rep_local_get(char *local_ring, int local_seq, int *local_max_seq) {
  * by the remote ring */
 ROUTE rep_local_open_or_create(char *local_ring, char *remote_ring) {
      ROUTE rt;
-     char *purl, *desc, *pt;
+     char purl[REP_PURL_LEN], *desc, *pt;
      TABLE info;
      int nslots;
 
@@ -582,16 +582,18 @@ void  rep_remote_status(char *rtstatus, char *rtinfo, int *remote_youngest_s,
      }
 
      /* convert to numeric */
-     if (remote_youngest_s)
+     if (remote_youngest_s) {
           if (ry_s)
 	       *remote_youngest_s = strtol(ry_s, (char**)NULL, 10);
 	  else
 	       *remote_youngest_s = -1;
-     if (remote_youngest_t)
+     }
+     if (remote_youngest_t) {
           if (ry_t)
 	       *remote_youngest_t = strtol(ry_t, (char**)NULL, 10);
 	  else
 	       *remote_youngest_t = 0;
+     }
 
      if (ry_s)
           nfree(ry_s);
