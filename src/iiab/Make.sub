@@ -23,7 +23,6 @@ iiab/rt_sqlrs.c		\
 iiab/rt_rs.c		\
 iiab/rs.c 		\
 iiab/rs_gdbm.c		\
-iiab/rs_berk.c		\
 iiab/hash.c		\
 iiab/iiab.c		\
 iiab/callback.c		\
@@ -40,6 +39,7 @@ iiab/httpd.c		\
 iiab/rep.c		\
 iiab/pattern.c		\
 iiab/timeline.c		\
+#iiab/rs_berk.c		\
 #iiab/record.c		\
 #iiab/ringbag.c		\
 #iiab/conv.c		\
@@ -52,14 +52,14 @@ IIABOBJ := $(patsubst %.c, %.o, $(IIABSRC))
 ifeq ($(ARCH),Darwin)
 IIABSOLIB = iiab/libiiab.dylib
 $(IIABSOLIB): $(IIABOBJ) pd/red-black/rb.o \
-			-lgdbm -ldb -ldl -lcurl -lz -lssl -lcrypto
+			-lgdbm -ldl -lcurl -lz -lssl -lcrypto
 	$(LINK.o) -dynamiclib -install_name @rpath/$(notdir $@) \
 		-o $@ $(call dep_nolib,$^) $(LOADLIBES) \
 		$(LDLIBS) $(call dep_libdir,$^) $(call dep_libname,$^)
 else
 IIABSOLIB = iiab/libiiab.so
 iiab/libiiab.so: $(IIABOBJ) pd/red-black/rb.o \
-			-lgdbm -ldb -ldl -lcurl -lz -lssl -lcrypto
+			-lgdbm -ldl -lcurl -lz -lssl -lcrypto
 	$(LINK.o) -shared -o $@ $(call dep_nolib,$^) $(LOADLIBES) $(LDLIBS) \
 		$(call dep_libdir,$^) $(call dep_libname,$^)
 

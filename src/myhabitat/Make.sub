@@ -90,6 +90,10 @@ myhabitat/pixmaps/font-32.png		\
 myhabitat/pixmaps/spreadsheet-16.png	\
 myhabitat/pixmaps/spreadsheet-32.png	\
 myhabitat/pixmaps/process-32.png	\
+myhabitat/pixmaps/zoomin-h-24.png	\
+myhabitat/pixmaps/zoomin-v-24.png	\
+myhabitat/pixmaps/zoomout-24.png	\
+myhabitat/pixmaps/zoomhome-24.png	\
 
 
 MYHABOBJ    := $(patsubst %.c, %.o, $(MYHABSRC))

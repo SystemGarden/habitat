@@ -42,7 +42,7 @@ void uiedit_load_route(char *purl, char *artifact)
      int length, nlines, readonly;
      PangoFontDescription *font_desc;
 
-     g_print("uiedit_load_route\n");
+     /*g_print("uiedit_load_route\n");*/
 
      /* check for read only */
      edit_readonly_label = get_widget("edit_readonly_label");
@@ -216,7 +216,7 @@ uiedit_on_cancel (GtkObject *object, gpointer user_data)
      GtkWidget *edit_win;
      GtkTextBuffer *edit_textbuffer;
 
-     g_print("uiedit_on_cancel\n");
+     /*g_print("uiedit_on_cancel\n");*/
 
      /* check for modified */
      edit_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object
@@ -241,7 +241,7 @@ uiedit_on_modified (GtkObject *object, gpointer user_data)
      GtkWidget *edit_status_label;
      GtkTextBuffer *edit_textbuffer;
 
-     g_print("uiedit_on_modified\n");
+     /*g_print("uiedit_on_modified\n");*/
 
      edit_status_label = get_widget("edit_status_label");
 
@@ -267,7 +267,7 @@ uiedit_on_recount_lines (GtkObject *object, gpointer user_data)
      int nlines;
      char *nlines_str;
 
-     g_print("uiedit_on_recount_lines\n");
+     /*g_print("uiedit_on_recount_lines\n");*/
 
      /* get UI refs */
      edit_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object

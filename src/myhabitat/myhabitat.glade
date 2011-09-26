@@ -1543,7 +1543,7 @@ www.systemgarden.com
                                 <property name="tooltip_text" translatable="yes">Zoom chart horizontally</property>
                                 <property name="label">HZoom</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-zoom-in</property>
+                                <property name="icon_widget">hzoomin_img</property>
                                 <signal name="clicked" handler="uigraph_on_zoom_in_horiz"/>
                               </object>
                               <packing>
@@ -1557,7 +1557,7 @@ www.systemgarden.com
                                 <property name="tooltip_text" translatable="yes">Zoom chart vertically</property>
                                 <property name="label">VZoom</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-zoom-in</property>
+                                <property name="icon_widget">vzoomin_img</property>
                                 <signal name="clicked" handler="uigraph_on_zoom_in_vert"/>
                               </object>
                               <packing>
@@ -1571,7 +1571,7 @@ www.systemgarden.com
                                 <property name="tooltip_text" translatable="yes">Zoom out in both axes</property>
                                 <property name="label">Zoomout</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-zoom-out</property>
+                                <property name="icon_widget">zoomout_img</property>
                                 <signal name="clicked" handler="uigraph_on_zoom_out"/>
                               </object>
                               <packing>
@@ -1585,7 +1585,7 @@ www.systemgarden.com
                                 <property name="tooltip_text" translatable="yes">Reset zoom level</property>
                                 <property name="label">Home</property>
                                 <property name="use_underline">True</property>
-                                <property name="stock_id">gtk-zoom-out</property>
+                                <property name="icon_widget">zoomhome_img</property>
                                 <signal name="clicked" handler="uigraph_on_zoom_out_home"/>
                               </object>
                               <packing>
@@ -8325,6 +8325,22 @@ Do you want to stop collecting?</property>
   <object class="GtkImage" id="process_img">
     <property name="visible">True</property>
     <property name="pixbuf">pixmaps/process-32.png</property>
+  </object>
+  <object class="GtkImage" id="hzoomin_img">
+    <property name="visible">True</property>
+    <property name="pixbuf">pixmaps/zoomin-h-24.png</property>
+  </object>
+  <object class="GtkImage" id="vzoomin_img">
+    <property name="visible">True</property>
+    <property name="pixbuf">pixmaps/zoomin-v-24.png</property>
+  </object>
+  <object class="GtkImage" id="zoomout_img">
+    <property name="visible">True</property>
+    <property name="pixbuf">pixmaps/zoomout-24.png</property>
+  </object>
+  <object class="GtkImage" id="zoomhome_img">
+    <property name="visible">True</property>
+    <property name="pixbuf">pixmaps/zoomhome-24.png</property>
   </object>
   <object class="GtkDialog" id="edit_win">
     <property name="border_width">5</property>

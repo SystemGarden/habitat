@@ -310,7 +310,7 @@ void iiab_init_routes() {
      route_register(&rt_https_method);
      route_register(&rt_sqlrs_method);
      route_register(&rt_grs_method);
-     route_register(&rt_brs_method);
+     /*route_register(&rt_brs_method);*/
      route_register(&rt_local_method);
      route_register(&rt_localmeta_method);
 }

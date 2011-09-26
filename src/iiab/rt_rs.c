@@ -32,6 +32,7 @@ const struct route_lowlevel rt_grs_method = {
      rt_grs_tread,   rt_rs_status,    rt_rs_checkpoint
 };
 
+#if 0
 const struct route_lowlevel rt_brs_method = {
      rt_brs_magic,   rt_brs_prefix,   rt_brs_description,
      rt_rs_init,     rt_rs_fini,      rt_brs_access,
@@ -39,6 +40,7 @@ const struct route_lowlevel rt_brs_method = {
      rt_rs_twrite,   rt_rs_tell,      rt_rs_read,
      rt_brs_tread,   rt_rs_status,    rt_rs_checkpoint
 };
+#endif
 
 char *rt_rs_schema[] = {"_time", "_seq", "text", NULL};
 
@@ -93,6 +95,7 @@ int    rt_grs_access(char *p_url, char *password, char *basename, int flag)
 }
 
 
+#if 0
 /* Check accessability of the ringstore file. Returns 1 for can access or 
  * 0 for no access */
 int    rt_brs_access(char *p_url, char *password, char *basename, int flag)
@@ -128,6 +131,7 @@ int    rt_brs_access(char *p_url, char *password, char *basename, int flag)
 	  return 0;	/* failure */
      }
 }
+#endif
 
 
 /* open ringstore, returning the descriptor for success or NULL for failure.
@@ -255,6 +259,7 @@ RT_LLD rt_grs_open (char *p_url, char *comment, char *password, int keep,
 }
 
 
+#if 0
 /* open ringstore, returning the descriptor for success or NULL for failure.
  * There are some special routes, donated by adding suffixes:-
  *   ?info    Information about the ring
@@ -377,6 +382,7 @@ RT_LLD rt_brs_open (char *p_url, char *comment, char *password, int keep,
 
      return rt;
 }
+#endif
 
 
 void   rt_rs_close (RT_LLD lld)
@@ -567,6 +573,7 @@ TABLE rt_grs_tread  (RT_LLD lld, int seq, int offset)
 }
 
 
+#if 0
 /* Read data from seq to the end and return it as a TABLE data type.
  * To read back as a table, the data should have been stored as a table
  * before [with rt_brs_twrite() by writing the output of table_outtable()
@@ -623,6 +630,7 @@ TABLE rt_brs_tread  (RT_LLD lld, int seq, int offset)
 			    rt->from_t, rt->to_t);
      }
 }
+#endif
 
 
 /*

@@ -45,7 +45,7 @@ typedef struct rt_rs_desc {
 } * RT_RSD;
 
 extern const struct route_lowlevel rt_grs_method;
-extern const struct route_lowlevel rt_brs_method;
+/*extern const struct route_lowlevel rt_brs_method;*/
 
 void   rt_rs_init  (CF_VALS cf, int debug);
 void   rt_rs_fini  ();

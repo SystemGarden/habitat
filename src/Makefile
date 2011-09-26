@@ -12,7 +12,7 @@
 MODULES := pd gnu iiab probe trm cmd myhabitat help man #util ...
 
 # Standard arguments
-CFLAGS += -pg -Wall -g -DNMALLOC $(EXTRA_INCLUDE) $(SYS_INCLUDE)
+CFLAGS += -Wall -g -DNMALLOC $(EXTRA_INCLUDE) $(SYS_INCLUDE)
 # -Wall -Wcast-qual -Wno-format-y2k # -O3 # -pg -a
 LINKPATHARG = -Wl,-rpath,../%
 LDFLAGS += 			# see Make.config
@@ -384,5 +384,5 @@ test/t.%: %.c
 	$(LINK.c) -DTEST -o $@ $<\
 		$(LOADLIBES) $(LDLIBS) \
 		$(patsubst %/,-L%,$(dir $(filter %.so,$^) $(filter %.a,$^))) \
-		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^)))) -Liiab -liiab -Lgnu/lib -lgdbm -ldb -lcurl -ldl
+		$(patsubst lib%,-l%,$(basename $(notdir $(filter %.so,$^) $(filter %.a,$^)))) -Liiab -liiab -Lgnu/lib -lgdbm -lcurl -ldl
 

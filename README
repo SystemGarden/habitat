@@ -17,8 +17,8 @@ CHANGES
 -------
 
 - Since the 1.x series, ringstore files have changed their driver name 
-  from 'rs:' to 'grs:' (they are based on GBDM) and an evaluation Berkley 
-  DB driver (bdb:) has been introduced for testing as a possible alternative.
+  from 'rs:' to 'grs:' (they are based on GBDM) to allow for other
+  ringstores to be evaulated
 - The local host ringstore is now 'checkpointed' hourly, used as a hook
   to housekeep and compact files to save storage (its become a route 
   method so it can be reused).
@@ -84,7 +84,7 @@ services.
 
 When a source is selected, a default data view is shown to the right, with
 buttons along the top to change the data seen and how it is visualised.
-The buttons below help navigate and alter the appearence of the tool.
+The buttons below help navigate and alter the appearance of the tool.
 
 The slider at the bottom shows how much data has been loaded and can
 be displayed; move it to the left to load and display more data. Zooming

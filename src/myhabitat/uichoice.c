@@ -340,7 +340,7 @@ uichoice_on_replication_log(GtkMenuItem *object, gpointer user_data) {
      purl    = util_strjoin("http://localhost:", HTTPD_PORT_HTTP_STR, 
 			    "/localtsv/rep", NULL);
 #else
-     purl    = util_strjoin("local:rep");
+     purl    = util_strjoin("local:rep,0", NULL);
 #endif
      uichoice_mknode_thishost_collector(purl, 
 					"Replication Log",
@@ -361,7 +361,7 @@ uichoice_on_collection_log(GtkMenuItem *object, gpointer user_data) {
      purl    = util_strjoin("http://localhost:", HTTPD_PORT_HTTP_STR, 
 			    "/localtsv/log", NULL);
 #else
-     purl    = util_strjoin("local:log");
+     purl    = util_strjoin("local:log,0", NULL);
 #endif
      uichoice_mknode_thishost_collector(purl,
 					 "Collection Log",
@@ -382,7 +382,7 @@ uichoice_on_event_log(GtkMenuItem *object, gpointer user_data) {
      purl    = util_strjoin("http://localhost:", HTTPD_PORT_HTTP_STR, 
 			    "/localtsv/patact", NULL);
 #else
-     purl    = util_strjoin("local:patact");
+     purl    = util_strjoin("local:patact,0", NULL);
 #endif
      uichoice_mknode_thishost_collector(purl,
 					 "Event Log",
@@ -401,6 +401,27 @@ void uichoice_mknode_thishost_collector(char *purl, char *label, char *name,
      GdkPixbuf *icon, *bigicon;
      GtkTreeView *choicetree;
      GtkTreePath *path;
+     char *existing_label;
+
+     /* need to check if the same node has been created before
+      * by walking across the local choice node */
+     if (gtk_tree_model_iter_children(GTK_TREE_MODEL(choicestore), 
+				      &log, &localparent) == FALSE) {
+          elog_printf(FATAL, "Unable to find children of local parent");
+	  return;
+     }
+     do {
+          gtk_tree_model_get(GTK_TREE_MODEL (choicestore), &log, 
+			     UICHOICE_COL_LABEL,           &existing_label,
+			     -1);
+	  if (strcmp(label, existing_label) == 0) {
+	       /* the same label is in the local branch of the choice tree */
+	       g_free(existing_label);
+	       return;
+	  }
+	  g_free(existing_label);
+     } while (gtk_tree_model_iter_next(GTK_TREE_MODEL(choicestore), 
+				       &log));
 
      /* create node */
      icon = uichoice_load_pixbuf(UICHOICE_ICON_LOGS);
