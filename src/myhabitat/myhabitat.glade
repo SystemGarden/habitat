@@ -9290,7 +9290,7 @@ Do you want to stop collecting?</property>
                                     <child>
                                       <object class="GtkLabel" id="collection_what_more_label">
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Show all collection jobs...</property>
+                                        <property name="label" translatable="yes">Show all collection jobs</property>
                                       </object>
                                       <packing>
                                         <property name="position">1</property>
@@ -9316,7 +9316,7 @@ Do you want to stop collecting?</property>
                           <object class="GtkLabel" id="collection_what_sys_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">System</property>
+                            <property name="label" translatable="yes">System:</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -9338,7 +9338,7 @@ Do you want to stop collecting?</property>
                           <object class="GtkLabel" id="collection_what_net_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Network</property>
+                            <property name="label" translatable="yes">Network:</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -9351,7 +9351,7 @@ Do you want to stop collecting?</property>
                           <object class="GtkLabel" id="collection_what_io_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Storage</property>
+                            <property name="label" translatable="yes">Storage:</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -9364,7 +9364,7 @@ Do you want to stop collecting?</property>
                           <object class="GtkLabel" id="collection_what_proc_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">Processes</property>
+                            <property name="label" translatable="yes">Processes:</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -9377,7 +9377,7 @@ Do you want to stop collecting?</property>
                           <object class="GtkLabel" id="collection_what_watch_label">
                             <property name="visible">True</property>
                             <property name="xalign">0</property>
-                            <property name="label" translatable="yes">File Watchers</property>
+                            <property name="label" translatable="yes">File Watchers:</property>
                           </object>
                           <packing>
                             <property name="left_attach">1</property>
@@ -9474,6 +9474,7 @@ Do you want to stop collecting?</property>
               <object class="GtkLabel" id="collection_where_value">
                 <property name="visible">True</property>
                 <property name="xalign">0</property>
+                <property name="xpad">17</property>
                 <property name="label" translatable="yes">label</property>
               </object>
             </child>
@@ -9501,71 +9502,8 @@ Do you want to stop collecting?</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                 <property name="n_rows">4</property>
                 <property name="n_columns">2</property>
-                <child>
-                  <object class="GtkEntry" id="collection_daemon_start_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="has_frame">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="text" translatable="yes">-</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">3</property>
-                    <property name="bottom_attach">4</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="collection_daemon_pid_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="text" translatable="yes">-</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">2</property>
-                    <property name="bottom_attach">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="collection_daemon_user_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="text" translatable="yes">-</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                    <property name="top_attach">1</property>
-                    <property name="bottom_attach">2</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkEntry" id="collection_daemon_name_entry">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                    <property name="editable">False</property>
-                    <property name="has_frame">False</property>
-                    <property name="invisible_char">•</property>
-                    <property name="text" translatable="yes">-</property>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="right_attach">2</property>
-                  </packing>
-                </child>
+                <property name="column_spacing">4</property>
+                <property name="row_spacing">2</property>
                 <child>
                   <object class="GtkLabel" id="collection_daemon_start_prompt">
                     <property name="visible">True</property>
@@ -9624,6 +9562,56 @@ Do you want to stop collecting?</property>
                     <property name="y_options"></property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkLabel" id="collection_daemon_name_label">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">process name</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="collection_daemon_user_label">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">username</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="collection_daemon_pid_label">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">pid</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="collection_daemon_start_label">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                    <property name="label" translatable="yes">time started</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">3</property>
+                    <property name="bottom_attach">4</property>
+                  </packing>
+                </child>
               </object>
             </child>
             <child type="label">
@@ -9665,7 +9653,7 @@ Do you want to stop collecting?</property>
                     <child>
                       <object class="GtkLabel" id="collection_log_label">
                         <property name="visible">True</property>
-                        <property name="label" translatable="yes">Show collector's logs...</property>
+                        <property name="label" translatable="yes">Show collector's logs</property>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -9724,7 +9712,7 @@ Do you want to stop collecting?</property>
     <child>
       <object class="GtkTable" id="repository_grid">
         <property name="visible">True</property>
-        <property name="n_rows">6</property>
+        <property name="n_rows">7</property>
         <property name="n_columns">2</property>
         <property name="column_spacing">10</property>
         <property name="row_spacing">5</property>
@@ -10184,10 +10172,10 @@ Do you want to stop collecting?</property>
                                 <property name="receives_default">True</property>
                                 <property name="relief">none</property>
                                 <child>
-                                  <object class="GtkHBox" id="hbox10">
+                                  <object class="GtkHBox" id="repository_sysgar_reauth_hbox">
                                     <property name="visible">True</property>
                                     <child>
-                                      <object class="GtkImage" id="image8">
+                                      <object class="GtkImage" id="repository_sysgar_reauth_image">
                                         <property name="visible">True</property>
                                         <property name="pixbuf">pixmaps/harvest_flower_16.png</property>
                                       </object>
@@ -10196,9 +10184,9 @@ Do you want to stop collecting?</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel" id="label8">
+                                      <object class="GtkLabel" id="repository_sysgar_reauth_label">
                                         <property name="visible">True</property>
-                                        <property name="label" translatable="yes">Sign up server with System Garden...</property>
+                                        <property name="label" translatable="yes">Sign up server with System Garden</property>
                                       </object>
                                       <packing>
                                         <property name="position">1</property>
@@ -10263,6 +10251,175 @@ Do you want to stop collecting?</property>
         </child>
         <child>
           <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <object class="GtkExpander" id="repository_when_expander">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <child>
+              <object class="GtkFrame" id="repository_when_frame">
+                <property name="visible">True</property>
+                <property name="label_xalign">0</property>
+                <property name="shadow_type">none</property>
+                <child>
+                  <object class="GtkAlignment" id="repository_when_alignment">
+                    <property name="visible">True</property>
+                    <property name="left_padding">12</property>
+                    <child>
+                      <object class="GtkTable" id="repository_when_grid">
+                        <property name="visible">True</property>
+                        <property name="n_rows">3</property>
+                        <property name="n_columns">3</property>
+                        <property name="column_spacing">4</property>
+                        <property name="row_spacing">2</property>
+                        <child>
+                          <object class="GtkImage" id="repository_when_next_image">
+                            <property name="visible">True</property>
+                            <property name="pixbuf">pixmaps/alarmclock-16.png</property>
+                          </object>
+                          <packing>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                            <property name="x_options"></property>
+                            <property name="y_options"></property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="repository_when_user_label">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Sending frequency:</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="repository_when_user_text">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">24 Hours</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="repository_what_next_label">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Next time to send:</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">1</property>
+                            <property name="right_attach">2</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="repository_when_next_text">
+                            <property name="visible">True</property>
+                            <property name="xalign">0</property>
+                            <property name="label" translatable="yes">Next time</property>
+                          </object>
+                          <packing>
+                            <property name="left_attach">2</property>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">1</property>
+                            <property name="bottom_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkHButtonBox" id="repository_when_btnbox">
+                            <property name="visible">True</property>
+                            <property name="layout_style">start</property>
+                            <child>
+                              <object class="GtkButton" id="repository_when_reauth_btn">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">True</property>
+                                <property name="relief">none</property>
+                                <child>
+                                  <object class="GtkHBox" id="repository_when_reauth_hbox">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <object class="GtkImage" id="repository_when_reauth_image">
+                                        <property name="visible">True</property>
+                                        <property name="pixbuf">pixmaps/replicate2-16.png</property>
+                                      </object>
+                                      <packing>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="repository_when_reauth_label">
+                                        <property name="visible">True</property>
+                                        <property name="label" translatable="yes">Send data to System Garden now</property>
+                                      </object>
+                                      <packing>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="right_attach">3</property>
+                            <property name="top_attach">2</property>
+                            <property name="bottom_attach">3</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkImage" id="repsoitory_when_freq_imag">
+                            <property name="visible">True</property>
+                            <property name="pixbuf">pixmaps/clock-16.png</property>
+                          </object>
+                          <packing>
+                            <property name="x_options"></property>
+                            <property name="y_options"></property>
+                          </packing>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child type="label">
+                  <object class="GtkLabel" id="repository_when_frame_label">
+                    <property name="visible">True</property>
+                    <property name="xpad">12</property>
+                    <property name="ypad">2</property>
+                    <property name="label" translatable="yes">&lt;b&gt;Replication Job&lt;/b&gt;</property>
+                    <property name="use_markup">True</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child type="label">
+              <object class="GtkLabel" id="repository_when_expander_label">
+                <property name="visible">True</property>
+                <property name="label" translatable="yes">When to send data next?</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="right_attach">2</property>
+            <property name="top_attach">6</property>
+            <property name="bottom_attach">7</property>
+          </packing>
         </child>
       </object>
     </child>
