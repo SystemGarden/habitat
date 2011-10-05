@@ -4,11 +4,14 @@ SYSTEM GARDEN HABITAT
 Welcome to Habitat, extensible collector, monitor and viewer for system 
 and applications. Also the main gateway into the System Garden project.
 
+This files covers changes, known problems, installation, how to run,
+how to connect to System Garden (not supported in Alpha releases)
+and documentation. See the file LICENSE for Habitat's licensing terms.
 
-VERSION 2.0 Snapshot 2
-----------------------
+VERSION 2.0 Alpha 1
+-------------------
 
-The GUI has been rewritten for Gtk 2, ready for 3.x and major updates 
+The GUI has been rewritten for Gtk late 2.x / early 3.x and major updates 
 to the interface have been made to make it more usable and logical. 
 The GUI is now called MyHabitat.
 
@@ -38,6 +41,21 @@ CHANGES
 - Added format input and default detection from file->open menu
 - Timeless tables now understood and will grey out time slider
 - File route as a table termination bugs fixed (rt_file_tread())
+
+
+KNOWN ISSUES
+------------
+- Connection to System Garden repoisoties not currently support functionality
+- Horizontal timeline scale does not adapt under all conditions
+- Day & time scale adaptions lose date reference
+- Auto refresh & data appending not fully tested
+- At detailed resolutions graphing can corrupt
+- Print and print preview does not work
+- Preferences and proerties used interchangeably
+- Preferences not fully working
+- Replication menu option not working
+- Resizing the chart can leave curve lists too large
+- Developer menu item should be removed for release
 
 
 INSTALLATION
@@ -297,5 +315,5 @@ and agree to the license.
 Nigel Stuckey
 
 System Garden Ltd
-July 2011
+October 2011
 nigel.stuckey@systemgarden.com
