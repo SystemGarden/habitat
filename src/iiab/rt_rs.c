@@ -17,7 +17,7 @@
 #include "tableset.h"
 #include "util.h"
 #include "rs_gdbm.h"
-#include "rs_berk.h"
+/*#include "rs_berk.h"*/
 #include "rs.h"
 #include "rt_rs.h"
 
