@@ -209,19 +209,22 @@ on_myhabitat_win_destroy (GtkObject *object, gpointer user_data)
 
 void complete_gui()
 {
-     GtkWidget *label;
+     GtkWidget *colour_this;
      GdkColor colour;
 
      /* Colour the background of the splash screen white. 
       * Chosen over style method */
-     label = get_widget("splash_eventbox");
+     colour_this = get_widget("splash_eventbox");
      colour.red   = 65535;
      colour.green = 65535;
      colour.blue  = 65535;
-     gtk_widget_modify_bg(label, GTK_STATE_NORMAL, &colour);
+     gtk_widget_modify_bg(colour_this, GTK_STATE_NORMAL, &colour);
 
-     label = get_widget("whatnext_eventbox");
-     gtk_widget_modify_bg(label, GTK_STATE_NORMAL, &colour);
+     colour_this = get_widget("whatnext_eventbox");
+     gtk_widget_modify_bg(colour_this, GTK_STATE_NORMAL, &colour);
+
+     colour_this = get_widget("about_win");
+     gtk_widget_modify_bg(colour_this, GTK_STATE_NORMAL, &colour);
 
      /* Disable repository buttons, which essentially disables it to us 
       * for the 2.0 Alpha series. It is planned to add Repositories in Beta */
@@ -229,7 +232,10 @@ void complete_gui()
      hide_widget("m_edit_harvest");
      hide_widget("m_edit_repository");
      /* Disable developer buttons */
-     /*hide_widget("m_dev_pulldown");*/
+     hide_widget("m_dev_pulldown");
+     /* Disable preference tabs */
+     hide_widget("pref_set2_scroll");
+     hide_widget("pref_set3_scroll");
 
 #if __APPLE_CC__
      /* Disable button based on platform -- Mac can't collect yet */

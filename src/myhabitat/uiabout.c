@@ -22,17 +22,32 @@ char *uiabout_browsers[] = {"firefox", "mozilla", "konqueror", "netscape",
 
 /* Initialise about window in the GUI */
 void uiabout_init() {
-     GtkAboutDialog *aboutwin;
-
-     /* grab log store and clear it */
-     aboutwin = GTK_ABOUT_DIALOG(gtk_builder_get_object(gui_builder,
-							"about_win"));
-     gtk_about_dialog_set_version(aboutwin, VERSION);
 }
 
 void uiabout_fini() {
 }
 
+
+/* callback to to the habitat wiki */
+G_MODULE_EXPORT void 
+uiabout_on_about (GtkObject *object, gpointer user_data)
+{
+     GtkAboutDialog *aboutwin;
+
+     aboutwin = GTK_ABOUT_DIALOG(gtk_builder_get_object(gui_builder,
+							"about_win"));
+     gtk_about_dialog_set_version(aboutwin, VERSION);
+     gint result = gtk_dialog_run (GTK_DIALOG(aboutwin));
+     switch (result)
+       {
+       case GTK_RESPONSE_OK:
+       case GTK_RESPONSE_CLOSE:
+	 break;
+       default:
+	 break;
+       }
+     gtk_widget_hide(GTK_WIDGET(aboutwin));
+}
 
 /* callback to to the habitat wiki */
 G_MODULE_EXPORT void 

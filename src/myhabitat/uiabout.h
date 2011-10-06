@@ -10,6 +10,7 @@
 
 void uiabout_init();
 void uiabout_fini();
+void uiabout_on_about (GtkObject *object, gpointer user_data);
 void on_support_wiki (GtkObject *object, gpointer user_data);
 void on_website (GtkObject *object, gpointer user_data);
 void on_manual (GtkObject *object, gpointer user_data);

@@ -34,5 +34,4 @@ widget "*GtkDatabox" style "graph"
 widget "*GtkDataboxRuler" style "graph"
 widget "*GtkDataboxTRuler" style "graph"
 widget "*curves_list" style "picker"
-
-
+widget "*about_win" style "whitebg"

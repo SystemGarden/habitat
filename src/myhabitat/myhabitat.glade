@@ -834,7 +834,7 @@ Options will appear on the choice tree</property>
                         <property name="visible">True</property>
                         <property name="label" translatable="yes">_About</property>
                         <property name="use_underline">True</property>
-                        <signal name="activate" handler="gtk_window_present" object="about_win"/>
+                        <signal name="activate" handler="uiabout_on_about"/>
                       </object>
                     </child>
                     <child>
@@ -1422,7 +1422,7 @@ www.systemgarden.com
                                 <child type="tab">
                                   <object class="GtkLabel" id="label6">
                                     <property name="visible">True</property>
-                                    <property name="label" translatable="yes">Property</property>
+                                    <property name="label" translatable="yes">Preference</property>
                                   </object>
                                   <packing>
                                     <property name="position">3</property>
@@ -5150,7 +5150,7 @@ Start collection now or connect to remote sources</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">About Habitat</property>
     <property name="window_position">center-on-parent</property>
-    <property name="icon">pixmaps/habitat_flower_16.png</property>
+    <property name="icon">pixmaps/habitat_flower_32.png</property>
     <property name="type_hint">normal</property>
     <property name="program_name">MyHabitat</property>
     <property name="copyright" translatable="yes">Copyright System Garden Limited 1996-2011. All rights reserved</property>
@@ -5850,7 +5850,7 @@ System Garden Ltd
     </child>
     <child>
       <object class="GtkImageMenuItem" id="pop_choice_prop">
-        <property name="label">Properties</property>
+        <property name="label">Preference</property>
         <property name="visible">True</property>
         <property name="tooltip_text" translatable="yes">Information about this choice</property>
         <property name="use_underline">True</property>
@@ -6007,6 +6007,9 @@ Data collection will continue if already started</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Attach to the System Garden Repository</property>
     <signal name="delete_event" handler="gtk_widget_hide" object="assist_harv_win"/>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <placeholder/>
     </child>
@@ -8598,7 +8601,7 @@ Do you want to stop collecting?</property>
   </object>
   <object class="GtkDialog" id="pref_win">
     <property name="border_width">5</property>
-    <property name="title" translatable="yes">MyHabitat Properties</property>
+    <property name="title" translatable="yes">MyHabitat Preferences</property>
     <property name="default_width">550</property>
     <property name="default_height">600</property>
     <property name="icon">pixmaps/habitat_flower_32.png</property>
@@ -8667,6 +8670,7 @@ Do you want to stop collecting?</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
+                                            <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">pref_fetchquant_radio1</property>
                                           </object>
@@ -8694,6 +8698,7 @@ Do you want to stop collecting?</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
+                                            <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">pref_fetchquant_radio1</property>
                                           </object>
@@ -10238,24 +10243,6 @@ Do you want to stop collecting?</property>
           </packing>
         </child>
         <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
           <object class="GtkExpander" id="repository_when_expander">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -10420,6 +10407,24 @@ Do you want to stop collecting?</property>
             <property name="top_attach">6</property>
             <property name="bottom_attach">7</property>
           </packing>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
+        </child>
+        <child>
+          <placeholder/>
         </child>
       </object>
     </child>
