@@ -57,6 +57,7 @@ myhabitat/pixmaps/replicate2-32.png	\
 myhabitat/pixmaps/screen-16.png		\
 myhabitat/pixmaps/screen-32.png		\
 myhabitat/pixmaps/network-16.png	\
+myhabitat/pixmaps/network1-16.png	\
 myhabitat/pixmaps/network2-32.png	\
 myhabitat/pixmaps/network2-128.png	\
 myhabitat/pixmaps/uptime-16.png		\
@@ -71,12 +72,15 @@ myhabitat/pixmaps/paper+pencil-24.png	\
 myhabitat/pixmaps/paper+pencil-32.png	\
 myhabitat/pixmaps/clock-16.png		\
 myhabitat/pixmaps/clock-32.png		\
+myhabitat/pixmaps/alarmclock-16.png	\
 myhabitat/pixmaps/barchart-16.png	\
 myhabitat/pixmaps/barchart-32.png	\
 myhabitat/pixmaps/expandleft-24.png	\
 myhabitat/pixmaps/expandright-24.png	\
 myhabitat/pixmaps/download-32.png	\
+myhabitat/pixmaps/chip-16.png		\
 myhabitat/pixmaps/chip-32.png		\
+myhabitat/pixmaps/disk-16.png		\
 myhabitat/pixmaps/disk-32.png		\
 myhabitat/pixmaps/arrow-btn-up-12.png   \
 myhabitat/pixmaps/arrow-btn-down-12.png \
@@ -89,11 +93,17 @@ myhabitat/pixmaps/font-16.png		\
 myhabitat/pixmaps/font-32.png		\
 myhabitat/pixmaps/spreadsheet-16.png	\
 myhabitat/pixmaps/spreadsheet-32.png	\
+myhabitat/pixmaps/process-16.png	\
 myhabitat/pixmaps/process-32.png	\
 myhabitat/pixmaps/zoomin-h-24.png	\
 myhabitat/pixmaps/zoomin-v-24.png	\
 myhabitat/pixmaps/zoomout-24.png	\
 myhabitat/pixmaps/zoomhome-24.png	\
+myhabitat/pixmaps/collect-16.png	\
+myhabitat/pixmaps/collect-64.png	\
+myhabitat/pixmaps/eye-16.png		\
+myhabitat/pixmaps/group-16.png		\
+myhabitat/pixmaps/multigroup-16.png	\
 
 
 MYHABOBJ    := $(patsubst %.c, %.o, $(MYHABSRC))
