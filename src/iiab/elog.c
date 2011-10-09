@@ -651,6 +651,21 @@ void elog_configure(CF_VALS cf)
 }
 
 /*
+ * Takes a severity code letter and returns associtated severity enum.
+ * Returns NOELOG if no match was found.
+ */
+enum elog_severity elog_lettertosev(char sevletter)
+{
+     int sev;
+
+     for (sev=0; sev < ELOG_NSEVERITIES; sev++) {
+          if (sevletter == elog_sevcupper[sev])
+	       return sev;
+     }
+     return NOELOG;
+}
+
+/*
  * Takes a string and attempts to match it against all possible severity 
  * strings, returning the index enum elog_severity. 
  * Returns NOELOG if no match was found.

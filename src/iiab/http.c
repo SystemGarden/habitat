@@ -217,10 +217,10 @@ char *http_get(char   *url, 	/* standard url */
 		 connect_timeout, timeout);
 
      /* prepare the timeouts if local */
-     if (strcmp(host, "localhost")) {
+     if (strcmp(host, "localhost") == 0) {
           /* if things are local, we expect it to be much faster */
           curl_easy_setopt(http_curlh, CURLOPT_CONNECTTIMEOUT, (long) 4);
-          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 30);
+          curl_easy_setopt(http_curlh, CURLOPT_TIMEOUT, (long) 6);
      }
 
      /* action the GET */

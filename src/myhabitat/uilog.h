@@ -25,7 +25,6 @@ enum {
      UILOG_COL_EOL
 };
 
-
 void uilog_init();
 void uilog_elog_raise(const char *errtext,int etlen);
 void uilog_modal_alert(char *primary, char *secondary, ...);

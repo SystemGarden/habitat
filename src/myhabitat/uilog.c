@@ -20,6 +20,23 @@
 #include "main.h"
 
 
+/* Colours for the log list */
+char *uilog_bgcolname[] = {"white",          /* nosev */
+			   "PaleGoldenRod",  /* debug */
+			   "LightGoldenRod", /* diag */
+			   "Gold",           /* info */
+			   "yellow",         /* warning */
+			   "red",            /* error */
+			   "black"           /* fatal */ };
+
+char *uilog_fgcolname[] = {"black",          /* nosev */
+			   "black",          /* debug */
+			   "black",          /* diag */
+			   "black",          /* info */
+			   "black",          /* warning */
+			   "white",          /* error */
+			   "white"           /* fatal */ };
+
 /* Initialise uilog GUI, building components not taken care of by Glade
  * and GtkBuilder. Thus, should be run after these components have run.
  */
@@ -52,17 +69,19 @@ void uilog_elog_raise(const char *errtext, 	/* text containing error */
 {
      char *errtext_dup, *tok_helper;
      char ecode, *esev, *efile, *efunc, *eline, *etext;
+     char *fg_colour, *bg_colour;
      time_t etime;
      guint contextid;
      GtkStatusbar *messagebar;
      GtkListStore *log_liststore;
      GtkTreeIter log_iter;
+     enum elog_severity elog_sev;
 
      /* in main(), we declared the message format to be:-
       *
       *       e|time|severity|file|function|line|text
       *
-      * where e is the error character: d, i, w, e, f.
+      * where e is the error character: D, G, I, W, E, F.
       */
 
      /* make a copy of the error text so we can patch it to buggery */
@@ -78,6 +97,13 @@ void uilog_elog_raise(const char *errtext, 	/* text containing error */
      efunc = strtok_r(NULL, "|", &tok_helper);
      eline = strtok_r(NULL, "|", &tok_helper);
      etext = strtok_r(NULL, "|", &tok_helper);
+
+     /* work out log colour */
+     elog_sev = elog_lettertosev(ecode);
+     bg_colour = uilog_bgcolname[elog_sev];
+     fg_colour = uilog_fgcolname[elog_sev];
+     /* g_print("Error code is %c, enum %d, bg %s, fg %s\n", 
+	ecode, elog_sev, bg_colour, fg_colour); */
 
      /* place error text into the Gtk GUI
       * 1. Push it onto the status bar
@@ -102,8 +128,8 @@ void uilog_elog_raise(const char *errtext, 	/* text containing error */
 			UILOG_COL_FUNCTION, efunc,
 			UILOG_COL_FILE,     efile,
 			UILOG_COL_LINE,     eline,
-			UILOG_COL_BG,       "red",
-			UILOG_COL_FG,       "white",
+			UILOG_COL_BG,       bg_colour,
+			UILOG_COL_FG,       fg_colour,
 			-1 );
 
      /* 3. If we have Fatal, we use this to generate a GUI popup in addition

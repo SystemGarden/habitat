@@ -6863,8 +6863,6 @@ Click below to read from System Garden's repository and to write to it</property
                         <child>
                           <object class="GtkCellRendererText" id="log_table_time_rend"/>
                           <attributes>
-                            <attribute name="background">6</attribute>
-                            <attribute name="foreground">7</attribute>
                             <attribute name="text">0</attribute>
                           </attributes>
                         </child>
@@ -6889,8 +6887,6 @@ Click below to read from System Garden's repository and to write to it</property
                         <child>
                           <object class="GtkCellRendererText" id="log_table_msg_rend"/>
                           <attributes>
-                            <attribute name="background">6</attribute>
-                            <attribute name="foreground">7</attribute>
                             <attribute name="markup">2</attribute>
                           </attributes>
                         </child>
@@ -6947,23 +6943,6 @@ Click below to read from System Garden's repository and to write to it</property
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkCheckButton" id="log_colour_check">
-                <property name="label" translatable="yes">Coloured messages</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">False</property>
-                <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
-                <property name="tooltip_text" translatable="yes">Colour and style the log message based on its severity</property>
-                <property name="active">True</property>
-                <property name="draw_indicator">True</property>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">0</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkCheckButton" id="log_expert_check">
                 <property name="label" translatable="yes">Expert locations</property>
                 <property name="visible">True</property>
@@ -6978,7 +6957,8 @@ Great for debugging and resolving issues</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">1</property>
+                <property name="position">0</property>
+                <property name="secondary">True</property>
               </packing>
             </child>
             <child>
@@ -6994,7 +6974,7 @@ Great for debugging and resolving issues</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">2</property>
+                <property name="position">1</property>
               </packing>
             </child>
             <child>
@@ -7010,12 +6990,11 @@ Great for debugging and resolving issues</property>
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">False</property>
-                <property name="position">3</property>
+                <property name="position">2</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -7023,7 +7002,6 @@ Great for debugging and resolving issues</property>
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">log_colour_check</action-widget>
       <action-widget response="0">log_expert_check</action-widget>
       <action-widget response="0">log_clear_btn</action-widget>
       <action-widget response="0">log_ok_btn</action-widget>

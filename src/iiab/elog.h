@@ -43,7 +43,7 @@ extern char *elog_stdfmt[];
 
 /* Severity levels */
 enum elog_severity {
-     NOELOG,	/* no logging, used for checking error states */
+     NOELOG=0,	/* no logging, used for checking error states */
      DEBUG,	/* debugging logs to aid the developers */
      DIAG,	/* diagnostic logs to aid support when deployed */
      INFO,	/* information logs to help the user */
@@ -78,6 +78,7 @@ int elog_setallformat(char *format);
 int elog_setoverride(enum elog_severity severity, char *pattern);
 int elog_rmoverride(char *pattern);
 void  elog_configure(CF_VALS cf);
+enum  elog_severity elog_lettertosev(char sevletter);
 enum  elog_severity elog_strtosev(char *sevstring);
 char *elog_sevtostr(enum elog_severity sev);
 TABLE elog_getstatus();

@@ -41,6 +41,7 @@ CHANGES
 - Added format input and default detection from file->open menu
 - Timeless tables now understood and will grey out time slider
 - File route as a table termination bugs fixed (rt_file_tread())
+- Colours added to message logs
 
 
 KNOWN ISSUES
@@ -54,7 +55,6 @@ KNOWN ISSUES
 - MyHabitat Preferences -> Initial Fetch Quantity : not fully working
 - Replication menu option not working
 - Resizing the chart can leave curve lists too large
-- log_win does not colour messages
 - Automatic refresh to chart
 
 
