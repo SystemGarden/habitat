@@ -35,9 +35,9 @@ void uilog_init() {
      GtkTreeViewColumn *func_col, *file_col, *line_col;
 
      log_table = GTK_TREE_VIEW(get_widget("log_table"));
-     func_col = gtk_tree_view_get_column(log_table, 3);
-     file_col = gtk_tree_view_get_column(log_table, 4);
-     line_col = gtk_tree_view_get_column(log_table, 5);
+     func_col = gtk_tree_view_get_column(log_table, UILOG_COL_FUNCTION);
+     file_col = gtk_tree_view_get_column(log_table, UILOG_COL_FILE);
+     line_col = gtk_tree_view_get_column(log_table, UILOG_COL_LINE);
      gtk_tree_view_column_set_visible(func_col, FALSE);
      gtk_tree_view_column_set_visible(file_col, FALSE);
      gtk_tree_view_column_set_visible(line_col, FALSE);
@@ -96,12 +96,14 @@ void uilog_elog_raise(const char *errtext, 	/* text containing error */
 							   "log_liststore"));
      gtk_list_store_prepend(log_liststore, &log_iter);
      gtk_list_store_set(log_liststore, &log_iter,
-			0, util_decdatetime(etime),
-			1, esev,
-			2, etext,
-			3, efunc,
-			4, efile,
-			5, eline,
+			UILOG_COL_TIME,     util_decdatetime(etime),
+			UILOG_COL_SEVERITY, esev,
+			UILOG_COL_TEXT,     etext,
+			UILOG_COL_FUNCTION, efunc,
+			UILOG_COL_FILE,     efile,
+			UILOG_COL_LINE,     eline,
+			UILOG_COL_BG,       "red",
+			UILOG_COL_FG,       "white",
 			-1 );
 
      /* 3. If we have Fatal, we use this to generate a GUI popup in addition
@@ -244,12 +246,12 @@ uilog_on_view_log_line (GtkTreeView        *treeview,
 
 	  /* grab the data from the model's activated line */
 	  gtk_tree_model_get(model, &iter, 
-			     0, &time,
-			     1, &severity,
-			     2, &message,
-			     3, &function,
-			     4, &file,
-			     5, &line,
+			     UILOG_COL_TIME,     &time,
+			     UILOG_COL_SEVERITY, &severity,
+			     UILOG_COL_TEXT,     &message,
+			     UILOG_COL_FUNCTION, &function,
+			     UILOG_COL_FILE,     &file,
+			     UILOG_COL_LINE,     &line,
 			     -1);
 
 	  /* grab the logline's value widgets*/
@@ -324,9 +326,9 @@ uilog_on_table_expert (GtkObject *object, gpointer user_data)
           vis=1;	/* button is off, make visible */
 
      log_table = GTK_TREE_VIEW(get_widget("log_table"));
-     func_col = gtk_tree_view_get_column(log_table, 3);
-     file_col = gtk_tree_view_get_column(log_table, 4);
-     line_col = gtk_tree_view_get_column(log_table, 5);
+     func_col = gtk_tree_view_get_column(log_table, UILOG_COL_FUNCTION);
+     file_col = gtk_tree_view_get_column(log_table, UILOG_COL_FILE);
+     line_col = gtk_tree_view_get_column(log_table, UILOG_COL_LINE);
      gtk_tree_view_column_set_visible(func_col, vis);
      gtk_tree_view_column_set_visible(file_col, vis);
      gtk_tree_view_column_set_visible(line_col, vis);

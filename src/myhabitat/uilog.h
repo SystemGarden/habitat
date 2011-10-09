@@ -11,6 +11,21 @@
 
 #include <gtk/gtk.h>
 
+
+/* Column definitions for log message list */
+enum {
+     UILOG_COL_TIME=0,
+     UILOG_COL_SEVERITY,
+     UILOG_COL_TEXT,
+     UILOG_COL_FUNCTION,
+     UILOG_COL_FILE,
+     UILOG_COL_LINE,
+     UILOG_COL_BG,
+     UILOG_COL_FG,
+     UILOG_COL_EOL
+};
+
+
 void uilog_init();
 void uilog_elog_raise(const char *errtext,int etlen);
 void uilog_modal_alert(char *primary, char *secondary, ...);

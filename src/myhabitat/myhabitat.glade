@@ -97,40 +97,6 @@
       </row>
     </data>
   </object>
-  <object class="GtkListStore" id="log_liststore">
-    <columns>
-      <!-- column-name time -->
-      <column type="gchararray"/>
-      <!-- column-name severity -->
-      <column type="gchararray"/>
-      <!-- column-name text -->
-      <column type="gchararray"/>
-      <!-- column-name function -->
-      <column type="gchararray"/>
-      <!-- column-name file -->
-      <column type="gchararray"/>
-      <!-- column-name line -->
-      <column type="gchararray"/>
-    </columns>
-    <data>
-      <row>
-        <col id="0" translatable="yes">12:15</col>
-        <col id="1" translatable="yes">Info</col>
-        <col id="2" translatable="yes">Test info message</col>
-        <col id="3" translatable="yes">some place</col>
-        <col id="4" translatable="yes">somefile.c</col>
-        <col id="5" translatable="yes">245</col>
-      </row>
-      <row>
-        <col id="0" translatable="yes">12:16</col>
-        <col id="1" translatable="yes">Error</col>
-        <col id="2" translatable="yes">Test error message</col>
-        <col id="3" translatable="yes">another place</col>
-        <col id="4" translatable="yes">anotherfile.c</col>
-        <col id="5" translatable="yes">927</col>
-      </row>
-    </data>
-  </object>
   <object class="GtkListStore" id="close_liststore">
     <columns>
       <!-- column-name name -->
@@ -234,6 +200,48 @@
   </object>
   <object class="GtkTreeModelFilter" id="choice_treefilter">
     <property name="child_model">choice_treestore</property>
+  </object>
+  <object class="GtkListStore" id="log_liststore">
+    <columns>
+      <!-- column-name time -->
+      <column type="gchararray"/>
+      <!-- column-name severity -->
+      <column type="gchararray"/>
+      <!-- column-name text -->
+      <column type="gchararray"/>
+      <!-- column-name function -->
+      <column type="gchararray"/>
+      <!-- column-name file -->
+      <column type="gchararray"/>
+      <!-- column-name line -->
+      <column type="gchararray"/>
+      <!-- column-name bg -->
+      <column type="gchararray"/>
+      <!-- column-name fg -->
+      <column type="gchararray"/>
+    </columns>
+    <data>
+      <row>
+        <col id="0" translatable="yes">12:15</col>
+        <col id="1" translatable="yes">Info</col>
+        <col id="2" translatable="yes">Test info message</col>
+        <col id="3" translatable="yes">some place</col>
+        <col id="4" translatable="yes">somefile.c</col>
+        <col id="5" translatable="yes">245</col>
+        <col id="6" translatable="yes">white</col>
+        <col id="7" translatable="yes">black</col>
+      </row>
+      <row>
+        <col id="0" translatable="yes">12:16</col>
+        <col id="1" translatable="yes">Error</col>
+        <col id="2" translatable="yes">Test error message</col>
+        <col id="3" translatable="yes">another place</col>
+        <col id="4" translatable="yes">anotherfile.c</col>
+        <col id="5" translatable="yes">927</col>
+        <col id="6" translatable="yes">white</col>
+        <col id="7" translatable="yes">black</col>
+      </row>
+    </data>
   </object>
   <object class="GtkWindow" id="myhabitat_win">
     <property name="visible">True</property>
@@ -6750,12 +6758,12 @@ Click below to read from System Garden's repository and to write to it</property
     <property name="type_hint">dialog</property>
     <signal name="delete_event" handler="gtk_widget_hide" object="log_win"/>
     <child internal-child="vbox">
-      <object class="GtkVBox" id="dialog-vbox17">
+      <object class="GtkVBox" id="log_dialog_vbox">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
         <property name="spacing">2</property>
         <child>
-          <object class="GtkVBox" id="log_vbox">
+          <object class="GtkVBox" id="log_level_vbox">
             <property name="visible">True</property>
             <property name="orientation">vertical</property>
             <property name="spacing">6</property>
@@ -6780,6 +6788,7 @@ Click below to read from System Garden's repository and to write to it</property
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Show Normal messages: Information, Warning, Error and Fatal severities</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">False</property>
                     <signal name="toggled" handler="uilog_on_collect_change"/>
@@ -6796,6 +6805,7 @@ Click below to read from System Garden's repository and to write to it</property
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Show Normal messages plus Diagnositcs</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">False</property>
                     <property name="group">log_collect_norm_rad</property>
@@ -6813,6 +6823,7 @@ Click below to read from System Garden's repository and to write to it</property
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Show Normal, Diagnostic and Debug messages</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">False</property>
                     <property name="group">log_collect_norm_rad</property>
@@ -6852,6 +6863,8 @@ Click below to read from System Garden's repository and to write to it</property
                         <child>
                           <object class="GtkCellRendererText" id="log_table_time_rend"/>
                           <attributes>
+                            <attribute name="background">6</attribute>
+                            <attribute name="foreground">7</attribute>
                             <attribute name="text">0</attribute>
                           </attributes>
                         </child>
@@ -6863,6 +6876,8 @@ Click below to read from System Garden's repository and to write to it</property
                         <child>
                           <object class="GtkCellRendererText" id="log_table_sev_rend"/>
                           <attributes>
+                            <attribute name="background">6</attribute>
+                            <attribute name="foreground">7</attribute>
                             <attribute name="text">1</attribute>
                           </attributes>
                         </child>
@@ -6874,6 +6889,8 @@ Click below to read from System Garden's repository and to write to it</property
                         <child>
                           <object class="GtkCellRendererText" id="log_table_msg_rend"/>
                           <attributes>
+                            <attribute name="background">6</attribute>
+                            <attribute name="foreground">7</attribute>
                             <attribute name="markup">2</attribute>
                           </attributes>
                         </child>
@@ -6925,17 +6942,18 @@ Click below to read from System Garden's repository and to write to it</property
           </packing>
         </child>
         <child internal-child="action_area">
-          <object class="GtkHButtonBox" id="dialog-action_area17">
+          <object class="GtkHButtonBox" id="log_dialog_area">
             <property name="visible">True</property>
             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkCheckButton" id="checkbutton1">
-                <property name="label" translatable="yes">Coloured text</property>
+              <object class="GtkCheckButton" id="log_colour_check">
+                <property name="label" translatable="yes">Coloured messages</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="tooltip_text" translatable="yes">Colour and style the log message based on its severity</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -6952,6 +6970,8 @@ Click below to read from System Garden's repository and to write to it</property
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
+                <property name="tooltip_text" translatable="yes">Show the origin of the message (file, line and function).
+Great for debugging and resolving issues</property>
                 <property name="draw_indicator">True</property>
                 <signal name="toggled" handler="uilog_on_table_expert"/>
               </object>
@@ -7003,7 +7023,7 @@ Click below to read from System Garden's repository and to write to it</property
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">checkbutton1</action-widget>
+      <action-widget response="0">log_colour_check</action-widget>
       <action-widget response="0">log_expert_check</action-widget>
       <action-widget response="0">log_clear_btn</action-widget>
       <action-widget response="0">log_ok_btn</action-widget>
@@ -7995,7 +8015,6 @@ Do you want to stop collecting?</property>
     <property name="destroy_with_parent">True</property>
     <property name="icon">pixmaps/habitat_flower_32.png</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox22e">
         <property name="visible">True</property>
@@ -8380,7 +8399,6 @@ Do you want to stop collecting?</property>
     <property name="border_width">5</property>
     <property name="icon">pixmaps/habitat_flower_32.png</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="edit_vbox1">
         <property name="visible">True</property>

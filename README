@@ -45,17 +45,17 @@ CHANGES
 
 KNOWN ISSUES
 ------------
-- Connection to System Garden repoisoties not currently support functionality
+- Connection to System Garden repositories not in alpha
 - Horizontal timeline scale does not adapt under all conditions
 - Day & time scale adaptions lose date reference
 - Auto refresh & data appending not fully tested
 - At detailed resolutions graphing can corrupt
 - Print and print preview does not work
-- Preferences and proerties used interchangeably
-- Preferences not fully working
+- MyHabitat Preferences -> Initial Fetch Quantity : not fully working
 - Replication menu option not working
 - Resizing the chart can leave curve lists too large
-- Developer menu item should be removed for release
+- log_win does not colour messages
+- Automatic refresh to chart
 
 
 INSTALLATION
