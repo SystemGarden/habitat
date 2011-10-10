@@ -42,6 +42,7 @@ CHANGES
 - Timeless tables now understood and will grey out time slider
 - File route as a table termination bugs fixed (rt_file_tread())
 - Colours added to message logs
+- Labels added above the curve and instance lists in the chart view
 
 
 KNOWN ISSUES
@@ -56,6 +57,7 @@ KNOWN ISSUES
 - Replication menu option not working
 - Resizing the chart can leave curve lists too large
 - Automatic refresh to chart
+- Drawing and undrawing a curve corrupts the lines
 
 
 INSTALLATION

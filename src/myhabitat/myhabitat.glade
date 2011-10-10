@@ -198,9 +198,6 @@
       <column type="gboolean"/>
     </columns>
   </object>
-  <object class="GtkTreeModelFilter" id="choice_treefilter">
-    <property name="child_model">choice_treestore</property>
-  </object>
   <object class="GtkListStore" id="log_liststore">
     <columns>
       <!-- column-name time -->
@@ -242,6 +239,9 @@
         <col id="7" translatable="yes">black</col>
       </row>
     </data>
+  </object>
+  <object class="GtkTreeModelFilter" id="choice_treefilter">
+    <property name="child_model">choice_treestore</property>
   </object>
   <object class="GtkWindow" id="myhabitat_win">
     <property name="visible">True</property>
@@ -1254,51 +1254,65 @@ www.systemgarden.com
                                         <property name="orientation">vertical</property>
                                         <property name="position_set">True</property>
                                         <child>
-                                          <object class="GtkScrolledWindow" id="inst_scrollwin">
+                                          <object class="GtkFrame" id="inst_frame">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="hscrollbar_policy">automatic</property>
-                                            <property name="vscrollbar_policy">automatic</property>
-                                            <property name="shadow_type">in</property>
+                                            <property name="label_xalign">0</property>
+                                            <property name="shadow_type">none</property>
                                             <child>
-                                              <object class="GtkTreeView" id="inst_list">
+                                              <object class="GtkScrolledWindow" id="inst_scrollwin">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <property name="model">inst_liststore</property>
-                                                <property name="headers_visible">False</property>
-                                                <property name="headers_clickable">False</property>
-                                                <property name="search_column">1</property>
-                                                <property name="tooltip_column">3</property>
+                                                <property name="hscrollbar_policy">automatic</property>
+                                                <property name="vscrollbar_policy">automatic</property>
+                                                <property name="shadow_type">in</property>
                                                 <child>
-                                                  <object class="GtkTreeViewColumn" id="inst_list_icon_col">
-                                                    <property name="title">icon</property>
+                                                  <object class="GtkTreeView" id="inst_list">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">True</property>
+                                                    <property name="model">inst_liststore</property>
+                                                    <property name="headers_visible">False</property>
+                                                    <property name="headers_clickable">False</property>
+                                                    <property name="search_column">1</property>
+                                                    <property name="tooltip_column">3</property>
                                                     <child>
-                                                      <object class="GtkCellRendererPixbuf" id="inst_list_icon_rend"/>
-                                                      <attributes>
-                                                        <attribute name="pixbuf">0</attribute>
-                                                      </attributes>
-                                                    </child>
-                                                  </object>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkTreeViewColumn" id="inst_list_button_col">
-                                                    <property name="title">button</property>
-                                                    <child>
-                                                      <object class="GtkCellRendererToggle" id="inst_list_button_rend">
-                                                        <signal name="toggled" handler="uigraph_on_inst_toggled"/>
+                                                      <object class="GtkTreeViewColumn" id="inst_list_icon_col">
+                                                        <property name="title">icon</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererPixbuf" id="inst_list_icon_rend"/>
+                                                          <attributes>
+                                                            <attribute name="pixbuf">0</attribute>
+                                                          </attributes>
+                                                        </child>
                                                       </object>
-                                                      <attributes>
-                                                        <attribute name="active">4</attribute>
-                                                      </attributes>
                                                     </child>
                                                     <child>
-                                                      <object class="GtkCellRendererText" id="inst_list_label_rend"/>
-                                                      <attributes>
-                                                        <attribute name="text">2</attribute>
-                                                      </attributes>
+                                                      <object class="GtkTreeViewColumn" id="inst_list_button_col">
+                                                        <property name="title">button</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererToggle" id="inst_list_button_rend">
+                                                            <signal name="toggled" handler="uigraph_on_inst_toggled"/>
+                                                          </object>
+                                                          <attributes>
+                                                            <attribute name="active">4</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="inst_list_label_rend"/>
+                                                          <attributes>
+                                                            <attribute name="text">2</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
                                                     </child>
                                                   </object>
                                                 </child>
+                                              </object>
+                                            </child>
+                                            <child type="label">
+                                              <object class="GtkLabel" id="inst_frame_label">
+                                                <property name="visible">True</property>
+                                                <property name="label" translatable="yes">&lt;b&gt;Instances&lt;/b&gt;</property>
+                                                <property name="use_markup">True</property>
                                               </object>
                                             </child>
                                           </object>
@@ -1308,53 +1322,67 @@ www.systemgarden.com
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkScrolledWindow" id="curves_scrollwin">
+                                          <object class="GtkFrame" id="curves_frame">
                                             <property name="visible">True</property>
-                                            <property name="can_focus">True</property>
-                                            <property name="hscrollbar_policy">automatic</property>
-                                            <property name="vscrollbar_policy">automatic</property>
-                                            <property name="shadow_type">in</property>
+                                            <property name="label_xalign">0</property>
+                                            <property name="shadow_type">none</property>
                                             <child>
-                                              <object class="GtkTreeView" id="curves_list">
+                                              <object class="GtkScrolledWindow" id="curves_scrollwin">
                                                 <property name="visible">True</property>
                                                 <property name="can_focus">True</property>
-                                                <property name="model">curves_liststore</property>
-                                                <property name="headers_visible">False</property>
-                                                <property name="headers_clickable">False</property>
-                                                <property name="search_column">3</property>
-                                                <property name="tooltip_column">2</property>
+                                                <property name="hscrollbar_policy">automatic</property>
+                                                <property name="vscrollbar_policy">automatic</property>
+                                                <property name="shadow_type">in</property>
                                                 <child>
-                                                  <object class="GtkTreeViewColumn" id="curves_list_icon_col">
-                                                    <property name="title">icon</property>
+                                                  <object class="GtkTreeView" id="curves_list">
+                                                    <property name="visible">True</property>
+                                                    <property name="can_focus">True</property>
+                                                    <property name="model">curves_liststore</property>
+                                                    <property name="headers_visible">False</property>
+                                                    <property name="headers_clickable">False</property>
+                                                    <property name="search_column">3</property>
+                                                    <property name="tooltip_column">2</property>
                                                     <child>
-                                                      <object class="GtkCellRendererPixbuf" id="curves_list_icon_rend"/>
-                                                      <attributes>
-                                                        <attribute name="pixbuf">0</attribute>
-                                                      </attributes>
-                                                    </child>
-                                                  </object>
-                                                </child>
-                                                <child>
-                                                  <object class="GtkTreeViewColumn" id="curves_list_button_col">
-                                                    <property name="title">button</property>
-                                                    <child>
-                                                      <object class="GtkCellRendererToggle" id="curves_list_button_rend">
-                                                        <signal name="toggled" handler="uigraph_on_curve_toggled"/>
+                                                      <object class="GtkTreeViewColumn" id="curves_list_icon_col">
+                                                        <property name="title">icon</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererPixbuf" id="curves_list_icon_rend"/>
+                                                          <attributes>
+                                                            <attribute name="pixbuf">0</attribute>
+                                                          </attributes>
+                                                        </child>
                                                       </object>
-                                                      <attributes>
-                                                        <attribute name="cell-background-gdk">6</attribute>
-                                                        <attribute name="active">4</attribute>
-                                                      </attributes>
                                                     </child>
                                                     <child>
-                                                      <object class="GtkCellRendererText" id="curves_list_label_rend"/>
-                                                      <attributes>
-                                                        <attribute name="cell-background-gdk">6</attribute>
-                                                        <attribute name="text">5</attribute>
-                                                      </attributes>
+                                                      <object class="GtkTreeViewColumn" id="curves_list_button_col">
+                                                        <property name="title">button</property>
+                                                        <child>
+                                                          <object class="GtkCellRendererToggle" id="curves_list_button_rend">
+                                                            <signal name="toggled" handler="uigraph_on_curve_toggled"/>
+                                                          </object>
+                                                          <attributes>
+                                                            <attribute name="cell-background-gdk">6</attribute>
+                                                            <attribute name="active">4</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                        <child>
+                                                          <object class="GtkCellRendererText" id="curves_list_label_rend"/>
+                                                          <attributes>
+                                                            <attribute name="cell-background-gdk">6</attribute>
+                                                            <attribute name="text">5</attribute>
+                                                          </attributes>
+                                                        </child>
+                                                      </object>
                                                     </child>
                                                   </object>
                                                 </child>
+                                              </object>
+                                            </child>
+                                            <child type="label">
+                                              <object class="GtkLabel" id="curves_frame_label">
+                                                <property name="visible">True</property>
+                                                <property name="label" translatable="yes">&lt;b&gt;Curves&lt;/b&gt;</property>
+                                                <property name="use_markup">True</property>
                                               </object>
                                             </child>
                                           </object>
@@ -6082,6 +6110,9 @@ Data collection will continue if already started</property>
       <placeholder/>
     </child>
     <child>
+      <placeholder/>
+    </child>
+    <child>
       <object class="GtkLabel" id="assist_harv_intro_label">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -6995,6 +7026,7 @@ Great for debugging and resolving issues</property>
             </child>
           </object>
           <packing>
+            <property name="expand">False</property>
             <property name="pack_type">end</property>
             <property name="position">0</property>
           </packing>
@@ -8602,7 +8634,6 @@ Do you want to stop collecting?</property>
     <property name="default_height">600</property>
     <property name="icon">pixmaps/habitat_flower_32.png</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox25">
         <property name="visible">True</property>
