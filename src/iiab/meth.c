@@ -574,14 +574,11 @@ int meth_execute(char *key,		/* name identifing job/process  */
 	       if (pid == -1) {
 		    elog_printf(ERROR, "unable to fork(), error %d %s", 
 				errno, strerror(errno));
-		    /*if (rset->res->method == TIMESTORE || 
-		          rset->res->method == TABLESTORE) {*/
-		         /* close all pipes */
+		    /* close all pipes */
 		    close(respipefd[0]);
 		    close(respipefd[1]);
 		    close(errpipefd[0]);
 		    close(errpipefd[1]);
-		    /*}*/
 		    if (rset->oneshot)
 			 meth_endrun(key,run,command,res_purl,err_purl,keep);
 		    nfree(rp);
@@ -596,12 +593,9 @@ int meth_execute(char *key,		/* name identifing job/process  */
 	       rset->pid = pid;
 
 	       /* Close off unnecessary fd's in parent */
-	       /*if (rset->res->method == TIMESTORE || 
-		     rset->res->method == TABLESTORE) {*/
 	       /* writing end of pipes */
 	       close(respipefd[1]);
 	       close(errpipefd[1]);
-	       /*}*/
 
 	  } else {
 
@@ -889,44 +883,36 @@ void meth_child(int sig /* signal vector */) {
 							    rp->start));
 
 	       /* close off i/o that the parent may have for the child */
-#if 0
-	       if (rset->res->method == TIMESTORE || 
-		   rset->res->method == TABLESTORE) {
-#endif
-		    /* Empty the result pipe containing data */
-		    if (rp->resfd != -1) {
-			 r = read(rp->resfd, pipebuf, PIPE_BUF);
-			 if (r == -1)
-			      elog_printf(ERROR, "result read() error: %d %s",
-					  errno, strerror(errno));
-			 if (r > 0)
-			      if (route_write(rset->res, pipebuf, r) < 0)
-				   elog_die(FATAL, "res route problem: "
-					    "key %s, start %d res %s err %s",
-					    rp->key, rp->start,
-					    rset->res_purl, rset->err_purl);
-			 close(rp->resfd);
-		    }
-	       /*}*/
-#if 0
-	       if (rset->err->method == TIMESTORE || 
-		   rset->err->method == TABLESTORE) {
-#endif
-		    /* Empty the error pipe containing data */
-		    if (rp->errfd != -1) {
-			 r = read(rp->errfd, pipebuf, PIPE_BUF);
-			 if (r == -1)
-			      elog_printf(ERROR, "error read() error: %d %s", 
-					  errno, strerror(errno));
-			 if (r > 0)
-			      if (route_write(rset->err, pipebuf, r) < 0)
-				   elog_die(FATAL, "err route problem: "
-					    "key %s, start %d res %s err %s",
-					    rp->key, rp->start,
-					    rset->res_purl, rset->err_purl);
-			 close(rp->errfd);
-		    }
-	       /*}*/
+
+	       /* Empty the result pipe containing data */
+	       if (rp->resfd != -1) {
+		    r = read(rp->resfd, pipebuf, PIPE_BUF);
+		    if (r == -1)
+		         elog_printf(ERROR, "result read() error: %d %s",
+				     errno, strerror(errno));
+		    if (r > 0)
+		         if (route_write(rset->res, pipebuf, r) < 0)
+			      elog_die(FATAL, "res route problem: "
+				       "key %s, start %d res %s err %s",
+				       rp->key, rp->start,
+				       rset->res_purl, rset->err_purl);
+		    close(rp->resfd);
+	       }
+
+	       /* Empty the error pipe containing data */
+	       if (rp->errfd != -1) {
+		    r = read(rp->errfd, pipebuf, PIPE_BUF);
+		    if (r == -1)
+		         elog_printf(ERROR, "error read() error: %d %s", 
+				     errno, strerror(errno));
+		    if (r > 0)
+		         if (route_write(rset->err, pipebuf, r) < 0)
+			   elog_die(FATAL, "err route problem: "
+				    "key %s, start %d res %s err %s",
+				    rp->key, rp->start,
+				    rset->res_purl, rset->err_purl);
+		    close(rp->errfd);
+	       }
 	       
 	       route_flush(rset->res);
 	       route_flush(rset->err);

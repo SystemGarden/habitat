@@ -53,6 +53,12 @@ then
    longtitle="System & application monitor, collector and visualizer"
 EOF
 fi
+if [ "%{RELEASE}" = "freedesktop" ]
+then
+fi
+if [ "%{RELEASE}" = "suse" ]
+then
+fi
 
 %clean
 rm -rf $RPM_BUILD_DIR %{_topdir}/broot
@@ -92,11 +98,33 @@ then
 	fi
 fi
 
+# Files section =============================================
 %files -f src/INVENTORY
 %defattr(-,daemon,daemon,-)
+
 %if %(test "%{RELEASE}" = "mdk" -o "%{RELEASE}" = "cl" && echo 1 || echo 0)
+# Makedrake and Connectiva Linux
 /%{_menudir}/habitat
 %endif
+
+%if %{freedesktop}
+# Freedesktop menu & icon
+/usr/share/pixmaps/habitat.png
+/usr/share/applications/habitat.desktop
+%endif
+
+%if %{suse} && !%{freedesktop}
+# SuSE menu & icon
+/etc/X11/susewm/AddEntrys/SuSE/Internet/WWW/habitat.desktop
+/usr/X11R6/share/icons/png/hicolor/misc/apps/habitat.png
+%endif
+
+%if %{oldredhat}
+# Old-style Red Hat menu & icon
+/usr/share/pixmaps/habitat.png
+/etc/X11/applnk/Internet/habitat.desktop
+%endif
+
 #%license %{_docdir}/%{name}-%{version}/LICENSE
 #%readme %{_docdir}/%{name}-%{version}/README
 #%doc %{_docdir}/%{name}-%{version}/LICENSE

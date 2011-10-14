@@ -958,7 +958,7 @@ int meth_builtin_restart_action(char *command,
 
      /* Before we terminate, fork()-exec() our next generation */
      if (fork() == 0) {
-          /* child */
+          /* -- child -- */
           route_printf(output,"%s (%d child of %d): ==== after fork at %s "
 		       "waiting 10 to start again\n", "restart", getpid(), 
 		       getppid(), 
@@ -972,21 +972,30 @@ int meth_builtin_restart_action(char *command,
 
 	  /* change to the original launch directory */
 	  if (chdir(cf_getstr(iiab_cf, "iiab.dir.launch")) == -1) {
-	    fprintf(stderr, "Unable to change to launch directory\n");
+	       elog_printf(FATAL, "Unable to change to launch directory\n");
 	  }
 
+	  /* flush directly rather than relying on meth, as exec will 
+	   * kill everything off */
+	  route_flush(output);
+	  route_flush(error);
+
           execv(meth_argv[0], meth_argv);
-	  fprintf(stderr, "*** pid %d meth_builtin_restart_action() after exec but shouldn't be here due to %s, aborting now\n", getpid(), strerror(errno));
+
+	  elog_printf(FATAL, "*** pid %d meth_builtin_restart_action() after "
+		      "exec but shouldn't be here due to %s, aborting now\n", 
+		      getpid(), strerror(errno));
 	  abort();
      }
 
+     /* -- parent -- */
      /* now exit, using the routine supplied to meth.c in meth_init() */
      (meth_shutdown_func)();
 
      /* just in case there was no exit in the SIGTERM handler, carry
       * out an exit */
-     fprintf(stderr, "Attempted to shutdown (pid %d) after a fork, but have "
-	     "not exited\n", getpid());
+     elog_printf(FATAL, "Attempted to shutdown (pid %d) after a fork, but "
+		 "have not exited\n", getpid());
      _Exit(10);
 }
 

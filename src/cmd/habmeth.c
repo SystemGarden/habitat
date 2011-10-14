@@ -125,7 +125,8 @@ int listmeths(char *buf, int buflen) {
 /* exit handler for signal */
 void exit_handler(int sig /* signal vector */) {
      sig_off();
-     elog_printf(INFO, "Shutting down from signal %d (pid %d)", sig, getpid());
+     elog_printf(INFO, "Shutting down from signal %d (I am pid %d)", sig, 
+		 getpid());
      meth_fini();
      iiab_stop();
      exit(0);
@@ -134,7 +135,7 @@ void exit_handler(int sig /* signal vector */) {
 /* exit from a method */
 void exit_method(int sig /* signal vector */) {
      sig_off();
-     elog_printf(INFO, "Shutting down from a method (pid %d)", getpid());
+     elog_printf(INFO, "Shutting down from a method (I am pid %d)", getpid());
      meth_fini();
      iiab_stop();
      exit(0);

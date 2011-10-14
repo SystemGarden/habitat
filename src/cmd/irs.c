@@ -825,8 +825,10 @@ int do_lsrings(int argc, char **argv) {
 	  return 1;
      }
 
-     /* get list and print it */
+     /* get list, remove the id and long name then print it */
      tab = rs_lsrings(&rs_gdbm_method, filepath);
+     table_rmcol(tab, "id");
+     table_rmcol(tab, "long");
      text = table_print(tab);
      puts(text);
      nfree(text);
@@ -836,61 +838,30 @@ int do_lsrings(int argc, char **argv) {
 }
 
 
-/* print a long listing of al the rings in the ringstore */
+/* print a long listing of all the rings in the ringstore */
 int do_inforings(int argc, char **argv) {
      TABLE tab;
-     char *text;
+     char *text, *cell, *newcell;
 
      if (argc > 1) {
 	  printf("Usage %s\n", argv[0]);
 	  return 1;
      }
 
-     /* get list and print it */
+     /* get list, format the time columns in to human readable and print it */
      tab = rs_inforings(&rs_gdbm_method, filepath);
+     table_traverse(tab) {
+          cell = table_getcurrentcell(tab, "otime");
+	  newcell = util_decdatetime(atoi(cell));
+	  table_replacecurrentcell_alloc(tab, "otime", newcell);
+          cell = table_getcurrentcell(tab, "ytime");
+	  newcell = util_decdatetime(atoi(cell));
+	  table_replacecurrentcell_alloc(tab, "ytime", newcell);
+     }
      text = table_print(tab);
      puts(text);
      nfree(text);
      table_destroy(tab);
-
-#if 0
-     TREE *l;
-
-     /* Take procautions */
-     if (!rsid) {
-	  printf("Ring not open\n");
-	  return 1;
-     }
-     if (argc > 1) {
-	  printf("Usage %s\n", argv[0]);
-	  return 1;
-     }
-
-     /* get list and print it */
-     l = tab_lsrings(rsid);
-     cmdln_begintabulate();
-     tree_traverse(l)
-	  cmdln_tabulate(tree_getkey(l));
-     cmdln_endtabulate();
-
-#if 0
-     l = tab_lsrings(rsid);
-     i=0;
-     tree_traverse(l) {
-	  printf("%s\t", tree_getkey(l));
-	  i++;
-	  if (i == 6) {
-	       printf("\n");
-	       i=0;
-	  }
-     }
-     if (i)
-	  printf("\n");
-#endif
-
-     /* release list */
-     tab_freelsrings(l);
-#endif
 
      return 0;
 }
