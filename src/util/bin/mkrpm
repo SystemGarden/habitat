@@ -4,8 +4,8 @@
 # To be run from Makefile directory of habitat
 # Places the RPM files in <builddir> when complete
 #
-# Nigel Stuckey 14 Dec 2004.
-# Copyright System Garden Ltd 2004. All rights reserved.
+# Nigel Stuckey 14 Dec 2004, 12 Oct 2011.
+# Copyright System Garden Ltd 2004,2011. All rights reserved.
 
 usage="usage: $0 <builddir> <srctarfile> <app> <ver>"
 
@@ -27,13 +27,40 @@ BUILDSRCSYM=$BUILDPATH/SOURCES/`basename $2`
 cd $LAUNCHPATH
 SPECPATH=$LAUNCHPATH/util/lib
 
-# work out release from the kernel name. default is fedora
-KERNEL=`uname -r`
-if expr match "$KERNEL" '.*mdk'
+# work out RELEASE from Linux OS clues as to its distribution
+if [ -e /usr/share/applications ]
 then
+    D_FREEDESKTOP=1
+    RELEASE="freedesktop"
+fi
+if [ -e /etc/conectiva-release ]
+then
+    D_CONNECTIVA=1
+    RELEASE="cl"
+fi
+if [ -e /etc/mandrake-release ]
+then
+    D_MANDRAKE=1
     RELEASE="mdk"
-else
-    RELEASE="fed"
+fi
+if [ -e /etc/SuSE-release ]
+then
+    D_SUSE=1
+    RELEASE="suse"
+    if [ `grep -E "VERSION = [1-7]\\." /etc/SuSE-release` ]
+    then
+	D_OLDSUSE=1
+    fi
+fi
+if [ -z "$RELEASE" -a -e /etc/redhat-release ]
+then
+    D_OLDREDHAT=1
+    RELEASE="rh"
+fi
+if [ -z "$RELEASE" ]
+then
+    D_PLAIN=1
+    RELEASE="plain"
 fi
 
 # Build the RPM spec file from a template
@@ -49,7 +76,7 @@ mkdir -p $1/RPMS/i586 $1/SRPMS $1/SOURCES $1/BUILD
 rm -f $BUILDSRCSYM
 ln -s $SRCFILE $BUILDSRCSYM
 
-# run the rpm
+# run the rpm builder
 rpmbuild -ba $SPEC
 
 # now clean up working directories and move results to the top

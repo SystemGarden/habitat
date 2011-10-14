@@ -13,12 +13,13 @@ Packager: Nigel Stuckey <nigel.stuckey@systemgarden.com>
 BuildRoot: %{_topdir}/broot/%{name}-%{version}-%{release}
 
 %description
-System performance and trending system with an extensible data collector 
-and visualiser for timeseries tabular data.
+Welcome to Habitat, collector, monitor and viewer for system 
+and applications. Highly extensible collector of timeseries tabular data and 
+also the main gateway into System Garden for social IT management.
 
-Data is collected from kernel and applications using a daemon (called 
-clockwork).  Applications and scripts can push their data into habitat 
-by command line or API using CSV and similar formats.
+Data is collected as a time series of tables from kernel and applications 
+using a daemon (called clockwork).  Applications and scripts can push their
+data into Habitat by command line or API using CSV and similar formats.
 Log files are monitored for regular expressions, causing events which 
 can generate logs in turn, relay information to other systems or 
 run arbitary scripts. File changes can also be recorded in a history
@@ -28,7 +29,7 @@ Data is stored on local machine in cascaded rings for low maintenance
 and disk economy; they can be archived remotely to a repository for 
 long term storage & trend analysis. Visualisation is by Gtk+ application, 
 curses or command line and can view data from peer machines also running 
-habitat.
+Habitat.
 
 %prep
 %setup -q -n %{name}-%{version}-src
@@ -43,12 +44,15 @@ make linuxinventory
 make LINROOT=$RPM_BUILD_ROOT linuxinstall
 echo "INVENTORY IS:-"
 cat INVENTORY
-mkdir -p $RPM_BUILD_ROOT%{_menudir}
-cat <<EOF >$RPM_BUILD_ROOT%{_menudir}/habitat
-?package(habitat):command="/usr/bin/ghabitat" icon="habitatlogo" \
-needs="X11" section="System/Monitoring" title="Habitat" \
-longtitle="System monitoring and trending"
+if [ "%{RELEASE}" = "mdk" -o "%{RELEASE}" = "cl" ]
+then
+    mkdir -p $RPM_BUILD_ROOT%{_menudir}
+    cat <<EOF >$RPM_BUILD_ROOT%{_menudir}/habitat
+   ?package(habitat):command="/usr/bin/myhabitat" icon="habitatlogo" \
+   needs="X11" section="System/Monitoring" title="Habitat" \
+   longtitle="System & application monitor, collector and visualizer"
 EOF
+fi
 
 %clean
 rm -rf $RPM_BUILD_DIR %{_topdir}/broot
@@ -89,12 +93,14 @@ then
 fi
 
 %files -f src/INVENTORY
-/%{_menudir}/habitat
 %defattr(-,daemon,daemon,-)
+%if %(test "%{RELEASE}" = "mdk" -o "%{RELEASE}" = "cl" && echo 1 || echo 0)
+/%{_menudir}/habitat
+%endif
 #%license %{_docdir}/%{name}-%{version}/LICENSE
+#%readme %{_docdir}/%{name}-%{version}/README
 #%doc %{_docdir}/%{name}-%{version}/LICENSE
 #%doc %{_docdir}/%{name}-%{version}/INVENTORY
-#%readme %{_docdir}/%{name}-%{version}/README
 %config /var/lib/habitat
 #%config /etc/
 

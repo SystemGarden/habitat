@@ -43,6 +43,7 @@ CHANGES
 - File route as a table termination bugs fixed (rt_file_tread())
 - Colours added to message logs
 - Labels added above the curve and instance lists in the chart view
+- RPMs fixed
 
 
 KNOWN ISSUES
@@ -58,6 +59,18 @@ KNOWN ISSUES
 - Resizing the chart can leave curve lists too large
 - Automatic refresh to chart
 - Drawing and undrawing a curve corrupts the lines
+- Debian source dependency packages (needed for compilation):-
+      pkg-config libgtk2.0-dev libgdbm-dev libcurl4-openssl-dev 
+      libreadine-dev libgtkdatabox-dev man2html rpm
+- Debian binary dependency packages (needed for installation):-
+      libgdbm libcurl4-openssl libreadline libgtk2.0-0 libgtkdatabox
+- RedHat/Fedora source dependency packages (needed for compilation):-
+      gtk2-devel gdbm-devel curl-devel readline-devel gtkdatabox-devel
+      man2html rpm
+- RedHat/Fedora binary dependency packages (needed for installation):-
+      readline gdbm curl gtk2 gtkdatabox
+- Does not create .deb
+- Clockwork goes zombie and does not restart properly after 24 hours
 
 
 INSTALLATION
