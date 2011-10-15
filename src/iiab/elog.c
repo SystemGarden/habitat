@@ -748,8 +748,9 @@ int elog_fstartsend(enum elog_severity severity,/* severity level */
 		    char *logtext		/* log a string */ )
 {
      int r;
-     char *ctimestr, *ctimenl;
      time_t logtime;
+     char timestr[50];
+     struct tm timestruct;
 
      /* to stderr if uninitialised */
      if ( ! elog_isinit) {
@@ -758,11 +759,10 @@ int elog_fstartsend(enum elog_severity severity,/* severity level */
 	  return 1;
      }
 
-     /* get time */
+     /* get time, reenterent style */
      logtime = time(NULL);
-     ctimestr = ctime(&logtime);
-     ctimenl = strchr(ctimestr, '\n');	/* naughty!! */
-     *ctimenl = '\0';			/* patch the returned static */
+     localtime_r(&logtime, &timestruct);
+     r = strftime(timestr, 50, "%c", &timestruct);
 
      /* severity in range? */
      if (severity >= ELOG_NSEVERITIES || severity < 0) {
@@ -779,7 +779,7 @@ int elog_fstartsend(enum elog_severity severity,/* severity level */
 		         (elog_opendest[severity].format ? 
 			  elog_opendest[severity].format : ELOG_DEFFORMAT), 
 		      util_decdatetime(logtime),/* DEC datetime */
-		      ctimestr,			/* unix datetime */
+		      timestr,			/* unix datetime */
 		      util_shortadaptdatetime(logtime),	/* short datetime */
 		      logtime,			/* epoch time */
 		      elog_sevstring[severity], /* severity string */
