@@ -329,9 +329,7 @@ clean_files =	$(wildcard $d/*[~%]) $(wildcard $d/*.bak) \
 		$(wildcard $d/.[^s.][^v][^n]*) 
 cleanall_files= $(wildcard $d/*.so) $(wildcard $d/*.a) $(wildcard $d/*.dylib) \
 		$(wildcard $d/*.lib) $(wildcard $d/*.dll)
-cleaninst_files=$(DSTBIN)/wrapper.bin \
-		$(addprefix $(DSTBIN)/,$(notdir $(BIN))) \
-		$(addsuffix .bin,$(addprefix $(DSTBIN)/,$(notdir $(BIN)))) \
+cleaninst_files=$(addprefix $(DSTBIN)/,$(notdir $(BIN))) \
 		$(addprefix $(DSTLIB)/,$(notdir $(LIB))) \
 		$(addprefix $(DSTSOLIB)/,$(notdir $(SOLIB))) \
 		$(addprefix $(DSTINC)/,$(notdir $(INC))) \
