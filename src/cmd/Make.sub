@@ -45,8 +45,10 @@ cmd/habitat	\
 
 # Prefab Job files for clockwork
 LIB += 		\
-cmd/norm.jobs	\
-cmd/normrep.jobs
+cmd/jobs.norm	\
+cmd/jobs.normrep\
+cmd/jobs.quick  \
+cmd/jobs.test
 
 # Suggestions for other job files
 #cmd/passive.jobs

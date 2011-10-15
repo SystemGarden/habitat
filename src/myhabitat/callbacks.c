@@ -354,8 +354,8 @@ on_edit_jobs (GtkObject *object, gpointer user_data)
 			   "Please specify -j, -J or set the directive `jobs' "
 			   "in the configuration file to the route containing "
 			   "a job table. \n\n"
-			   "For example, `jobs=file:/etc/clockwork.jobs' "
-			   "will look for the file /etc/clockwork.jobs");
+			   "For example, `jobs=file:/etc/jobs.norm' "
+			   "will look for the file /etc/jobs.norm");
 	       return;
 	  }
      }
@@ -367,8 +367,8 @@ on_edit_jobs (GtkObject *object, gpointer user_data)
 		      "no valid configuration directives in the table %s/%s. "
 		      "Please specify -j, -J or set the directive `jobs' in "
 		      "the configuration file to the route containing a job "
-		      "table. For example, `jobs=file:/etc/clockwork.jobs' "
-		      "will look for the file /etc/clockwork.jobs", 
+		      "table. For example, `jobs=file:/etc/jobs.norm' "
+		      "will look for the file /etc/jobs.norm", 
 		      jobpurl, jobpurl_t);
 	  return;
      }

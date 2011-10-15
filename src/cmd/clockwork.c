@@ -50,7 +50,7 @@ char *cfdefaults =
      "job.debug  -1\n"
      "nmalloc    0\n"	/* 0: memory checking off, !0: memory checking on */
      "log        stderr:\n"
-     "jobs       file:%l/norm.jobs\n"
+     "jobs       file:%l/jobs.norm\n"
      "elog.all   none:\n"
      "elog.above warning stderr:"
   /*     "elog.above warning grs:%v/%h.grs,log\n"*/
@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
      }
      if (opt_j) {
           /* replace job config with different standard table */
-          jobcf = util_strjoin("file:%l/", cf_getstr(iiab_cf, "j"), ".jobs",
+          jobcf = util_strjoin("file:%l/jobs.", cf_getstr(iiab_cf, "j"),
 			       NULL);
           cf_putstr(iiab_cf, "jobs", jobcf);
 	  nfree(jobcf);
@@ -112,8 +112,8 @@ int main(int argc, char **argv) {
 		  "configuration directive. Please specify -j, -J or set "
 		  "the directive `jobs' in the configuration file to the "
 		  "route containing a job table. For example, "
-		  "`jobs=file:/etc/clockwork.jobs' will look for the "
-		  "file /etc/clockwork.jobs");
+		  "`jobs=file:/etc/jobs.norm' will look for the "
+		  "file /etc/jobs.norm");
 	  elog_printf(FATAL, "Unable to load jobs without valid config "
 		      "directive (looking for 'jobs' in cf)");
 	  iiab_stop();
@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 		 opt_f ? "foreground" : "background",
 		 opt_s ? " not" : "",
 		 (opt_J ? cf_getstr(iiab_cf, "J") : 
-		    (opt_j ? cf_getstr(iiab_cf, "j") : "norm.jobs") ),
+		    (opt_j ? cf_getstr(iiab_cf, "j") : "jobs.norm") ),
 		 ctime(&clock) );
 
      /* run jobs in var dir if we have a public responsibility to 

@@ -1,0 +1,124 @@
+job 1
+#
+# Job table for clockwork, part of Habitat.
+# Contains the timings for probes to gather data and to process it 
+# afterwards.
+# 
+# Copyright System Garden Ltd 1996-2011, All rights reserved.
+#
+# Line format is:-
+#   start   period   phase   count   name   requester   results   errors   nrings   method   command
+# Tokens replaced on startup are:-
+#	%j  this job's name, eg 'alive'
+#	%i  interval (period) of this job, eg 0
+#	%h  host name of this machine
+#	%f  fully qualified hostname
+#	%m  domain name
+#	%u  home directory of running user (possibly a daemon)
+#	%v  relative path to habitat's var
+#	%l  relative path to habitat's lib
+#	%e  relative path to habitat's etc
+# All files created relative to the data directory, typically <home>/var,
+# but can change depending on installation
+
+#
+# ----- one off probes -----
+#
+# name probe: on startup
+0 0 0 1 name    habitat@systemgarden.com    grs:%h.grs,%j,%i grs:%h.grs,err,0 20 probe names
+
+#
+# ----- probes for uptime, downtime and alive-ness -----
+# the alive probe implements a heartbeat, showing when the last recorded
+# time the system was alive. The down probe is run once per invocation and
+# attempts to find any recent down time that was recorded and the
+# last time the machine was up. Finally, uptime runs once a day to give a
+# the inverse of down time: how long the machine has been running.
+#
+# tstamp probe: each minute
+0 60    0 0 alive   habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 60  tstamp -
+
+# down time probe: once at each restart
+0 0     0 1 down    habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 60  probe "down grs:%h.grs,boot,0 grs:%h.grs,alive,60"
+
+# uptime probe: once a few seceonds after restart and then each day 
+5 0     0 1 up,0     habitat@systemgarden.com grs:%h.grs,%j,%i   grs:%h.grs,err,0 60  probe up
+0 86400 0 0 up,86400 habitat@systemgarden.com grs:%h.grs,up,0 grs:%h.grs,err,0 60  probe up
+
+#
+# ----- probes with cascading data to conserve space -----
+#
+#
+# system probes: 2h@10s, 1d@5m, 7d@15m, 1mo@1h
+#
+0 10    0 0 sys,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 720 probe sys
+0 300   0 0 sys,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 288 sample "avg grs:%h.grs,sys,60"
+0 900   0 0 sys,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,sys,300"
+0 3600  0 0 sys,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,sys,900"
+
+#
+# io (disk) probes: 2h@10s, 1d@5m, 7d@15m, 1mo@1h
+#
+0 10    0 0 io,%i  habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 720 probe io
+0 300   0 0 io,%i  habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 288 sample "avg grs:%h.grs,io,60"
+0 900   0 0 io,%i  habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,io,300"
+0 3600  0 0 io,%i  habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,io,900"
+
+#
+# network probes: 2h@10s, 1d@5m, 7d@15m, 1mo@1h
+#
+0 10    0 0 net,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 720 probe net
+0 300   0 0 net,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 288 sample "avg grs:%h.grs,net,60"
+0 900   0 0 net,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,net,300"
+0 3600  0 0 net,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,net,900"
+
+#
+# interrupt probes: 2h@10s, 1d@5m, 7d@15m, 1mo@1h
+#
+0 10    0 0 intr,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 720 probe intr
+0 300   0 0 intr,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 288 sample "avg grs:%h.grs,intr,60"
+0 900   0 0 intr,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,intr,300"
+0 3600  0 0 intr,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 672 sample "avg grs:%h.grs,intr,900"
+
+#
+# process probe: 1h@60s
+#
+# Usage: probe ps [file:filter]
+# Default filter collects only 'biggest' processes in order to keep 
+# collected data small. Change filter location to customise with new
+# parameters or remove filter argument to collect everything.
+# Uncomment if necessary
+0 60    0 0 ps,%i   habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 60  probe "ps file:%l/ps.conf"
+
+#
+# ----- probes for watching data -----
+#
+# demonstration probe to watch for data patterns
+#
+#0 2     0 0 watch1  habitat@systemgarden.com stdout:             stdout: 1000 pattern "grs:%h.grs,patact,0 grs:%h.grs,watched,0"
+
+#
+# ----- replication and updating methods -----
+#
+# replication communicates with system garden instances, sending data for 
+# archival, analysis and fectching new configurations. 
+# 
+# The job below (commented out by default) triggers a replication 
+# every 23 hours. Log output goes into rep,82800; state goes into rstate,0.
+# See the habrep(1) command to run ad hoc replication from the command line.
+# See www.systemgarden.com/harvest for details of the on-line harvest 
+# web service
+#0 82800 0 0 rep,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 60  replicate "replicate.in replicate.out grs:%h.grs,rstate,0"
+
+#
+# ----- clean up and housekeeping -----
+#
+# checkpoint the data store, which reclaims unused space and keeps the
+# storage small. Hourly offset by 10s to avoid lock congestion
+#
+10 3600  0 0 ckpt,%i    habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,log,0 1000 checkpoint grs:%h.grs,name,0
+#
+# restart clockwork 2 seconds after 24 hours. In this way, the daemon 
+# restart time will gradually change over time but the sample periods are
+# broadly maintined
+86402 0 0 1 restart,%i habitat@systemgarden.com grs:%h.grs,%j,%i grs:%h.grs,err,0 60  restart ""
