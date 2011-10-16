@@ -126,7 +126,7 @@ struct meth_info meth_builtins[]= {
        meth_builtin_restart_type,	/* one of METH_{SOURCE,FORK,THREAD} */
        NULL,				/* start of run initialisation */
        NULL,				/* pre-action call */
-       meth_builtin_restart_action,	/* action - JFDI!*/
+       meth_builtin_restart_action1,	/* action - JFDI!*/
        NULL,				/* end of run finalisation */
        NULL				/* name of shared library */ },
      /* shutdown method */
@@ -937,10 +937,12 @@ enum exectype meth_builtin_restart_type() { return METH_SOURCE; }
 /*
  * This method attempts to restart the executable with its original arguments
  * and launch directory.
- * It is useful to free an application from any lingering memory or 
- * resource leaks in a long running process. Its also one way, albeit
- * expensive, of restarting with new configuration.
- * This will not return and will exit this instance of the application
+ * This is a useful technique to free an application from any lingering 
+ * memory or resource leaks in a long running process. Its also one way,
+ * albeit expensive, of restarting with new configuration.
+ * The method is in two parts: the first part registers part 2 with atexit()
+ * then it triggers meth's shutdown routine. Once the whole app exists
+ * then part 2 gets run which does the actual restart
  */
 /* static globals from meth.c file */
 extern int     meth_argc;		/* saved argc */
@@ -948,55 +950,52 @@ extern char  **meth_argv;		/* saved argv */
 extern void  (*meth_shutdown_func)();   /* saved shutdown function used by 
 					 * restart and shutdown */
 
-int meth_builtin_restart_action(char *command, 
-				ROUTE output, ROUTE error,
-				struct meth_runset *rset) {
+/*
+ * Returns -1 if there was an error, such as the external command
+ * not existing or a failure to reach the reposiotry
+ */
+int meth_builtin_restart_action1(char *command, 
+				 ROUTE output, ROUTE error,
+				 struct meth_runset *rset) {
 
      route_printf(output,"%s (%d child of %d): **** shutting down at %s to "
 		  "start again\n", "restart", getpid(), getppid(), 
 		  util_decdatetime( time(NULL) ) );
 
-     /* Before we terminate, fork()-exec() our next generation */
-     if (fork() == 0) {
-          /* -- child -- */
-          route_printf(output,"%s (%d child of %d): ==== after fork at %s "
-		       "waiting 10 to start again\n", "restart", getpid(), 
-		       getppid(), 
-		       util_decdatetime( time(NULL) ) );
+     /* load action 2 with atexit() */
+     atexit(meth_builtin_restart_action2);
 
-          sleep(10);	/* wait a little while */
-          route_printf(output,"%s (%d child of %d): ==== before exec at %s "
-		       "to start again\n", "restart", getpid(), 
-		       getppid(), 
-		       util_decdatetime( time(NULL) ) );
-
-	  /* change to the original launch directory */
-	  if (chdir(cf_getstr(iiab_cf, "iiab.dir.launch")) == -1) {
-	       elog_printf(FATAL, "Unable to change to launch directory\n");
-	  }
-
-	  /* flush directly rather than relying on meth, as exec will 
-	   * kill everything off */
-	  route_flush(output);
-	  route_flush(error);
-
-          execv(meth_argv[0], meth_argv);
-
-	  elog_printf(FATAL, "*** pid %d meth_builtin_restart_action() after "
-		      "exec but shouldn't be here due to %s, aborting now\n", 
-		      getpid(), strerror(errno));
-	  abort();
+     /* change to the original launch directory */
+     if (chdir(cf_getstr(iiab_cf, "iiab.dir.launch")) == -1) {
+          elog_printf(FATAL, "Unable to change to launch directory\n");
      }
 
-     /* -- parent -- */
+     /* flush directly rather than relying on meth, as exec will 
+      * kill everything off */
+     route_flush(output);
+     route_flush(error);
+
      /* now exit, using the routine supplied to meth.c in meth_init() */
      (meth_shutdown_func)();
 
-     /* just in case there was no exit in the SIGTERM handler, carry
-      * out an exit */
-     elog_printf(FATAL, "Attempted to shutdown (pid %d) after a fork, but "
-		 "have not exited\n", getpid());
-     _Exit(10);
+     return 0;
+}
+
+void meth_builtin_restart_action2(void) {
+
+     elog_printf(INFO,"%s (%d child of %d): ==== before exec at %s "
+		 "to start again\n", "restart", getpid(), getppid(), 
+		 util_decdatetime( time(NULL) ) );
+
+     sleep(10);
+
+     execv(meth_argv[0], meth_argv);
+
+     elog_printf(FATAL, "*** pid %d meth_builtin_restart_action() after "
+		 "exec but shouldn't be here due to %s, aborting now\n", 
+		 getpid(), strerror(errno));
+     abort();
+
 }
 
 
