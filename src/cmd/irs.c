@@ -816,8 +816,8 @@ int do_lsrings(int argc, char **argv) {
      TABLE tab;
      char *text;
 
-     if (!filepath) {
-	  printf("File not known: please use 'open' to specify one\n");
+     if (!filepath || !*filepath) {
+	  printf("No file open: please use 'open' to specify one\n");
 	  return 1;
      }
      if (argc > 1) {
@@ -827,6 +827,10 @@ int do_lsrings(int argc, char **argv) {
 
      /* get list, remove the id and long name then print it */
      tab = rs_lsrings(&rs_gdbm_method, filepath);
+     if (!tab) {
+	  printf("Unable to list rings\n");
+	  return 1;
+     }
      table_rmcol(tab, "id");
      table_rmcol(tab, "long");
      text = table_print(tab);
@@ -843,6 +847,10 @@ int do_inforings(int argc, char **argv) {
      TABLE tab;
      char *text, *cell, *newcell;
 
+     if (!filepath || !*filepath) {
+	  printf("No file open: please use 'open' to specify one\n");
+	  return 1;
+     }
      if (argc > 1) {
 	  printf("Usage %s\n", argv[0]);
 	  return 1;
@@ -850,6 +858,10 @@ int do_inforings(int argc, char **argv) {
 
      /* get list, format the time columns in to human readable and print it */
      tab = rs_inforings(&rs_gdbm_method, filepath);
+     if (!tab) {
+	  printf("Unable to list ring information\n");
+	  return 1;
+     }
      table_traverse(tab) {
           cell = table_getcurrentcell(tab, "otime");
 	  newcell = util_decdatetime(atoi(cell));

@@ -159,14 +159,17 @@ RS    rs_open(RS_METHOD method	/* method vectors */,
      lld = method->ll_open(filename, filemode, flags);
 
      /* return if failed */
-     if ( ! lld )
+     if ( ! lld ) {
+	  elog_printf(ERROR, "Unable to open %s", filename);
 	  return NULL;
+     }
 
      /* lock up your datastores for READING */
      if ( ! method->ll_lock(lld, RS_RDLOCK, "rs_open") ) {
 	  /* if we can't lock at the begining of this process, 
 	   * we should fail the entire call */
 	  method->ll_close(lld);
+	  elog_printf(ERROR, "Unable to lock %s", filename);
 	  return NULL;
      }
 
@@ -437,9 +440,12 @@ int   rs_put(RS    ring	/* ring descriptor */,
 
      /* get write lock & load ring's index */
      if ( ! ring->method->ll_lock(ring->handle, RS_WRLOCK, "rs_put") ) {
+       elog_printf(DIAG, "Unable to get read/write lock for %s", 
+		   rs_ringname(ring));
 	  return 0;
      }
      if ( ! rs_priv_load_index(ring, &index) ) {
+	  elog_printf(ERROR, "Unable to load ring index, possibly it may not exist");
 	  return 0;
      }
 

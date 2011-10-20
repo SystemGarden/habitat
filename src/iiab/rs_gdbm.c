@@ -242,8 +242,10 @@ int    rs_gdbm_lock(RS_LLD lld,		/* RS generic low level descriptor */
      }
 
      /* obtain lock and record in descriptor */
-     if (!rs_gdbm_dbopen(rs, where, rw))
+     if (!rs_gdbm_dbopen(rs, where, rw)) {
+	  elog_printf(ERROR, "Unable to open gdbm for lock from %s", where);
 	  return 0;	/* failure */
+     }
      switch (rw) {
      case RS_WRLOCK:
      case RS_WRLOCKNOW:
@@ -1174,16 +1176,20 @@ int rs_gdbm_dbopen(RS_GDBMD rs, char *where, enum rs_db_lock rw)
 		 where, rw, rs->name);
 #endif
 
-     if (rs->ref)
-          elog_printf(ERROR, "error DBM file %s already open", rs->name);
+     if (rs->ref) {
+          return 1;	/* already open, soit has to be successful */
+     }
 
      /* loop to retry dbm repeatedly to get a lock */
      for (i=0; i < RS_GDBM_NTRYS; i++) {
           switch (rw) {
 	  case RS_RDLOCK:	/* read */
 	  case RS_RDLOCKNOW:
-	       if (access(rs->name, F_OK) == -1)
+	       if (access(rs->name, F_OK) == -1) {
+		    elog_printf(ERROR, "Unable to access() %s with "
+				"RD_RDLOCK_NOW", rs->name);
 		    return 0;
+	       }
 	       db = gdbm_open(rs->name, 0, GDBM_READER || GDBM_NOLOCK, 
 			      rs->mode, rs_gdbm_dberr);
 	       break;
@@ -1208,8 +1214,11 @@ int rs_gdbm_dbopen(RS_GDBMD rs, char *where, enum rs_db_lock rw)
 	  }
 
 	  /* NOW! locks should fail now */
-	  if (rw == RS_RDLOCKNOW || rw == RS_WRLOCKNOW || rw == RS_CRLOCKNOW)
+	  if (rw == RS_RDLOCKNOW || rw == RS_WRLOCKNOW || rw == RS_CRLOCKNOW) {
+	       elog_printf(ERROR, "Unable to get an immediate lock "
+			   "(a *NOW lock)");
 	       return 0;	/* fail */
+	  }
 
 	  /* Allow lock failures to proceed with another try */
 	  if (gdbm_errno != GDBM_CANT_BE_READER &&
@@ -1231,10 +1240,10 @@ int rs_gdbm_dbopen(RS_GDBMD rs, char *where, enum rs_db_lock rw)
      }
 
      /* fatally failed to open gdbm file */
-     elog_safeprintf(DIAG, 
-		     "%s unable to open %s mode %d (err %d: %s)", 
+     elog_safeprintf(DIAG, "%s unable to open %s mode %d (err %d: %s) "
+		     "after %d attempts", 
 		     where, rs->name, rw, 
-		     gdbm_errno, gdbm_strerror(gdbm_errno));
+		     gdbm_errno, gdbm_strerror(gdbm_errno), i);
 
      return 0;
 }

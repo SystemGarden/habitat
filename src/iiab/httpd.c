@@ -417,6 +417,9 @@ int httpd_request_scan(int fd, char *request, char **path, TREE **headers)
      char *pt, *tok, *start, *hdr;
      int method, r;
 
+     if (!request)
+          return HTTPD_METHOD_FAIL;
+
      /* get rid of quaint carrage returns and put spaces in its place */
      for (pt=request; *pt != '\0'; pt++)
 	  if (*pt == '\r')

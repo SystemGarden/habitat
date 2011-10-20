@@ -197,7 +197,7 @@ int main(int argc, char **argv) {
 		 opt_f ? "foreground" : "background",
 		 opt_s ? " not" : "",
 		 (opt_J ? cf_getstr(iiab_cf, "J") : 
-		    (opt_j ? cf_getstr(iiab_cf, "j") : "jobs.norm") ),
+		    (opt_j ? cf_getstr(iiab_cf, "j") : "norm") ),
 		 ctime(&clock) );
 
      /* run jobs in var dir if we have a public responsibility to 

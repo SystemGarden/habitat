@@ -873,12 +873,12 @@ void meth_child(int sig /* signal vector */) {
 	       elog_startprintf(INFO, "  fork job %-10s pid %d: ",
 				rp->key, pid);
 	       if (WIFEXITED(status))
-		    elog_contprintf(INFO, "exit=%d", WEXITSTATUS(status));
+		    elog_contprintf(INFO, " exit=%d ", WEXITSTATUS(status));
 	       else if (WIFSIGNALED(status))
-		    elog_contprintf(INFO, "signal=%d %s", WTERMSIG(status),
+		    elog_contprintf(INFO, " signal=%d %s ", WTERMSIG(status),
 				    strsignal(WTERMSIG(status)));
 	       else
-		    elog_contprintf(INFO, "UNKNOWN KILL");
+		    elog_contprintf(INFO, " UNKNOWN KILL ");
 	       elog_endprintf(INFO, " took=%.0fs", difftime(time(NULL), 
 							    rp->start));
 

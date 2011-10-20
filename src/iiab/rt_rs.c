@@ -216,7 +216,7 @@ RT_LLD rt_grs_open (char *p_url, char *comment, char *password, int keep,
 	       if ( ! id ) {
 		    /* well... we tried */
 		    elog_printf(DEBUG, "Unable to open %sringstore "
-				"`" RT_RS_GDBM_PREFIX "%s,%s,%s'", 
+				"`" RT_RS_GDBM_PREFIX ":%s,%s,%s'", 
 				(keep > 0) ? "or create " : "", 
 				file, ring, dur);
 		    nfree(file);

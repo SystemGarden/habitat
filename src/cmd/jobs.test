@@ -121,4 +121,4 @@ job 1
 # Test!! Restart clockwork after a short test period. In this way, the daemon 
 # restart time will gradually change over time but the sample periods are
 # broadly maintined
-3600 0 0 1 restart,%i habitat@systemgarden.com grs:%h.grs,%j grs:%h.grs,err,0 60  restart ""
+80 0 0 1 restart,%i habitat@systemgarden.com grs:%h.grs,%j grs:%h.grs,err,0 60  restart ""
