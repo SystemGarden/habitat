@@ -27,6 +27,7 @@
 #include "uilog.h"
 #include "uichoice.h"
 #include "uivis.h"
+#include "uipref.h"
 #include "fileroute.h"
 #include "main.h"
 
@@ -39,6 +40,7 @@ gchar         *current_choice_label='\0',
               *current_choice_purl='\0', 
               *current_ringname='\0';
 gpointer       current_choice_getdatacb=NULL;
+guint          current_timeout_id=0;
 char          *uidata_ringpurl='\0';
 TABLE        (*uidata_ringdatacb)(time_t, time_t) = NULL;
 TABLE          current_info_tab = NULL;
@@ -51,6 +53,8 @@ void uidata_init() {
 }
 
 void uidata_fini() {
+     uidata_stop_timed_update();
+
      if (current_info_tab)
           table_destroy(current_info_tab);
      if (uidata_ringpurl)
@@ -116,6 +120,12 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
 	       /*g_print("repeat selection on choice tree\n");*/
 	       return;
 	  }
+
+	  /* -- we now load a new choice -- */
+
+	  /* stop data updates right now to make the following safe and
+	   * avoid unnecessary work */
+	  uidata_stop_timed_update();
 
 	  /* free previous data as we fetch new data */
 	  if (current_choice_label) {
@@ -555,6 +565,9 @@ fprintf(stderr, "******type text\n");
 
      /* Clear up */
      uilog_clearprogress();
+
+     /* Set up repeats */
+     uidata_set_timed_update();
 }
 
 
@@ -801,6 +814,70 @@ void uidata_deilluminate_time() {
 }
 
 
+/* Set the next timed update of the current ring, removing any existing
+ * one that be in effect. If no ring is current, the net effect is to 
+ * unset the timer. if thereis no 'dur' in the column, a default of
+ * 30 seconds is chosen */
+void uidata_set_timed_update()
+{
+     char *dur_txt;
+     int dur, defdur, cfdur;
+
+     uidata_stop_timed_update();
+
+     /* find default: confgured first, then emergency default */
+     cfdur = cf_getint(iiab_cf, UIPREF_CFKEY_UPDATE);
+     if (cfdur == CF_UNDEF || cfdur < 1)
+          defdur = UIDATA_DEFAULT_UPDATE_TIME;
+     else
+          defdur = cfdur;
+
+     /* extract the interval or default to one and set up the glib timeout  */
+     if (current_info_tab && current_ringname) {
+          if (table_search(current_info_tab, "name", current_ringname) != -1) {
+	       dur_txt = table_getcurrentcell(current_info_tab, "dur");
+	       if (dur_txt)
+		    dur = atoi(dur_txt);
+	       else
+		    dur = defdur;
+
+	       /* If duration is irregular, use a default update */
+	       if (dur == 0)
+		    dur = defdur;
+	  } else {
+	       /* no duration column, use a default refresh */
+	       dur = defdur;
+	  }
+	  current_timeout_id = g_timeout_add_seconds(dur, 
+						     uidata_on_timed_update, 
+						     NULL);
+     }
+}
+
+
+/* Remove any existing update */
+void uidata_stop_timed_update() {
+     /* Remove any existing timer */
+     if (current_timeout_id) {
+          g_source_remove(current_timeout_id);
+	  current_timeout_id = 0;
+     }
+}
+
+
+/* Call back from an alarm event to update data in the visualisation pane */
+gint uidata_on_timed_update()
+{
+     if (current_choice_purl && current_info_tab && current_ringname) {
+          uidata_data_update();
+	  return TRUE; 			/* carry on till the next interval */
+     } else {
+          current_timeout_id = 0;	/* clear the global reference */
+          return FALSE;			/* cancel further updates */
+     }
+}
+
+
 /* callback to update data in visualisation pane */
 G_MODULE_EXPORT void 
 uidata_on_data_update (GtkObject *object, gpointer user_data)
@@ -821,7 +898,7 @@ void uidata_data_update()
      /* Get new info table */
      if (current_choice_purl) {
           /* Update from a ROUTE with a purl address */
-          uilog_setprogress("Loading data summary", 0.2, 0);
+          uilog_setprogress("Updating data summary", 0.2, 0);
 
           /* poll the route source for the latest info table, store it and 
 	   * then update the current ring */
@@ -875,7 +952,7 @@ void uidata_data_update()
      }
 
      /* more waiting */
-     uilog_setprogress("Loading ring data", 0.4, 0);
+     uilog_setprogress("Loading latest data", 0.4, 0);
 
      /* update the slider with the latest details, which will cause 
       * everything to get redrawn. Owing to the cache, only the new 

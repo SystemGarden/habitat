@@ -587,7 +587,7 @@ void runq_dispatch() {
       * Run these events and mark them for reschedualing.
       * Use a traversal loop which can cope with removals
       */
-     elog_printf(DEBUG, "before dispatching - size of event queue %d", 
+     elog_printf(DEBUG, "event queue of %d before dispatching", 
 		 itree_n(runq_event));
 
      /* 
@@ -636,7 +636,7 @@ void runq_dispatch() {
 	       break;
      }
 
-     elog_printf(DEBUG, "after dispatching - size of event queue %d", 
+     elog_printf(DEBUG, "event queue of %d after dispatching", 
 		 itree_n(runq_event));
 
      /*

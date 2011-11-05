@@ -393,10 +393,17 @@ uichoice_on_event_log(GtkMenuItem *object, gpointer user_data) {
 }
 
 
-/* Create the node HABITAT->This Host->(something) in the choice tree 
- * optionally show it and run it */
-void uichoice_mknode_thishost_collector(char *purl, char *label, char *name, 
-					char *tooltip, int show, int run) {
+/* Create the node HABITAT->This Host (name)->NEWNODE in the choice tree.
+ * Use purl as data source, label for onscreen text, name+tooltip to
+ * compile the help. The flag show expands the tree path down to
+ * the new label, run selects the node as though it had been clicked,
+ * causing the purl to be shown */
+void uichoice_mknode_thishost_collector(char *purl,	/* Data source */
+					char *label, 	/* Visible label */
+					char *name,	/* Full name */
+					char *tooltip,	/* Label's tooltip */
+					int show,	/* Show tree path */
+					int run		/* Autoclick */) {
      GtkTreeIter log;
      GdkPixbuf *icon, *bigicon;
      GtkTreeView *choicetree;

@@ -119,6 +119,7 @@ main (int argc, char *argv[])
      uilog_setprogress("Starting up...", 0.2, 0);
 
      /* start bits of the myhabitat (this) app */
+     uipref_init();
      rcache_init();
      uichoice_init();
      uivis_init();
@@ -190,6 +191,7 @@ main (int argc, char *argv[])
      uivis_fini();
      uichoice_fini();
      rcache_fini();
+     uipref_fini();
 
      iiab_stop();
 

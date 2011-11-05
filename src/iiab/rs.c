@@ -491,8 +491,9 @@ int   rs_put(RS    ring	/* ring descriptor */,
 
      /* calculate the new ring endpoints and expire data and index 
       * entries if needed */
-elog_printf(DEBUG, "put -- o %d y %d c %d ==> ", ring->oldest, ring->youngest, 
-       ring->current);
+     elog_startprintf(DEBUG, "seq '%s' before -- o %d y %d c %d ==> ", 
+		      rs_ringname(ring), ring->oldest, 
+		      ring->youngest, ring->current);
      ring->youngest = seq - 1;
      if (ring->oldest < 0)
 	  ring->oldest = 0;
@@ -515,8 +516,8 @@ elog_printf(DEBUG, "put -- o %d y %d c %d ==> ", ring->oldest, ring->youngest,
 	  r = ring->method->ll_expire_dblock(ring->handle, ring->ringid, 
 					     old_oldest, ring->oldest-1);
      }
-elog_printf(DEBUG, "o %d y %d c %d", ring->oldest, ring->youngest, 
-       ring->current);
+     elog_endprintf(DEBUG, "after -- o %d y %d c %d", ring->oldest, 
+		 ring->youngest, ring->current);
 
      /* store the updated index and header (and cache?) */
      r = ring->method->ll_write_index(ring->handle, ring->ringid, index);
@@ -696,8 +697,9 @@ TABLE rs_mget_nseq(RS ring		/* ring descriptor */,
 	  return NULL;
      }
 
-elog_printf(DEBUG, "mget %d -- o %d y %d c %d ==> ", 
-	    nsequences, ring->oldest, ring->youngest, ring->current);
+elog_printf(DEBUG, "mget %d from '%s' -- o %d y %d c %d", 
+	    nsequences, rs_ringname(ring), ring->oldest, ring->youngest, 
+	    ring->current);
 
      /* reset current pointer if we already know it to be out of bounds */
      if (ring->current < ring->oldest)

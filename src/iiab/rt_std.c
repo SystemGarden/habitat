@@ -136,8 +136,8 @@ int    rt_std_write (RT_LLD lld, const void *buf, int buflen)
 	  n = write(1, buf, buflen);	/* stdout all other cases */
 
      if (n == -1)
-	  elog_printf(ERROR, "write() system call returns -1: %s",
-		      strerror(errno));
+	  fprintf(stderr, "write() system call returns -1: %s",
+		  strerror(errno));
      return n;
 }
 

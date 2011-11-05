@@ -864,10 +864,10 @@ int do_inforings(int argc, char **argv) {
      }
      table_traverse(tab) {
           cell = table_getcurrentcell(tab, "otime");
-	  newcell = util_decdatetime(atoi(cell));
+	  newcell = util_shortadaptdatetime(atoi(cell));
 	  table_replacecurrentcell_alloc(tab, "otime", newcell);
           cell = table_getcurrentcell(tab, "ytime");
-	  newcell = util_decdatetime(atoi(cell));
+	  newcell = util_shortadaptdatetime(atoi(cell));
 	  table_replacecurrentcell_alloc(tab, "ytime", newcell);
      }
      text = table_print(tab);

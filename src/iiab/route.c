@@ -379,10 +379,10 @@ int route_flush(ROUTE rt /* open, valid route */) {
 	  r = rt->method->ll_write(rt->handle, rt->unsent.buffer, 
 				   rt->unsent.buflen);
 	  if (r < rt->unsent.buflen) {
-	       elog_printf(ERROR, "can't write to %s, "
-			   "discarding len=%d text='%.20s'%s", rt->p_url, 
-			   rt->unsent.buflen, rt->unsent.buffer,
-			   (rt->unsent.buflen>20)?"...(truncated)":"");
+	       fprintf(stderr, "can't write to %s, "
+		       "discarding len=%d text='%.20s'%s", rt->p_url, 
+		       rt->unsent.buflen, rt->unsent.buffer,
+		       (rt->unsent.buflen>20)?"...(truncated)":"");
 	       ret = 0;	/* failure */
 	  } else {
 	       ret = 1;	/* success */

@@ -124,8 +124,11 @@ unsigned int hash_block(char *k, 		/* key */
 	  /* case 0: nothing left to add */
      }
      mix(a,b,c);
+
      /*-------------------------------------------- report the result */
-     elog_printf(DEBUG, "HASH %s => %u (0x%x)", orig_k, c, c);
+     /*elog_printf(DEBUG, "HASH %s => %u (0x%x)", orig_k, c, c);*/
+     elog_printf(DEBUG, "computed hash %u (0x%x)", c, c);
+
      return c;
 }
 

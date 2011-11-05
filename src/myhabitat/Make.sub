@@ -23,6 +23,7 @@ myhabitat/uidialog.c	\
 myhabitat/uicopy.c	\
 myhabitat/uiemail.c	\
 myhabitat/uiconv.c	\
+myhabitat/uipref.c	\
 myhabitat/rcache.c	\
 myhabitat/graphdbox.c	\
 myhabitat/gconv.c	\

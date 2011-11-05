@@ -12,6 +12,9 @@
 #include "uivis.h"
 #include "../iiab/tree.h"
 
+/* default data update time */
+#define UIDATA_DEFAULT_UPDATE_TIME 30
+
 void uidata_init();
 void uidata_fini();
 void uidata_on_choice_changed (GtkTreeView *tree, gpointer data);
@@ -27,6 +30,9 @@ void uidata_remove_child_widget(GtkWidget* widget, gpointer data);
 void uidata_illuminate_vis_btns(enum uivis_t vistype);
 void uidata_illuminate_time();
 void uidata_deilluminate_time();
+void uidata_set_timed_update();
+void uidata_stop_timed_update();
+gint uidata_on_timed_update();
 void uidata_on_data_update (GtkObject *object, gpointer user_data);
 void uidata_data_update();
 

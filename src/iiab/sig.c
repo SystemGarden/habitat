@@ -136,10 +136,10 @@ void sig_blocktty()
  * signal set */
 void sig_off()
 {
-     elog_send(DEBUG, "disable signals");
-
      if (sigprocmask(SIG_BLOCK, &blockall, &blockprev) == -1)
-	  elog_die(FATAL, "unable to BLOCK");
+	  elog_die(FATAL, "unable to BLOCK signals when attempting to disable");
+
+     elog_send(DEBUG, "disabled signals");
 }
 
 /* Restore signal set previously diabled by sig_off() */
@@ -154,5 +154,5 @@ void sig_on()
      }
 
      if (sigprocmask(SIG_SETMASK, &blockprev, NULL) == -1)
-	  elog_die(FATAL, "unable to UNBLOCK");
+	  elog_die(FATAL, "unable to UNBLOCK signal to restore them");
 }

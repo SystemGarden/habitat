@@ -3,8 +3,10 @@
 #
 # Copyright System Garden Ltd 1996-2012. All rights reserved.
 #
-# Please edit the configurations setting in Make.config, not in this
-# Makefile
+# Please edit the configuration settings in Make.config, not in this
+# Makefile. Make.config should contain everything needed to detect multiple
+# platforms and set up the flags, options and variables needed to compile 
+# for that platform.
 
 # Definition section ----------------------------------------
 # This is a recursive-less makefile and will include all the dependencies

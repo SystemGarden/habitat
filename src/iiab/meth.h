@@ -105,7 +105,8 @@ int  meth_isrunning_s(struct meth_invoke *args, int argl);
 int  meth_isrunning(char *key);
 void meth_kill(struct meth_runprocinfo *rp);
 void meth_butcher(struct meth_runprocinfo *rp);
-void meth_child(int signum);
+void meth_sigchild(int signum);
+void meth_exitchildren();
 int  meth_relay();
 int  meth_shutdown();
 

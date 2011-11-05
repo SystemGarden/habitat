@@ -31,10 +31,12 @@
  * should be provided by the user to refer to the invocation, which may
  * be reused once the work is finished.
  *
- * When a method executed as a sub process has finished, meth_child() 
- * is called by the SIGCHLD signal to clear up, flush buffers and 
- * calculate audit details. You can check for a running process by
- * using meth_isrunning() with the user supplied key.
+ * When a method executed as a sub process has finished, the signal handler
+ * meth_sigchild() is called by the SIGCHLD signal to collect the exit 
+ * condition and enqueue for later processing by meth_exitchildren(), 
+ * which clear ups, flush buffers and calculates audit details. 
+ * You can check for a running process by using meth_isrunning() with the 
+ * user supplied key.
  *
  * Once jobs have been set up, meth_relay() should be used to implement
  * non native i/o, specifically the timestore route. It implements
@@ -75,11 +77,13 @@ TREE    *meth_methods;	/* loaded methods; tree of meth_info index by name */
 TREE    *meth_rsetbykey;/* open routes indexed by work key */
 ITREE   *meth_procbypid;/* running method processes; 
 			 * tree of meth_runprocinfo index by pid */
+ITREE   *meth_exitbypid;/* exited processes; tree of pids (in key) populated
+			 * by meth_sigchild() and consumed by meth_child() */
 ITREE   *meth_cbbyfd;	/* callback by file descriptor */
 int   meth_restartselect; /* set by meth_child() for meth_relay() to restart
 			   * its select() as the results may not be correct */
-int    meth_argc;	  /* saved argc used by restart */
-char **meth_argv;	  /* saved argv used by restart */
+int      meth_argc;	  /* saved argc used by restart method */
+char   **meth_argv;	  /* saved argv used by restart method */
 void *meth_shutdown_func; /* shutdown function used by restart and shutdown
 			   * built-in methods */
 
@@ -95,11 +99,12 @@ void meth_init(int argc, char *argv[],		/* used for restart built-in */
 {
      int i;
 
-     sig_setchild(meth_child);
+     sig_setchild(meth_sigchild);
      sig_off();		/* normally unaccepted - use preemption points */
      meth_methods       = tree_create();
      meth_rsetbykey     = tree_create();
      meth_procbypid     = itree_create();
+     meth_exitbypid     = itree_create();
      meth_cbbyfd        = itree_create();
      meth_restartselect = 0;
      meth_shutdown_func = this_shutdown_func;
@@ -119,6 +124,7 @@ void meth_fini()
      struct meth_info *m;
      struct meth_runset *rset;
      struct meth_runprocinfo *rp;
+     int status, pid;
 
      /* All plain sailing apart from running processes which potentially 
       * have outstanding I/O, but we don't care about them. So the only
@@ -146,6 +152,16 @@ void meth_fini()
      }
      tree_destroy(meth_rsetbykey);
 
+     /* remove exitbypid - the list of child processes that have exit()ed */
+     while ( ! tree_empty(meth_exitbypid) ) {
+	  itree_first(meth_exitbypid);
+	  pid    = itree_getkey(meth_exitbypid);
+	  status = (int) itree_get(meth_exitbypid);
+	  elog_printf(INFO, "Child process %d exited with status %d", pid, 
+		      status);
+	  itree_rm(meth_exitbypid);
+     }
+
      /* remove procbypid */
      while ( ! tree_empty(meth_procbypid) ) {
 	  itree_first(meth_procbypid);
@@ -169,6 +185,9 @@ void meth_fini()
 	  tree_rm(meth_methods);
      }
      tree_destroy(meth_methods);
+
+     /* remove exited process tree */
+     itree_destroy(meth_exitbypid);
 
      /* remove running process tree */
      itree_destroy(meth_procbypid);
@@ -463,10 +482,12 @@ int meth_execute_s(struct meth_invoke *args,	/* Argument structure */
 
 /*
  * Execute a method.
- * Run specifies the method, key names the method.
+ * The method is to be named by the string key (which should be unique, 
+ * used for killing etc), METHID run specifies the method and passes the
+ * arguments in a string called command.
  * Res_purl and err_purl specify the pseudo-urls for the job's 
  * result and error channels (stdout and stderr).
- * The method's type() dictates which thread should be used:-
+ * The method's definition (METHID->type) dictates how to run/schedule:-
  *    (1) the main thread (discouraged as it may take lots of time)
  *    (2) a new thread
  *    (3) a new process
@@ -676,10 +697,10 @@ int meth_execute(char *key,		/* name identifing job/process  */
 
 
 /* 
- * Special method execution for standalone utilities that run only
- * one thing at a time. All methods are treated as METH_SOURCE only
- * (type is ignored), it is a oneoff (no persistant routes open)
- * and there is no key.
+ * Simplified, alternative version of method running for stand-alone
+ * utilities that run one thing at a time.
+ * Control is handed over to method for the duration of its execution
+ * ignoring METHID->type, persistant routes and without naming.
  * Returns the method's value or 1 if unable to start the method
  */
 int meth_actiononly(METHID run,		/* method specification */
@@ -808,6 +829,159 @@ int  meth_isrunning(char *key		/* string key */)
 }
 
 
+/*
+ * Signal handler called when a child process's status changes.
+ * Suspends/restarts are ignored, but exits are collected and queued
+ * for later processing in meth_childexit() called from the main loop
+ */
+void meth_sigchild(int sig /* signal vector */) {
+     int pid, status;
+
+     sig_off();		/* I'm working */
+     while( (pid = waitpid(-1, &status, WNOHANG)) ) {
+
+          /* special statuses */
+	  if (pid == -1) {
+	       /* interrupted waitpid call */
+	       if (errno == EINTR) {
+		    continue;
+	       }
+	       sig_on();
+	       return;
+	  }
+
+	  /* ignore stopped processes */
+	  if ( WIFSTOPPED(status) ) {
+	       /*elog_printf(DEBUG, "process %d stopped", pid);*/
+	       continue;
+	  }
+
+	  /* At this point, a process has terminated normally or from an
+	   * uncaught signal. Either way, its dead */
+
+          /* add status and pid in an ITREE making an unordered list */
+          itree_add(meth_exitbypid, pid, (void *) status);
+     }
+     sig_on();
+}
+
+
+/*
+ * Process child exit statuses that have been collected by meth_sigchild().
+ * Essentially, flushing the I/O buffers of exited methods, removing the 
+ * running method structures and logging the progress for information 
+ * and debug.
+ */
+void meth_exitchildren() {
+     int pid, status, r;
+     char pipebuf[PIPE_BUF];
+     struct meth_runprocinfo *rp;
+     struct meth_runset *rset;
+
+     /* traverse the exited children list */
+     while ( ! tree_empty(meth_exitbypid) ) {
+	  itree_first(meth_exitbypid);
+	  pid    = itree_getkey(meth_exitbypid);
+	  status = (int) itree_get(meth_exitbypid);
+       
+          meth_restartselect++;		/* select args may have changed */
+
+	  /* Process the child's death */
+	  if (itree_find(meth_procbypid, pid) != ITREE_NOVAL) {
+	       rp = itree_get(meth_procbypid);
+	       rset = tree_find(meth_rsetbykey, rp->key);
+	       if (rset == ITREE_NOVAL)
+		    elog_die(FATAL, "method key %s not in meth_rsetbykey", 
+			     rp->key);
+
+	       /* log the death */
+	       elog_startprintf(INFO, "  fork job %-10s pid %d: ",
+				rp->key, pid);
+	       if (WIFEXITED(status))
+		    elog_contprintf(INFO, " exit=%d ", WEXITSTATUS(status));
+	       else if (WIFSIGNALED(status))
+		    elog_contprintf(INFO, " signal=%d %s ", WTERMSIG(status),
+				    strsignal(WTERMSIG(status)));
+	       else
+		    elog_contprintf(INFO, " UNKNOWN KILL ");
+	       elog_endprintf(INFO, " took=%.0fs", difftime(time(NULL), 
+							    rp->start));
+
+	       /* close off i/o that the parent may have for the child */
+
+	       /* Empty the result pipe containing data */
+	       if (rp->resfd != -1) {
+		    r = read(rp->resfd, pipebuf, PIPE_BUF);
+		    if (r == -1)
+		         elog_printf(ERROR, "result read() error: %d %s",
+				     errno, strerror(errno));
+		    if (r > 0)
+		         if (route_write(rset->res, pipebuf, r) < 0)
+			      elog_die(FATAL, "res route problem: "
+				       "key %s, start %d res %s err %s",
+				       rp->key, rp->start,
+				       rset->res_purl, rset->err_purl);
+		    close(rp->resfd);
+	       }
+
+	       /* Empty the error pipe containing data */
+	       if (rp->errfd != -1) {
+		    r = read(rp->errfd, pipebuf, PIPE_BUF);
+		    if (r == -1)
+		         elog_printf(ERROR, "error read() error: %d %s", 
+				     errno, strerror(errno));
+		    if (r > 0)
+		         if (route_write(rset->err, pipebuf, r) < 0)
+			   elog_die(FATAL, "err route problem: "
+				    "key %s, start %d res %s err %s",
+				    rp->key, rp->start,
+				    rset->res_purl, rset->err_purl);
+		    close(rp->errfd);
+	       }
+	       
+	       route_flush(rset->res);
+	       route_flush(rset->err);
+	       
+	       if (rset->oneshot)
+		    meth_endrun(rp->key, 0, "unknown", rset->res_purl, 
+				rset->err_purl, 0);
+
+	       /* remove the pid refrence from the list of those running */
+	       rset->pid = -1;
+	       itree_rm(meth_procbypid);
+
+	       /* propagate the death to anyone listening on the 
+		* METH_CB_FINISHED event and pass the method name key */
+	       callback_raise(METH_CB_FINISHED, rp->key, NULL, NULL, NULL);
+
+	       /* clear the storage */
+	       nfree(rp->key);
+	       nfree(rp);
+
+	  } else {
+	       /* process does not have an entry in meth_procbypid;
+		* log the death */
+	       elog_startprintf(ERROR, "unknown process pid %d ", pid);
+	       if (WIFEXITED(status))
+		    elog_contprintf(ERROR,"exit with %d",WEXITSTATUS(status));
+	       else if (WIFSIGNALED(status))
+		    elog_contprintf(ERROR, "killed by signal %d", 
+				    WTERMSIG(status));
+	       else
+		    elog_contprintf(ERROR, "UNKNOWN DEATH");
+	       elog_endprintf(ERROR, " finished at %d", time(NULL));
+	  }
+
+	  /* remove processed item from list */
+	  itree_rm(meth_exitbypid);
+     }
+
+     return;
+}
+
+
+
+#if 0
 /*
  * Signal handler called when a child process dies.
  * It is assumed that the signal returns the status of 0 or more children
@@ -950,9 +1124,11 @@ void meth_child(int sig /* signal vector */) {
 
      return;
 }
+#endif
+
 
 /*
- * Dispatch i/o relay and process servicing.
+ * Dispatch I/O relay and process servicing.
  * Calling this routine enables the results and errors of completed jobs 
  * to be collected, scheduals new ones and coordinates i/o from jobs 
  * with non-file descriptor routes jobs (eg timstore).
@@ -962,6 +1138,7 @@ void meth_child(int sig /* signal vector */) {
  * was done.
  * Returns -1 to indicate meth_relay() should be rerun as signals had
  * interrupted I/O. Otherwise, the number of relays carried out is returned.
+ * Should be run in a loop.
  */
 int meth_relay() {
      struct meth_runprocinfo *rp;
@@ -973,15 +1150,11 @@ int meth_relay() {
      char buf[1025];
      int blen=0;
 
-     /*
-      * Unix, single process distributor.
-      * In this version of events, we construct a list of open file 
-      * descriptors from processes that have been spawned by meth
-      * but have no direct connection with the routes.
-      * We relay their data using already opened routes (such as timestore).
-      * Additionally, we listen to file descriptors sent up externally
-      * to meth and issue callbacks when fd events take place.
-      */
+     /* This routine uses select(), which is a Unix command so this will 
+      * need to be modified when ported to Windows */
+
+     /* Construct a list of file descriptors for select() from running
+      * processes (meth_procbypid) and relay fds (meth_cbbyfd) */
      blen = sprintf(buf, "selecting on fds: ");
      FD_ZERO(&fds);
      itree_traverse(meth_procbypid) {
@@ -1020,6 +1193,7 @@ int meth_relay() {
 
      sig_off();
 
+     /* work out the fds that were changed */
      if ( avail == -1 ) {
           if (errno == EBADF || errno == EINTR) {
 	       elog_startprintf(DEBUG, "select() error %d %s ( ", 
@@ -1038,6 +1212,9 @@ int meth_relay() {
 	  }
 	  return avail;
      }
+
+     /* process the child exit codes */
+     meth_exitchildren();
 
      /* meth_child() has been called, causing the select() results to
       * be possibly incorrect (the orphan catching code below). Restart

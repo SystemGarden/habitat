@@ -6113,6 +6113,9 @@ Data collection will continue if already started</property>
       <placeholder/>
     </child>
     <child>
+      <placeholder/>
+    </child>
+    <child>
       <object class="GtkLabel" id="assist_harv_intro_label">
         <property name="visible">True</property>
         <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
@@ -8686,6 +8689,7 @@ Do you want to stop collecting?</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="draw_indicator">True</property>
+                                            <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
                                             <property name="position">0</property>
@@ -8700,6 +8704,7 @@ Do you want to stop collecting?</property>
                                             <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">pref_fetchquant_radio1</property>
+                                            <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
                                             <property name="position">1</property>
@@ -8714,6 +8719,7 @@ Do you want to stop collecting?</property>
                                             <property name="active">True</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">pref_fetchquant_radio1</property>
+                                            <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
                                             <property name="position">2</property>
@@ -8728,6 +8734,7 @@ Do you want to stop collecting?</property>
                                             <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
                                             <property name="group">pref_fetchquant_radio1</property>
+                                            <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
                                             <property name="position">3</property>
@@ -8806,6 +8813,7 @@ Do you want to stop collecting?</property>
                                             <property name="invisible_char">●</property>
                                             <property name="width_chars">3</property>
                                             <property name="text" translatable="yes">10</property>
+                                            <signal name="changed" handler="uipref_on_cachesize_set"/>
                                           </object>
                                           <packing>
                                             <property name="expand">False</property>
@@ -8850,7 +8858,84 @@ Do you want to stop collecting?</property>
                           </packing>
                         </child>
                         <child>
-                          <placeholder/>
+                          <object class="GtkFrame" id="pref_update_frame">
+                            <property name="visible">True</property>
+                            <property name="border_width">10</property>
+                            <property name="label_xalign">0</property>
+                            <child>
+                              <object class="GtkAlignment" id="pref_update_align">
+                                <property name="visible">True</property>
+                                <property name="top_padding">10</property>
+                                <property name="bottom_padding">10</property>
+                                <property name="left_padding">17</property>
+                                <property name="right_padding">5</property>
+                                <child>
+                                  <object class="GtkVBox" id="pref_update_vbox">
+                                    <property name="visible">True</property>
+                                    <child>
+                                      <object class="GtkHBox" id="pref_update_hbox">
+                                        <property name="visible">True</property>
+                                        <child>
+                                          <object class="GtkLabel" id="pref_update_prompt">
+                                            <property name="visible">True</property>
+                                            <property name="label" translatable="yes">Seconds to Next Update: </property>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">False</property>
+                                            <property name="position">0</property>
+                                          </packing>
+                                        </child>
+                                        <child>
+                                          <object class="GtkEntry" id="pref_update_entry">
+                                            <property name="visible">True</property>
+                                            <property name="can_focus">True</property>
+                                            <property name="invisible_char">•</property>
+                                            <property name="width_chars">3</property>
+                                            <property name="text" translatable="yes">30</property>
+                                            <signal name="changed" handler="uipref_on_update_set"/>
+                                          </object>
+                                          <packing>
+                                            <property name="expand">False</property>
+                                            <property name="fill">False</property>
+                                            <property name="position">1</property>
+                                          </packing>
+                                        </child>
+                                      </object>
+                                      <packing>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="pref_update_description">
+                                        <property name="visible">True</property>
+                                        <property name="xalign">0</property>
+                                        <property name="ypad">10</property>
+                                        <property name="label" translatable="yes">The number of seconds between data updates. Used when the data has an irregular arrival or if the duration can't be calculated.</property>
+                                        <property name="wrap">True</property>
+                                        <property name="width_chars">60</property>
+                                      </object>
+                                      <packing>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                            <child type="label">
+                              <object class="GtkLabel" id="pref_update_label">
+                                <property name="visible">True</property>
+                                <property name="label" translatable="yes">&lt;b&gt;Display Update Fequency&lt;/b&gt;</property>
+                                <property name="use_markup">True</property>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
                       </object>
                     </child>

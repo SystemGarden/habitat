@@ -25,4 +25,4 @@ void uicopy_on_dest_clear (GtkButton *object, gpointer user_data);
 void uicopy_on_copy (GtkButton *object, gpointer user_data);
 void uicopy_on_help (GtkButton *object, gpointer user_data);
 
-#endif /* _COPY_H_ */
+#endif /* _UICOPY_H_ */
