@@ -398,7 +398,6 @@ Added to optional system &amp; global options</property>
                     <child>
                       <object class="GtkImageMenuItem" id="m_edit_replication">
                         <property name="label">Re_plication...</property>
-                        <property name="visible">True</property>
                         <property name="tooltip_text" translatable="yes">Data replication with the repository</property>
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
@@ -642,7 +641,6 @@ Options will appear on the choice tree</property>
                             </child>
                             <child>
                               <object class="GtkCheckMenuItem" id="m_view_offsets">
-                                <property name="visible">False</property>
                                 <property name="tooltip_text" translatable="yes">Add or remove the offset panel</property>
                                 <property name="label" translatable="yes">_Offsets</property>
                                 <property name="use_underline">True</property>
@@ -8683,7 +8681,7 @@ Do you want to stop collecting?</property>
                                       <object class="GtkHBox" id="pref_fetchquant_hbox1">
                                         <property name="visible">True</property>
                                         <child>
-                                          <object class="GtkRadioButton" id="pref_fetchquant_radio1">
+                                          <object class="GtkRadioButton" id="pref_fetchquant_1h_radio">
                                             <property name="label" translatable="yes">One Hour</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
@@ -8696,14 +8694,14 @@ Do you want to stop collecting?</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkRadioButton" id="pref_fetchquant_radio2">
+                                          <object class="GtkRadioButton" id="pref_fetchquant_1d_radio">
                                             <property name="label" translatable="yes">One Day</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
-                                            <property name="group">pref_fetchquant_radio1</property>
+                                            <property name="group">pref_fetchquant_1h_radio</property>
                                             <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
@@ -8711,14 +8709,14 @@ Do you want to stop collecting?</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkRadioButton" id="pref_fetchquant_radio3">
+                                          <object class="GtkRadioButton" id="pref_fetchquant_1w_radio">
                                             <property name="label" translatable="yes">One Week</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="active">True</property>
                                             <property name="draw_indicator">True</property>
-                                            <property name="group">pref_fetchquant_radio1</property>
+                                            <property name="group">pref_fetchquant_1h_radio</property>
                                             <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
@@ -8726,14 +8724,14 @@ Do you want to stop collecting?</property>
                                           </packing>
                                         </child>
                                         <child>
-                                          <object class="GtkRadioButton" id="pref_fetchquant_radio4">
+                                          <object class="GtkRadioButton" id="pref_fetchquant_1m_radio">
                                             <property name="label" translatable="yes">One Month</property>
                                             <property name="visible">True</property>
                                             <property name="can_focus">True</property>
                                             <property name="receives_default">False</property>
                                             <property name="active">False</property>
                                             <property name="draw_indicator">True</property>
-                                            <property name="group">pref_fetchquant_radio1</property>
+                                            <property name="group">pref_fetchquant_1h_radio</property>
                                             <signal name="clicked" handler="uipref_on_fetchquant_set"/>
                                           </object>
                                           <packing>
@@ -8963,7 +8961,7 @@ Do you want to stop collecting?</property>
                 <child>
                   <object class="GtkLabel" id="pref_set1_label">
                     <property name="visible">True</property>
-                    <property name="label" translatable="yes">Data</property>
+                    <property name="label" translatable="yes">Cache</property>
                   </object>
                   <packing>
                     <property name="position">1</property>

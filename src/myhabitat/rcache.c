@@ -187,8 +187,8 @@ enum rcache_load_status rcache_request(char *basepurl,
           /* add new data to existing table */
           table_addtable(existing->tab, tab, 1);
 	  table_sortnumeric(existing->tab, "_time", NULL);
-	  g_print("- appended %d rows, %d rows total\n", 
-		  table_nrows(tab), table_nrows(existing->tab));
+	  /*g_print("- appended %d rows, %d rows total\n", 
+	    table_nrows(tab), table_nrows(existing->tab));*/
 	  rcache_priv_grow_entry(existing, from_t, to_t);
 	  table_destroy(tab);
      } else {
@@ -196,7 +196,7 @@ enum rcache_load_status rcache_request(char *basepurl,
           slot = rcache_priv_oldest_entry();
 	  rcache_priv_free_entry(slot);
 	  rcache_priv_create_entry(slot, basepurl, tab, min_t, max_t, status);
-	  g_print("- new, %d rows in slot %d\n", table_nrows(tab), slot);
+	  /*g_print("- new, %d rows in slot %d\n", table_nrows(tab), slot);*/
      }
 
      return status;		/* complete success */

@@ -269,7 +269,7 @@ void uitime_slider_change(time_t slider_from, time_t slider_to)
      if (slider_from == uitime_view_oldest &&
 	 slider_to   == uitime_view_youngest) {
           /* if boundaries are the same as before, do nothing */
-          g_print("uitime_slider_change() - no change from remembered data; returning\n");
+          /*g_print("uitime_slider_change() - no change from remembered data; returning\n");*/
 	  return;
      }
 
