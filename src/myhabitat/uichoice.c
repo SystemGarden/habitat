@@ -1135,7 +1135,7 @@ uichoice_on_source_close  (GtkButton *object, gpointer user_data)
 			      UICHOICE_CLOSE_COL_FNAME, &fname,
 			      -1);
      } else {
-          /* unslected: do nothing */
+          /* unselected: do nothing */
           return;
      }
 

@@ -288,18 +288,27 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
 extern GtkTreeIter localparent;
 
 /* Call back from an alarm event to update the visualisation pane to 
- * the local view */
+ * the local view. Do not change if there is a selection in place */
 gint uidata_choice_change_to_local()
 {
      GtkTreeStore *choicestore;
      GtkTreeView *choicetree;
      GtkTreeSelection *selection;
      GtkTreePath *path;
+     GtkTreeIter iter;
+     GtkTreeModel *model;
 
-     /* get the selection object pointer+path from tree an store */
+     /* get the selection object pointer */
      choicetree = GTK_TREE_VIEW(gtk_builder_get_object(gui_builder,
 						       "choice_tree"));
      selection = gtk_tree_view_get_selection(choicetree);
+     if (gtk_tree_selection_get_selected (selection, &model, &iter)) {
+          /* there is a selection already, so don't attempt to 
+	   * select the local */
+          return;
+     }
+
+     /* get the path from tree and store */
      choicestore = GTK_TREE_STORE(gtk_builder_get_object(gui_builder,
 							 "choice_treestore"));
      path = gtk_tree_model_get_path(GTK_TREE_MODEL(choicestore), 
