@@ -21,7 +21,7 @@ CHANGES
 
 - Since the 1.x series, ringstore files have changed their driver name 
   from 'rs:' to 'grs:' (they are based on GBDM) to allow for other
-  ringstores to be evaulated
+  storage methods to be evaluated as ringstores
 - The local host ringstore is now 'checkpointed' hourly, used as a hook
   to housekeep and compact files to save storage (its become a route 
   method so it can be reused).
@@ -50,6 +50,8 @@ CHANGES
 - Autorefresh time added to preferences window & hooked up to config
   as myhab.update
 - Loaded config values into preferences on initialisation
+- Made safe from single sample data
+- Display local view 5 seconds from startup
 
 
 P1 BUGS TO FIX BEFORE ALPHA 1

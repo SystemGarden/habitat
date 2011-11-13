@@ -66,6 +66,7 @@
 #include "uivis.h"
 #include "uilog.h"
 #include "uidialog.h"
+#include "uipref.h"
 #include "dyndata.h"
 #include "fileroute.h"
 #include "main.h"

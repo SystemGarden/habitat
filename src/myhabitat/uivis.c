@@ -161,7 +161,8 @@ void uivis_draw(char *route, TABLE (*dfunc)(time_t, time_t),
 
      vis_notebook = GTK_NOTEBOOK(get_widget("visualisation_notebook"));
      vis_table_scroll = get_widget("vis_table_scroll");
-     vis_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(gui_builder,"vis_textbuffer"));
+     vis_textbuffer = GTK_TEXT_BUFFER(gtk_builder_get_object(gui_builder,
+							     "vis_textbuffer"));
 
      /* Clear up current visutalisations */
      switch (uivis_vis_oldmode) {

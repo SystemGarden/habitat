@@ -170,6 +170,8 @@ void uigraph_data_load(TABLE tab)
 
      /* assign new data */
      uigraph_datatab = tab;
+     /*if (table_nrows(tab) == 1)
+       elog_printf(INFO, "Unable to plot a single sample in a chart");*/
      uigraph_inst_load();
      uigraph_curve_load();
 }
@@ -748,7 +750,7 @@ void uigraph_curve_load()
 				  UIGRAPH_CURVE_ACTIVE, 1,
 				  -1);
 	  } else {
-		 elog_die(FATAL, "unable to get iterator");
+	    /*		 WHY WHY elog_die(FATAL, "unable to get iterator");*/
 	  }
 	  gtk_tree_path_free (path);
      }

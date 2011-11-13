@@ -64,11 +64,29 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
      time_t current_t, previous_t;
      char *str;
 
-     /* timestamps have to support a reasonable sample */
-     if (from_t == to_t ||
-	 from_t > to_t ||
-	 to_t == 0)
-       return;
+     /*fprintf(stderr, "uitime_set_slider() - from_t=%ld to_t=%ld "
+	     "openage_t=%ld\n",
+	     from_t, to_t, openage_t);*/
+
+     /* Time should contain something in order to display.
+      * For now, don't change the existing display but tell the user there
+      * is not data to display */
+     if (to_t == 0) {
+          elog_printf(INFO, "No data to display, leaving old display");
+	  return;
+     }
+
+     /* Just plain wrong! the dates are reversed */
+     if (from_t > to_t) {
+          elog_printf(INFO, "Crazy mixed up data dates, leaving old display");
+	  return;
+     }
+
+     /* Single data elements dont make sense when graphing */
+     if (from_t == to_t) {
+       /* log here is too chatty */
+       /*elog_printf(INFO, "Only one sample, can't draw chart");*/
+     }
 
      /* gather the widgets */
      from_w    = get_widget("view_timescale_min");
@@ -121,10 +139,13 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
 #endif
 
      /* Set the slider with min and max limits, but dont allow to redraw */
+     previous_t = gtk_range_get_value(GTK_RANGE(slider_w));
      g_signal_handlers_block_by_func(G_OBJECT(slider_w), 
 				     G_CALLBACK(uitime_on_slider_value_changed),
 				     NULL);
-     gtk_range_set_range(GTK_RANGE(slider_w), (float)from_t, (float)to_t);
+     if (from_t != to_t)
+          gtk_range_set_range(GTK_RANGE(slider_w), (float)from_t, (float)to_t);
+     gtk_range_set_value(GTK_RANGE(slider_w), current_t);
      g_signal_handlers_unblock_by_func(G_OBJECT(slider_w), 
 				     G_CALLBACK(uitime_on_slider_value_changed),
 				     NULL);
@@ -133,21 +154,14 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
      uitime_avail_oldest = from_t;
      uitime_avail_youngest = to_t;
 
-     previous_t = gtk_range_get_value(GTK_RANGE(slider_w));
 #if 0
      g_print("uitime_set_slider() - setting GtkRange [%lu..(%lu)..%lu], "
 	     "prev=%lu, setting value\n", 
 	     from_t, current_t, to_t, previous_t);
 #endif
 
-     /* set slider position which will cause a redraw if
-      * the value is different */
-     gtk_range_set_value(GTK_RANGE(slider_w), current_t);
-
-     /* if the previous and new slider values are the same, we need
-      * to explictly redraw */
-     if (current_t == previous_t)
-          uitime_slider_change(current_t, to_t);
+     /* redraw */
+     uitime_slider_change(current_t, to_t);
 }
 
 
@@ -250,7 +264,7 @@ void uitime_slider_change(time_t slider_from, time_t slider_to)
      if (slider_from > slider_to) {
           /* not all the arguments are in, some times casused by 
 	   * premiture events */
-          g_print("uitime_slider_change() - to < from; returning\n");
+          g_print("uitime_slider_change() - from > to; returning\n");
 	  return;
      }
 

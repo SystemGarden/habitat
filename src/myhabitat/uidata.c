@@ -285,6 +285,38 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
 }
 
 
+extern GtkTreeIter localparent;
+
+/* Call back from an alarm event to update the visualisation pane to 
+ * the local view */
+gint uidata_choice_change_to_local()
+{
+     GtkTreeStore *choicestore;
+     GtkTreeView *choicetree;
+     GtkTreeSelection *selection;
+     GtkTreePath *path;
+
+     /* get the selection object pointer+path from tree an store */
+     choicetree = GTK_TREE_VIEW(gtk_builder_get_object(gui_builder,
+						       "choice_tree"));
+     selection = gtk_tree_view_get_selection(choicetree);
+     choicestore = GTK_TREE_STORE(gtk_builder_get_object(gui_builder,
+							 "choice_treestore"));
+     path = gtk_tree_model_get_path(GTK_TREE_MODEL(choicestore), 
+				    &localparent);
+
+     /* set the choice selection to the local view */
+     gtk_tree_selection_select_path(selection, path);
+     gtk_tree_path_free(path);
+
+     /* fire the visualisation manually, I dont know which signal should 
+      * be emitted */
+     uidata_choice_change(selection);
+
+     return FALSE;			/* cancel further updates */
+}
+
+
 /* callback to handle a change in the ring button list */
 const gchar *uidata_ring_current_label="\0";
 G_MODULE_EXPORT void 
@@ -335,7 +367,7 @@ uidata_on_other_ring_item_activated (GtkImageMenuItem *menubutton,
      const gchar *label;
 
      label = gtk_menu_item_get_label(GTK_MENU_ITEM(menubutton));
-     fprintf(stderr, "callback to %s\n", label);
+     /*fprintf(stderr, "uidata_on_other_ring_item_activated() callback to %s\n", label);*/
 
      /* change the ring and display it */
      uitime_forget_data();
@@ -416,9 +448,9 @@ void uidata_ring_change (char *ringlabel)
 		    if (current_choice_purl && *current_choice_purl) {
 		         /* data from a ROUTE */
 		         uidata_ring_current_label = "CPU";
-			 g_print("uidata_ring_change() - given NULL, no "
+			 /*g_print("uidata_ring_change() - given NULL, no "
 				 "pressed buttons, defaulting to %s\n", 
-				 uidata_ring_current_label);
+				 uidata_ring_current_label);*/
 		    } else {
 		         /* At this point we have no idea!! */
 		         uidata_ring_current_label = "";
@@ -448,6 +480,11 @@ void uidata_ring_change (char *ringlabel)
        else
 	    current_ringname = NULL;
      }
+
+     /*fprintf(stderr, "uidata_ring_change() - current_label=%s, "
+	     "current_ringname=%s\n",
+	     uidata_ring_current_label ? uidata_ring_current_label : "(null)",
+	     current_ringname);*/
 
      /* Only operate when there is an info table and a ringname */
      if (current_info_tab && current_ringname) {
@@ -494,8 +531,6 @@ void uidata_ring_change (char *ringlabel)
       * Each can add the additional p-url parts they need for their
       * specific function */
      if (current_choice_purl) {
-          /*g_print ("You selected ring label %s purl %s ringname %s\n", 
-	    uidata_ring_current_label, current_choice_purl, current_ringname);*/
 
 	  /* compile route */
           if (current_choice_type == FILEROUTE_TYPE_TSV  || 
@@ -515,6 +550,11 @@ void uidata_ring_change (char *ringlabel)
 
 	  }
 
+          /*g_print ("You selected ring label=%s purl=%s ringname=%s "
+		   "ringpurl=%s\n", 
+		   uidata_ring_current_label, current_choice_purl, 
+		   current_ringname, ringpurl);*/
+
 	  /* save globally */
           if (uidata_ringpurl)
 	       nfree(uidata_ringpurl);
@@ -528,6 +568,9 @@ void uidata_ring_change (char *ringlabel)
 	       nfree(uidata_ringpurl);
 	  uidata_ringpurl = '\0';
 	  uidata_ringdatacb = current_choice_getdatacb;
+
+          /*g_print ("You selected a direct function %p\n", 
+	    uidata_ringdatacb);*/
      }
 
      /* common global */

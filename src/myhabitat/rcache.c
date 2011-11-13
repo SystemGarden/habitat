@@ -115,12 +115,12 @@ enum rcache_load_status rcache_request(char *basepurl,
 	       /* we don't have youngest, set to asked */
 	       to_t = max_t;
 	  if (from_t > to_t) {
-	       g_print("already have %s from %s to %s, ", basepurl, 
+	       /*g_print("already have %s from %s to %s, ", basepurl, 
 		       util_decdatetime(existing->oldest), 
 		       util_sdecdatetime(existing->youngest));       
 	       g_print("asked for %s to %s\n",
 		       util_decdatetime(min_t), 
-		       util_sdecdatetime(max_t));
+		       util_sdecdatetime(max_t));*/
 	       return existing->status;		/* complete success */
 	  }
      } else {

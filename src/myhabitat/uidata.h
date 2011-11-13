@@ -19,6 +19,7 @@ void uidata_init();
 void uidata_fini();
 void uidata_on_choice_changed (GtkTreeView *tree, gpointer data);
 void uidata_choice_change (GtkTreeSelection *selection);
+gint uidata_choice_change_to_local();
 void uidata_on_ring_changed (GtkToolButton *toolbutton, gpointer data);
 void uidata_on_other_ring_pressed (GtkToolButton *toolbutton, gpointer data);
 void uidata_on_other_ring_item_activated (GtkImageMenuItem *menubutton, 

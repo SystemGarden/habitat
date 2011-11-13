@@ -170,6 +170,10 @@ main (int argc, char *argv[])
      uichoice_init_expand();
      uilog_setprogress("Welcome to Habitat", 0.0, 0);
 
+     /* allow five seconds to look at the splash screen, then change the 
+      * view if the local clockwork is running */
+     g_timeout_add_seconds(5, uidata_choice_change_to_local, NULL);
+
      /* Start main loop */
      gtk_main();
 
