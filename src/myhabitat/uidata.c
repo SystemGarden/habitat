@@ -255,8 +255,8 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
           /* No PURL, use the GETDATACB function to get the TABLE */
 
           /* Debug */
-          g_print ("You selected the label %s vis %d dynamic\n", 
-		   current_choice_label, vis);
+          /*g_print ("You selected the label %s vis %d dynamic\n", 
+	    current_choice_label, vis);*/
 
           /* No ring information currently implemented for GETDATACB */
 	  if (current_info_tab)
@@ -275,8 +275,8 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
 
      } else {
           /* Debug */
-          g_print ("You selected the label %s vis %d but no purl\n", 
-		   current_choice_label, vis);
+          /*g_print ("You selected the label %s vis %d but no purl\n", 
+	    current_choice_label, vis);*/
      }
 
      /* Clear up */
