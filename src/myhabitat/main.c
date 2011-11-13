@@ -22,6 +22,7 @@
 #include "uicollect.h"
 #include "uiharvest.h"
 #include "uiedit.h"
+#include "uipref.h"
 #include "../iiab/route.h"
 #include "../iiab/elog.h"
 #include "../iiab/iiab.h"
