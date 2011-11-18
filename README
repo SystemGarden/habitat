@@ -77,6 +77,7 @@ KNOWN ISSUES
 - Clockwork network security -- switch to libmicrohttpd?
 - Clockwork crashes when httpd code is given certain urls - switch to 
   libmicrohttpd?
+- Auto update resets any zoomed state
 
 
 NOTES

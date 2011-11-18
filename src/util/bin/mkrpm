@@ -52,6 +52,11 @@ then
 	D_OLDSUSE=1
     fi
 fi
+if [ -z "$RELEASE" -a -e /etc/fedora-release ]
+then
+    D_FEDORA=1
+    RELEASE="rhfc"
+fi
 if [ -z "$RELEASE" -a -e /etc/redhat-release ]
 then
     D_OLDREDHAT=1
@@ -63,11 +68,16 @@ then
     RELEASE="plain"
 fi
 
+echo "** Building RPM (mkrpm) ** App: $3 ** Ver: $4 **"
+echo "** Release: $RELEASE **"
+echo "** Src:     $SRCFILE **"
+echo "** Build:   $1 **"
+
 # Build the RPM spec file from a template
 SPECTMPL=$SPECPATH/$3.tmpl.spec
 SPEC=$SPECPATH/$3.spec
 
-printf "%%define version %s\n%%define name %s\n%%define release %s\n%%define _topdir %s\nSource0: %s\n" $4 $3 $RELEASE $BUILDPATH $BUILDSRCSYM | cat - $SPECTMPL >$SPEC
+printf "# Habitat RPM spec file definitions\n%%define version %s\n%%define name %s\n%%define release %s\n%%define _topdir %s\nSource0: %s\n" $4 $3 $RELEASE $BUILDPATH $BUILDSRCSYM | cat - $SPECTMPL >$SPEC
 
 # make the directories
 mkdir -p $1/RPMS/i586 $1/SRPMS $1/SOURCES $1/BUILD

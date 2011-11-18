@@ -1,4 +1,12 @@
-%define prefix /usr
+# Habitat RPM spec file template, expecting the following to be set by mkrpm:
+# version, name, release, _topdir, Source0
+%define prefix /
+%define is_mandrake %(test %{release} = "mdk" && echo 1 || echo 0)
+%define is_suse %(test %{release} = "suse" && echo 1 || echo 0)
+%define is_fedora %(test %{release} = "rhfc" && echo 1 || echo 0)
+%define is_redhat %(test %{release} = "rh" && echo 1 || echo 0)
+%define is_freedesktop %(test %{release} = "freedesktop" && echo 1 || echo 0)
+%define is_connectiva %(test %{release} = "cl" && echo 1 || echo 0)
 
 Summary: Application and system performance monitor, collecting and visualising trends, availability and service levels
 Name: %{name}
@@ -14,22 +22,24 @@ BuildRoot: %{_topdir}/broot/%{name}-%{version}-%{release}
 
 %description
 Welcome to Habitat, collector, monitor and viewer for system 
-and applications. Highly extensible collector of timeseries tabular data and 
-also the main gateway into System Garden for social IT management.
+and applications. An extendable and flexible collector of timeseries 
+tabular data and also the main gateway into System Garden for social IT 
+management.
 
 Data is collected as a time series of tables from kernel and applications 
 using a daemon (called clockwork).  Applications and scripts can push their
 data into Habitat by command line or API using CSV and similar formats.
-Log files are monitored for regular expressions, causing events which 
-can generate logs in turn, relay information to other systems or 
-run arbitary scripts. File changes can also be recorded in a history
-of versions.
+Log files can be collected or monitored for patterns to generate events 
+that relay information to other systems or run arbitary scripts. 
+File changes can also be recorded in a history of versions.
 
-Data is stored on local machine in cascaded rings for low maintenance 
-and disk economy; they can be archived remotely to a repository for 
-long term storage & trend analysis. Visualisation is by Gtk+ application, 
-curses or command line and can view data from peer machines also running 
-Habitat.
+Data is typically stored on the local machine with periodic synchronisation
+to System Garden at a configurable rate. Local data storage uses a series 
+of fixed sized ring buffers on disk, reducing data frequency over time for 
+low maintenance and storage economy. Visualisation of local and peer Habitat
+machines is by a Gtk+ GUI application, myHabitat or using System Garden.
+Data can be extracted using command line tools and management is by 
+multi-tier configuration files or GUI.
 
 %prep
 %setup -q -n %{name}-%{version}-src
@@ -44,21 +54,22 @@ make linuxinventory
 make LINROOT=$RPM_BUILD_ROOT linuxinstall
 echo "INVENTORY IS:-"
 cat INVENTORY
-if [ "%{RELEASE}" = "mdk" -o "%{RELEASE}" = "cl" ]
-then
+%if %{is_mandrake} || %{is_connectiva}
     mkdir -p $RPM_BUILD_ROOT%{_menudir}
     cat <<EOF >$RPM_BUILD_ROOT%{_menudir}/habitat
    ?package(habitat):command="/usr/bin/myhabitat" icon="habitatlogo" \
    needs="X11" section="System/Monitoring" title="Habitat" \
    longtitle="System & application monitor, collector and visualizer"
 EOF
-fi
-if [ "%{RELEASE}" = "freedesktop" ]
-then
-fi
-if [ "%{RELEASE}" = "suse" ]
-then
-fi
+%endif
+%if %{is_freedesktop}
+    # Freedesktop menu & icon
+    mkdir -p $RPM_BUILD_ROOT/usr/share/pixmaps $RPM_BUILD_ROOT/usr/share/applications
+    install -m 644 myhabitat/pixmaps/habitat_flower_32.png $RPM_BUILD_ROOT/usr/share/pixmaps
+    install -m 644 util/lib/habitat.desktop $RPM_BUILD_ROOT/usr/share/applications
+%endif
+%if %{is_suse}
+%endif
 
 %clean
 rm -rf $RPM_BUILD_DIR %{_topdir}/broot
@@ -102,24 +113,24 @@ fi
 %files -f src/INVENTORY
 %defattr(-,daemon,daemon,-)
 
-%if %(test "%{RELEASE}" = "mdk" -o "%{RELEASE}" = "cl" && echo 1 || echo 0)
+%if %{is_mandrake} || %{is_connectiva}
 # Makedrake and Connectiva Linux
 /%{_menudir}/habitat
 %endif
 
-%if %{freedesktop}
+%if %{is_freedesktop}
 # Freedesktop menu & icon
-/usr/share/pixmaps/habitat.png
+/usr/share/pixmaps/habitat_flower_32.png
 /usr/share/applications/habitat.desktop
 %endif
 
-%if %{suse} && !%{freedesktop}
+%if %{is_suse} && !%{is_freedesktop}
 # SuSE menu & icon
 /etc/X11/susewm/AddEntrys/SuSE/Internet/WWW/habitat.desktop
 /usr/X11R6/share/icons/png/hicolor/misc/apps/habitat.png
 %endif
 
-%if %{oldredhat}
+%if %{is_redhat}
 # Old-style Red Hat menu & icon
 /usr/share/pixmaps/habitat.png
 /etc/X11/applnk/Internet/habitat.desktop

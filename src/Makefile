@@ -210,7 +210,7 @@ install: all
 	$(COPY)  $(HTMLMAN8)     $(DSTHTMLMAN8); \
 	$(COPY)  $(PIXMAPS)      $(DSTPIXMAPS);
 
-# Linux install for its system friendly build
+# Linux install into its various system areas, rather than in a single tree
 linuxinstall: all
 	$(MKDIR) $(LINDSTALL); \
 	$(COPY)  $(BIN)       $(LINDSTBIN); \
@@ -237,6 +237,7 @@ linuxinstall: all
 	$(COPY)  $(PIXMAPS)   $(LINDSTPIXMAPS); \
 	$(COPY)  $(DOC) $(LININVENTORY) $(LINDSTDOC);
 
+# produce a INVENTORY file reflecting the locations of a linux install
 linuxinventory:
 	echo $(addprefix $(LINDSTBIN)/,$(notdir $(BIN))) \
 	  $(addprefix $(LINDSTLIB)/,$(notdir $(LIB))) \
@@ -303,9 +304,6 @@ bintar:	install
 	tar cvhzf $(BINTOP).tar.gz --exclude='$(BINTOP)/var/*' \
 		--exclude='*.bak' --exclude='*~' --exclude='.*' $(BINTARF); \
 	rm $(BINTOP);
-
-nrpm:
-	util/pkgmake-0.1.8/pkgmake $(APP) $(VERSION)
 
 rpm:	srctar
 	$(MKDIR) $(DSTDIST)/$(RPMDIR); \

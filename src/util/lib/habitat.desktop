@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=%{version}
+Encoding=UTF-8
+Name=MyHabitat
+GenericName=Habitat
+Comment=Show system and application performance
+Exec=/usr/bin/myhabitat
+TryExec=myhabitat
+Terminal=false
+Type=Application
+Icon=/usr/share/pixmaps/habitat_flower_32.png
+Categories=Application;Utility;GNOME;GTK;Monitor
+MimeType=text/plain
