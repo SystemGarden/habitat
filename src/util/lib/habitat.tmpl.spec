@@ -9,19 +9,32 @@
 %define is_connectiva %(test %{release} = "cl" && echo 1 || echo 0)
 
 Summary: Application and system performance monitor, collecting and visualising trends, availability and service levels
-Name: %{name}
+Name: System Garden Habitat
+Sname: %{name}
 Version: %{version}
 Release: %{release}
 License: GPL
 Group: Application/System
 URL: http://www.systemgarden.com/habitat/
-#Source1: http://www.systemgarden.com/habitat/download/%{name}-%{version}-src.tar.gz
+#Source1: http://www.systemgarden.com/habitat/download/%{sname}-%{version}-src.tar.gz
 Vendor: System Garden Ltd
 Packager: Nigel Stuckey <nigel.stuckey@systemgarden.com>
-BuildRoot: %{_topdir}/broot/%{name}-%{version}-%{release}
+BuildRoot: %{_topdir}/broot/%{sname}-%{version}-%{release}
+Requires: readline
+Requires: gdbm
+Requires: curl
+Requires: gtk2
+Requires: gtkdatabox
+BuildRequires: readline-devel
+BuildRequires: gdbm-devel
+BuildRequires: curl-devel
+BuildRequires: gtk2-devel
+BuildRequires: gtkdatabox-devel
+BuildRequires: man2html
+BuildRequires: rpm
 
 %description
-Welcome to Habitat, collector, monitor and viewer for system 
+Habitat is a collector, monitor and viewer for system 
 and applications. An extendable and flexible collector of timeseries 
 tabular data and also the main gateway into System Garden for social IT 
 management.
@@ -42,7 +55,7 @@ Data can be extracted using command line tools and management is by
 multi-tier configuration files or GUI.
 
 %prep
-%setup -q -n %{name}-%{version}-src
+%setup -q -n %{sname}-%{version}-src
 
 %build
 cd src
@@ -136,10 +149,10 @@ fi
 /etc/X11/applnk/Internet/habitat.desktop
 %endif
 
-#%license %{_docdir}/%{name}-%{version}/LICENSE
-#%readme %{_docdir}/%{name}-%{version}/README
-#%doc %{_docdir}/%{name}-%{version}/LICENSE
-#%doc %{_docdir}/%{name}-%{version}/INVENTORY
+#%license %{_docdir}/%{sname}-%{version}/LICENSE
+#%readme %{_docdir}/%{sname}-%{version}/README
+#%doc %{_docdir}/%{sname}-%{version}/LICENSE
+#%doc %{_docdir}/%{sname}-%{version}/INVENTORY
 %config /var/lib/habitat
 #%config /etc/
 

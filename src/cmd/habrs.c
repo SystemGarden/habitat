@@ -1,11 +1,10 @@
 /*
- * Interactive ring store tool  -  irs
+ * Habitat's interactive ring store tool  -  habrs
  * Makes ringstore API available from the command line together with some
  * convenience and management functions.
  *
- * Based on its.
  * Nigel Stuckey, July 2004
- * Copyright System Garden Ltd 2004. All rights reserved.
+ * Copyright System Garden Ltd 2004-11. All rights reserved.
  */
 
 #include <stdio.h>

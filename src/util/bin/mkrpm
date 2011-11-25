@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# Make the RPM specfile for habitat
-# To be run from Makefile directory of habitat
+# Make the RPM specfile for Habitat and then create the source and binary RPMs.
+# To be run from Makefile directory of Habitat
 # Places the RPM files in <builddir> when complete
 #
-# Nigel Stuckey 14 Dec 2004, 12 Oct 2011.
+# Nigel Stuckey 14 Dec 2004, Oct & Nov 2011.
 # Copyright System Garden Ltd 2004,2011. All rights reserved.
 
 usage="usage: $0 <builddir> <srctarfile> <app> <ver>"
@@ -77,7 +77,7 @@ echo "** Build:   $1 **"
 SPECTMPL=$SPECPATH/$3.tmpl.spec
 SPEC=$SPECPATH/$3.spec
 
-printf "# Habitat RPM spec file definitions\n%%define version %s\n%%define name %s\n%%define release %s\n%%define _topdir %s\nSource0: %s\n" $4 $3 $RELEASE $BUILDPATH $BUILDSRCSYM | cat - $SPECTMPL >$SPEC
+printf "# Habitat RPM spec file definitions\n%%define version %s\n%%define sname %s\n%%define release %s\n%%define _topdir %s\nSource0: %s\n" $4 $3 $RELEASE $BUILDPATH $BUILDSRCSYM | cat - $SPECTMPL >$SPEC
 
 # make the directories
 mkdir -p $1/RPMS/i586 $1/SRPMS $1/SOURCES $1/BUILD

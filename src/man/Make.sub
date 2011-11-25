@@ -9,7 +9,7 @@ man/habget.1		\
 man/habput.1		\
 man/habmeth.1		\
 man/habprobe.1		\
-man/irs.1
+man/habrs.1
 
 MAN5 +=			\
 man/habconf.5
@@ -20,3 +20,5 @@ man/killclock.8		\
 man/statclock.8		\
 man/habedit.8		\
 man/habrep.8		\
+
+MANHTMLCSS = man/habitatman.css

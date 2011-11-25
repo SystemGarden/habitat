@@ -6,7 +6,7 @@
 SRC += 			\
 cmd/habput.c 		\
 cmd/habget.c 		\
-cmd/irs.c		\
+cmd/habrs.c		\
 cmd/habmeth.c		\
 cmd/clockwork.c 	\
 cmd/killclock.sh	\
@@ -36,7 +36,7 @@ cmd/habrep	\
 
 # The below need libterm & curses linked in
 CMDTBIN :=	\
-cmd/irs		\
+cmd/habrs		\
 #cmd/track 	\
 
 # Scripts for /etc/init.d
@@ -51,11 +51,11 @@ cmd/jobs.quick  \
 cmd/jobs.test
 
 # Suggestions for other job files
-#cmd/passive.jobs
-#cmd/himem.jobs
-#cmd/histore.jobs
-#cmd/hiharv.jobs
-#cmd/himem.jobs
+#cmd/jobs.passive
+#cmd/jobs.himem
+#cmd/jobs.histore
+#cmd/jobs.hiharv
+#cmd/jobs.himem
 
 BIN += $(CMDBIN) $(CMDTBIN)
 ETC += cmd/habitat.conf

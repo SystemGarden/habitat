@@ -1,0 +1,29 @@
+<style type="text/css">
+<!--
+/*
+ * Style sheet for System Garden Habitat manual pages in HTML
+ */
+
+body { font-family: Georgia, "Times New Roman", Times, serif; 
+          font-size:14px; color:#3c3e41}
+h1      { font-family: Georgia, "Times New Roman", Times, serif; 
+          font-size:32px; padding:0 0 5px 0; margin:0; color:#3c3e41; 
+          height:36px; border-bottom:dotted 1px #6e6c6c; margin-bottom:5px; }
+h2      { font-family: Georgia, "Times New Roman", Times, serif; 
+          font-size:18px; padding:0 0 5px 0; margin:0; color:#3c3e41; 
+          height:18px; border-bottom:dotted 1px #6e6c6c; margin-bottom:5px; }
+h3      { font-family: Georgia, "Times New Roman", Times, serif; 
+          font-size:16px; padding:0 0 5px 0; margin:0; color:#3c3e41; 
+          height:16px; border-bottom:dotted 1px #6e6c6c; margin-bottom:5px; }
+h4      { font-family: Georgia, "Times New Roman", Times, serif; 
+          font-size:14px; padding:0 0 5px 0; margin:0; color:#3c3e41; 
+          height:14px; border-bottom:dotted 1px #6e6c6c; margin-bottom:5px; }
+td      { font-size:13px; }
+a:link, a:visited, a:active     { color:#096f35; text-decoration:none; }
+a:hover { color:#b6c71d; text-decoration:underline; }
+ul      { list-style-type:none; padding:0 0 20px 0; margin:0; }
+li      { background-image:url(../images/bullet.gif); 
+          background-repeat:no-repeat; background-position:0px; 
+          padding-left:10px; }
+-->
+</style>

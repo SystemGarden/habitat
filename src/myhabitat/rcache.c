@@ -117,8 +117,8 @@ enum rcache_load_status rcache_request(char *basepurl,
 	  if (from_t > to_t) {
 	       /*g_print("already have %s from %s to %s, ", basepurl, 
 		       util_decdatetime(existing->oldest), 
-		       util_sdecdatetime(existing->youngest));       
-	       g_print("asked for %s to %s\n",
+		       util_sdecdatetime(existing->youngest));*/
+		       /*g_print("asked for %s to %s\n",
 		       util_decdatetime(min_t), 
 		       util_sdecdatetime(max_t));*/
 	       return existing->status;		/* complete success */
@@ -155,8 +155,8 @@ enum rcache_load_status rcache_request(char *basepurl,
           elog_printf(DIAG, 
 		      "No data available between %s and %s from '%s' (%s)\n", 
 		      from_txt, to_txt, basepurl, purl);
-	  g_print("-- no data available between %s and %s from '%s'\n", 
-		      from_txt, to_txt, basepurl);
+	  /*g_print("-- no data available between %s and %s from '%s'\n", 
+	    from_txt, to_txt, basepurl);*/
 	  nfree(from_txt);
 	  nfree(to_txt);
 	  if (existing) {

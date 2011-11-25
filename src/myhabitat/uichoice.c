@@ -253,13 +253,6 @@ void uichoice_init_expand() {
 						       "choice_tree"));
 
      /* Expand whole tree after this initialisation */
-#if 0
-     GtkTreePath *path;
-
-     path = gtk_tree_path_new_from_string("0");
-     gtk_tree_view_expand_row(path, 1);
-     gtk_tree_path_free(path);
-#endif
      gtk_tree_view_expand_all(choicetree);
 }
 
@@ -801,7 +794,7 @@ void uichoice_loadfile(char *fname, char *format)
 
      choicetree = GTK_TREE_VIEW(gtk_builder_get_object(gui_builder,
 						       "choice_tree"));
-     path = gtk_tree_path_new_from_string("0:1");
+     path = gtk_tree_path_new_from_string("1"); /* FILES is 2nd item */
      gtk_tree_view_expand_row(choicetree, path, 0);
      gtk_tree_path_free(path);
 
@@ -1002,7 +995,7 @@ void uichoice_loadhost(char *purl,		/* route spec p-url */
 
      choicetree = GTK_TREE_VIEW(gtk_builder_get_object(gui_builder,
 						       "choice_tree"));
-     path = gtk_tree_path_new_from_string("0:2");
+     path = gtk_tree_path_new_from_string("2"); /* HOSTS is 3rd item */
      gtk_tree_view_expand_row(choicetree, path, 0);
      gtk_tree_path_free(path);
 

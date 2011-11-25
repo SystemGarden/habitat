@@ -1,10 +1,10 @@
-.TH "irs" "1" "2.0" "Nigel Stuckey" "Habitat"
+.TH "habrs" "1" "2.0" "Nigel Stuckey" "Habitat"
 .SH "NAME"
 .LP 
-irs \- command line interface to Ringstore storage
+habrs \- command line interface to Ringstore storage
 .SH "SYNTAX"
 .LP 
-irs [\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
+habrs [\fI\-c <purl>\fP] [\fI\-C <cfcmd>\fP] 
 [\fI\-e <fmt>\fP] [\fI\-dDhv\fP] [file [ring [dur]]]
 .SH "DESCRIPTION"
 .LP 
@@ -18,7 +18,7 @@ and \fIdur\fR arguments for names of the Ringstore file,
 the time series ring and its duration.
 Alternatively, these can be specified with the 
 commands '\fBfile\fR', '\fBring\fR' and '\fBduration\fR'
-once \fBirs\fR has started.
+once \fBhabrs\fR has started.
 
 The prompt will contain the current file and ring name with duration.
 .SH "OPTIONS"
@@ -68,7 +68,7 @@ Without \fI<cmd>\fR, print a tabular list of commands.
 Otherwise print an explanation and usage of \fI<cmd>\fR
 .TP 
 bye   exit   e   quit   q
-All of the above commands will exit \fBirs\fR
+All of the above commands will exit \fBhabrs\fR
 .TP 
 close
 Closes the currently open file and ring

@@ -52,11 +52,15 @@ CHANGES
 - Loaded config values into preferences on initialisation
 - Made safe from single sample data
 - Display local view 5 seconds from startup
+- Renamed its to habrs, manual pages too
+- Disabled debug comments in rcache
+- Adding a host or file will always expand the parent node in choice tree
+- Generated HTML manual pages given a style similar to the website
 
 
 P1 BUGS TO FIX BEFORE ALPHA 1
 -----------------------------
-Build and test RPMs, check file names and location wisdom
+Test RPMs, check file names and location wisdom
 Create a .deb
 Signal handlers that need to be made signal safe :-
         runq_sigdispatch()
@@ -74,10 +78,10 @@ KNOWN ISSUES
 - Tooltips fail when scrolling right in a table view of data
 - Does not create .deb
 - Viewing some text data remotely causes a coredump of myhabitat
-- Clockwork network security -- switch to libmicrohttpd?
-- Clockwork crashes when httpd code is given certain urls - switch to 
-  libmicrohttpd?
-- Auto update resets any zoomed state
+- Clockwork network security and reliability -- switch to libmicrohttpd
+- Auto update resets any zoomed state, as v1, check if zoomed and don't update
+- Starting from no database does not start displaying properly & generates
+  lots of error messages
 
 
 NOTES

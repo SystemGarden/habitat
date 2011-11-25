@@ -11,7 +11,7 @@
 # Definition section ----------------------------------------
 # This is a recursive-less makefile and will include all the dependencies
 # needs from module definitions
-MODULES := pd gnu iiab probe trm cmd myhabitat help man #util ...
+MODULES := pd gnu iiab probe trm cmd myhabitat man #help util ...
 
 # Standard arguments
 CFLAGS += -Wall -g -DNMALLOC $(EXTRA_INCLUDE) $(SYS_INCLUDE)
@@ -135,7 +135,7 @@ DEPFILES := $(OBJ:.o=.P)
 -include $(DEPFILES)
 
 # Continuation of major target
-really-all: $(TAGFILE) $(SOLIB) $(BIN) $(INITBIN) htmlman help-build
+really-all: $(TAGFILE) $(SOLIB) $(BIN) $(INITBIN) htmlman #help-build
 
 # Calculate the c include dependencies (-MD flag) into .d file, then process
 # into .P file, making every dependency a 'no-action' target so make doesn't
@@ -178,14 +178,14 @@ HTMLMAN8 :=	$(patsubst %.8, %.8.html, $(MAN8))
 htmlman: $(HTMLMAN1) $(HTMLMAN5) $(HTMLMAN8)
 
 # Rules to compile manpages into html
-%.1.html: %.1
-	$(MAN2HTML) -p -r $< >$<.html
+%.1.html: %.1 $(MANHTMLCSS)
+	$(MAN2HTML) -p -r $< | tail -n +2 - | cat $(MANHTMLCSS) - >$<.html
 
-%.5.html: %.5
-	$(MAN2HTML) -p -r $< >$<.html
+%.5.html: %.5 $(MANHTMLCSS)
+	$(MAN2HTML) -p -r $< | tail -n +2 - | cat $(MANHTMLCSS) - >$<.html
 
-%.8.html: %.8
-	$(MAN2HTML) -p -r $< >$<.html
+%.8.html: %.8 $(MANHTMLCSS)
+	$(MAN2HTML) -p -r $< | tail -n +2 - | cat $(MANHTMLCSS) - >$<.html
 
 # Make tags and sym links to the modules
 tags: $(TAGFILE)
@@ -199,7 +199,6 @@ install: all
 	$(COPY)  $(BIN)          $(DSTBIN); \
 	$(COPY)  $(LIB) $(SOLIB) $(DSTLIB); \
 	$(COPY)  $(INC)          $(DSTINC); \
-	$(COPY)  $(HELPFILES)    $(DSTHELP); \
 	$(COPY)  $(ETC)          $(DSTETC); \
 	$(COPY)  $(INITBIN)      $(DSTINIT); \
 	$(COPY)  $(MAN1)         $(DSTMAN1); \
@@ -209,6 +208,7 @@ install: all
 	$(COPY)  $(HTMLMAN5)     $(DSTHTMLMAN5); \
 	$(COPY)  $(HTMLMAN8)     $(DSTHTMLMAN8); \
 	$(COPY)  $(PIXMAPS)      $(DSTPIXMAPS);
+#	$(COPY)  $(HELPFILES)    $(DSTHELP);
 
 # Linux install into its various system areas, rather than in a single tree
 linuxinstall: all
@@ -216,7 +216,6 @@ linuxinstall: all
 	$(COPY)  $(BIN)       $(LINDSTBIN); \
 	$(COPY)  $(LIB)       $(LINDSTLIB); \
 	$(COPY)  $(SOLIB)     $(LINDSTSOLIB); \
-	$(COPY)  $(HELPFILES) $(LINDSTHELP); \
 	$(COPY)  $(ETC)       $(LINDSTETC); \
 	$(COPY)  $(INITBIN)   $(LINDSTINIT); \
 	for f in $(MAN1); \
@@ -236,6 +235,7 @@ linuxinstall: all
 	$(COPY)  $(HTMLMAN8)  $(LINDSTHTMLMAN8); \
 	$(COPY)  $(PIXMAPS)   $(LINDSTPIXMAPS); \
 	$(COPY)  $(DOC) $(LININVENTORY) $(LINDSTDOC);
+#	$(COPY)  $(HELPFILES) $(LINDSTHELP);
 
 # produce a INVENTORY file reflecting the locations of a linux install
 linuxinventory:
