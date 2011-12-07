@@ -196,9 +196,43 @@ void uigraph_set_timebase(time_t oldest, time_t youngest)
  * stays with the caller */
 void uigraph_data_update_redraw(TABLE tab)
 {
-     /* assign new data */
+     /* assign updated data: we will expect appends and removals from the
+      * front. We don't expect the columns to change */
      uigraph_datatab = tab;
+ 
+#if 0
+     /* Dont change the view or reset the time base, just walk over the
+      * new instances and curves fo the new data, seeing if each is plotted
+      * then replace the ones that are */
      /* TODO: REDRAW DRAW */
+uigraph_drawcurve
+     while instnace
+       while curve
+	 if (graphdbox_lookupcurve(g, graphname, curvename)) {
+	       nvals = gconv_table2arrays(uigraph_graphset, uigraph_datatab, 
+					  uigraph_oldest, uigraph_youngest,
+					  colname, 
+					  uigraph_keycol, instance,
+					  &xvals, &yvals);
+	       if (nvals <= 1)
+		 return;
+
+	       /* scale if needed */
+	       if (scale != 1.0 || offset > 0.0)
+		    for (i=0; i < nvals; i++)
+			 yvals[i] = scale * yvals[i] + offset;
+
+	       /* now draw the replacement and ignore colour */
+	       colour = graphdbox_draw(uigraph_graphset, instance, colname, 
+				       nvals, xvals, yvals, NULL, 1);
+
+	       /* find new max from this curve */
+	       if (possmax > max)
+		    max = possmax;
+	     }
+     graphdbox_setallminmax(uigraph_graphset, max);
+#endif
+
 }
 
 /* Clear the reference to the data, the instance and curve lists.
@@ -432,6 +466,13 @@ uigraph_on_zoom_out_home (GtkButton      *button,
 			  gpointer      user_data)
 {
      graphdbox_allgraph_zoomout_home(uigraph_graphset);
+}
+
+
+/* Return 1 if the graph has been zoomed or 0 otherwise */
+int uigraph_iszoomed()
+{
+     return graphdbox_iszoomed(uigraph_graphset);
 }
 
 

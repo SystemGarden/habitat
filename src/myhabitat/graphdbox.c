@@ -272,7 +272,7 @@ GdkColor *graphdbox_draw(GRAPHDBOX *g, char *graph_name, char *curve_name,
 		      "gtk_databox_graph_add(), style %d", curve_name, 
 		      mycurve->style);
 
-     graphdbox_updateaxis(gs);
+     graphdbox_updateaxis(gs); /* do I want this ?? should updateing the axis not be a different call? */
 
      /*gtk_databox_redraw(GTK_DATABOX(gs->gdbox));*/
      /*g_print("curve %s allocated index %d\n", curve_name, mycurve->index);*/

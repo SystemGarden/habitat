@@ -63,6 +63,7 @@ void uigraph_on_zoom_in_horiz (GtkButton *button, gpointer user_data);
 void uigraph_on_zoom_in_vert  (GtkButton *button, gpointer user_data);
 void uigraph_on_zoom_out      (GtkButton *button, gpointer user_data);
 void uigraph_on_zoom_out_home (GtkButton *button, gpointer user_data);
+int  uigraph_iszoomed();
 
 void uigraph_inst_load();
 void uigraph_inst_unload();

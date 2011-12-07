@@ -263,12 +263,23 @@ void uivis_draw(char *route, TABLE (*dfunc)(time_t, time_t),
 	   * uigraph/graphdbox internally create float arrays that do 
 	   * a similar thing .*/
 
-       /* update -- if the same route or the same function and currently zoomed  (so need uigraph_is_zoomed()) then do uigraph_data_update_redraw() or uigraph_redraw_all_selelcted() or nothing at all */
-          uigraph_rm_all_graphs();
-	  uigraph_data_load(tabdata);
-	  uigraph_set_timebase(view_oldest, view_youngest);
-	  uigraph_draw_all_selected();
+#if 0
+          if (uigraph_iszoomed()) {
 
+	       /* Graph(s) is/are zoomed */
+	       uigraph_data_update_redraw(tabdata);
+	       uigraph_draw_all_selected();
+
+	  } else {
+#endif
+	       /* Unzoomed, so remove everything, reload and draw */
+	       uigraph_rm_all_graphs();
+	       uigraph_data_load(tabdata);
+	       uigraph_set_timebase(view_oldest, view_youngest);
+	       uigraph_draw_all_selected();
+#if 0
+	  }
+#endif
           model = NULL;
           break;
      case UIVIS_SPLASH:
