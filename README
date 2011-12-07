@@ -58,13 +58,6 @@ CHANGES
 - Generated HTML manual pages given a style similar to the website
 
 
-P1 BUGS TO FIX BEFORE ALPHA 1
------------------------------
-Test RPMs, check file names and location wisdom
-Create a .deb
-Signal handlers that need to be made signal safe :-
-        runq_sigdispatch()
-
 KNOWN ISSUES
 ------------
 - Connection to System Garden repositories not in alpha
@@ -82,6 +75,10 @@ KNOWN ISSUES
 - Auto update resets any zoomed state, as v1, check if zoomed and don't update
 - Starting from no database does not start displaying properly & generates
   lots of error messages
+- Test RPMs, check file names and location wisdom
+- Create a .deb
+- Signal handlers that need to be made signal safe :-
+        runq_sigdispatch()
 
 
 NOTES
