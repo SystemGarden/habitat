@@ -50,8 +50,8 @@ struct probe_sampletab *plinnet_getcols()    {return plinnet_cols;}
 struct probe_rowdiff   *plinnet_getrowdiff() {return plinnet_diffs;}
 char                  **plinnet_getpub()     {return NULL;}
 
-/* linux version; assume 2.4 being the latest */
-int plinnet_linuxversion=24;
+/* linux version; assume 3.x being the latest */
+int plinnet_linuxversion=30;
 int plinnet_ndev=1;
 
 /*
@@ -80,6 +80,8 @@ void plinnet_init() {
           plinnet_linuxversion=24;
      } else if (strncmp(vpt, "2.5.", 4) == 0 || strncmp(vpt, "2.6.", 4) == 0) {
           plinnet_linuxversion=26;
+     } else if (strncmp(vpt, "3.", 2) == 0) {
+          plinnet_linuxversion=30;
      } else {
           elog_printf(ERROR, "unsupported linux kernel version");
      }
@@ -118,8 +120,8 @@ void plinnet_collect(TABLE tab) {
  * provided as a tokenised list
  */
 void plinnet_col_netdev(TABLE tab, ITREE *idata) {
-     /* /proc/interrupts in versions 2.2, 2.4 & 2.6 have a layout similar 
-      * to the one below:-
+     /* /proc/net/dev in versions 2.2, 2.4, 2.6 & 3.x have a layout  
+      * similar to the one below:-
       *
       * Inter-|   Receive                                                |  Transmit
       *  face |bytes    packets errs drop fifo frame compressed multicast|bytes    packets errs drop fifo colls carrier compressed
@@ -131,7 +133,7 @@ void plinnet_col_netdev(TABLE tab, ITREE *idata) {
       */
 
      if (plinnet_linuxversion == 24 || plinnet_linuxversion == 22 || 
-	 plinnet_linuxversion == 26) {
+	 plinnet_linuxversion == 26 || plinnet_linuxversion == 30) {
 	  itree_first(idata);
 	  table_replacecurrentcell(tab, "device", itree_get(idata));
 	  itree_next(idata);

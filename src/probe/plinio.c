@@ -93,7 +93,7 @@ void plinio_init() {
           plinio_linuxversion=24;       
      } else if (strncmp(vpt, "2.5.", 4) == 0 || strncmp(vpt, "2.6.", 4) == 0) {
           plinio_linuxversion=26;       
-     } else if (strncmp(vpt, "version 3.", 10) == 0) {
+     } else if (strncmp(vpt, "3.", 2) == 0) {
           plinio_linuxversion=30;       
      } else {
           elog_printf(ERROR, "unsupported linux kernel version");

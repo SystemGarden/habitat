@@ -160,8 +160,8 @@ struct probe_sampletab *plinsys_getcols()    {return plinsys_cols;}
 struct probe_rowdiff   *plinsys_getrowdiff() {return plinsys_diffs;}
 char                  **plinsys_getpub()     {return plinsys_pub;}
 
-/* Linux version; assume 2.4 being the latest */
-int plinsys_linuxversion=24;
+/* Linux version; assume 3.x being the latest */
+int plinsys_linuxversion=30;
 
 /*
  * Initialise probe for linux system information
@@ -189,6 +189,8 @@ void plinsys_init() {
           plinsys_linuxversion=24;
      } else if (strncmp(vpt, "2.5.", 4) == 0 || strncmp(vpt, "2.6.", 4) == 0) {
           plinsys_linuxversion=26;
+     } else if (strncmp(vpt, "3.", 2) == 0) {
+          plinsys_linuxversion=30;
      } else {
           elog_printf(ERROR, "unsupported linux kernel version");
      }
@@ -215,7 +217,7 @@ void plinsys_collect(TABLE tab) {
           plinsys_collect22(tab);
      else if (plinsys_linuxversion == 24)
           plinsys_collect22(tab);
-     else if (plinsys_linuxversion == 26)
+     else if (plinsys_linuxversion == 26 || plinsys_linuxversion == 30)
           plinsys_collect26(tab);
 }
 

@@ -51,8 +51,8 @@ struct probe_sampletab *plinintr_getcols()    {return plinintr_cols;}
 struct probe_rowdiff   *plinintr_getrowdiff() {return plinintr_diffs;}
 char                  **plinintr_getpub()     {return NULL;}
 
-/* linux version; assume 2.4 being the latest */
-int plinintr_linuxversion=24;
+/* linux version; assume 2.x being the latest */
+int plinintr_linuxversion=30;
 int plinintr_ncpu=1;
 
 /*
@@ -81,6 +81,8 @@ void plinintr_init() {
           plinintr_linuxversion=24;
      } else if (strncmp(vpt, "2.5.", 4) == 0 || strncmp(vpt, "2.6.", 4) == 0) {
           plinintr_linuxversion=26;
+     } else if (strncmp(vpt, "3.", 2) == 0) {
+          plinintr_linuxversion=30;
      } else {
           elog_printf(ERROR, "unsupported linux kernel version");
      }
@@ -134,7 +136,7 @@ void plinintr_col_intr(TABLE tab, ITREE *idata) {
       * the last column are the devices sharing that interrupt.
       * These are taken to fill the table plinintr_tab, columns name and hard.
       *
-      * In version 2.4 & 2.6, the interrupts are split into cpu's handling the 
+      * In version 2.4, 2.6 & 3.0, the interrupts are split into cpu's handling the 
       * interrupts, looking like this:-
       *
       *            CPU0       
@@ -161,7 +163,9 @@ void plinintr_col_intr(TABLE tab, ITREE *idata) {
 	  table_replacecurrentcell(tab, "hard", itree_get(idata));
 	  itree_last(idata);
 	  table_replacecurrentcell(tab, "name", itree_get(idata));
-     } else if (plinintr_linuxversion == 24 || plinintr_linuxversion == 26) {
+     } else if (plinintr_linuxversion == 24 || 
+                plinintr_linuxversion == 26 ||
+                plinintr_linuxversion == 30) {
           int i, val=0;
 
 	  for (i=1; i <= plinintr_ncpu; i++) {
