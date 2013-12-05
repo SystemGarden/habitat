@@ -21,7 +21,7 @@
 #include "main.h"
 
 
-/* Initialise Harvest class in MyHarvest by loading the repository details
+/* Initialise Harvest class in MyHabitat by loading the repository details
  * into the gui if they have been set up */
 void harv_init() {
      harv_populate_gui();
@@ -64,7 +64,7 @@ void harv_populate_gui ()
      /* get repository urls & account details */
      geturl = cf_getstr(iiab_cf, RT_SQLRS_GET_URLKEY);
      puturl = cf_getstr(iiab_cf, RT_SQLRS_PUT_URLKEY);
-     rt_sqlrs_get_credentials("ghabitat configuration", &auth, &cookies, 
+     rt_sqlrs_get_credentials("myhabitat configuration", &auth, &cookies, 
 			      &cookiejar);
      if (cookies) {
           username     = cf_getstr(cookies, "__username");

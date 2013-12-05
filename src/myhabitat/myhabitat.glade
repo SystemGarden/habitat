@@ -985,7 +985,7 @@ Options will appear on the choice tree</property>
                             <property name="events">GDK_POINTER_MOTION_MASK | GDK_POINTER_MOTION_HINT_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK</property>
                             <property name="label" translatable="yes">&lt;b&gt;System Garden Habitat&lt;/b&gt;
 www.systemgarden.com
-&lt;small&gt;Copyright System Garden 2001-2011&lt;/small&gt;</property>
+&lt;small&gt;Copyright System Garden 2001-2014&lt;/small&gt;</property>
                             <property name="use_markup">True</property>
                             <property name="justify">center</property>
                           </object>
