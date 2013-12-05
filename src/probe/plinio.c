@@ -61,8 +61,8 @@ struct probe_sampletab *plinio_getcols()    {return plinio_cols;}
 struct probe_rowdiff   *plinio_getrowdiff() {return plinio_diffs;}
 char                  **plinio_getpub()     {return NULL;}
 
-/* Linux version; assume 2.4 being the latest */
-int plinio_linuxversion=24;
+/* Linux version; assume 3.0 being the latest */
+int plinio_linuxversion=30;
 
 /* last set of samples taken. key is short device name, value is struct 
  * plinio_assemble */
@@ -93,6 +93,8 @@ void plinio_init() {
           plinio_linuxversion=24;       
      } else if (strncmp(vpt, "2.5.", 4) == 0 || strncmp(vpt, "2.6.", 4) == 0) {
           plinio_linuxversion=26;       
+     } else if (strncmp(vpt, "version 3.", 10) == 0) {
+          plinio_linuxversion=30;       
      } else {
           elog_printf(ERROR, "unsupported linux kernel version");
      }
@@ -116,7 +118,7 @@ void plinio_collect(TABLE tab) {
           plinio_collect22(tab);
      else if (plinio_linuxversion == 24)
           plinio_collect24(tab);
-     else if (plinio_linuxversion == 26)
+     else if (plinio_linuxversion == 26 || plinio_linuxversion == 30)
           plinio_collect26(tab);
 }
 
@@ -473,7 +475,7 @@ void plinio_col_partitions(TREE *assemble, ITREE *lol) {
 	  }
      }
 
-     /* /proc/partitions in linux kernel 2.6 just gives the block sizes
+     /* /proc/partitions in linux kernel 2.6 & 3.x just gives the block sizes
       * of each device and its major and minor number. It lokks like this:-
       *   1     0      32000 ram0
       *   1     1      32000 ram1
@@ -486,7 +488,7 @@ void plinio_col_partitions(TREE *assemble, ITREE *lol) {
       *   3     7     401593 hda7
       *   3     8   23687811 hda8
       */
-     if (plinio_linuxversion == 26) {
+     if (plinio_linuxversion == 26 || plinio_linuxversion == 30) {
 	  ITREE *row;
 	  void *attr;
 	  struct plinio_assemble *asmb;
