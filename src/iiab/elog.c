@@ -1036,7 +1036,16 @@ void elog_fsafeprintf(enum elog_severity severity, /* severity */
      n = vsnprintf(logtext, ELOG_STRLEN, format, ap);
      va_end(ap);
 
-     /* if severity is out of range, dump the error data in a fali safe way */
+	if (n >= ELOG_STRLEN) {
+		elog_printf(ERROR, "elog_fsafe(): error too long: want %d, limit %d. "
+		      "Truncated error is:-\n"
+		      "location: %s:%s:%d\n"
+		      "text:     %s\n",
+	          n, ELOG_STRLEN, file, function, line, logtext);
+	    return;
+	}
+
+     /* if severity is out of range, dump the error data in a fail safe way */
      if ( ! sev_in_range) {
 	  elog_printf(ERROR, "elog_fsafe(): severity %d out of "
 		      "range (0..%d). original error is:-\n"

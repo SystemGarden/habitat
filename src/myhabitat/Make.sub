@@ -116,7 +116,7 @@ LIB        += myhabitat/myhabitat.rc myhabitat/myhabitat.glade
 PIXMAPS    += $(MYHABPIXMAPS)
 GTKLIBS    := $(shell pkg-config --libs-only-l gtk+-2.0 gmodule-2.0 gtkdatabox)
 GTKFLAGS   := $(shell pkg-config --libs-only-other gtk+-2.0 gmodule-2.0 gtkdatabox)
-THINLIBS   := -liiab -ldl -lm -lgdbm -lcurl -lXi -lXext -lX11
+THINLIBS   := -liiab -ldl -lgdbm -lcurl -lXi -lXext -lX11 -lm
 FATLIBS    := -lgtk -lgdk -lgmodule -lglib 
 
 # Special dependency on version number: callbacks contain the about...
