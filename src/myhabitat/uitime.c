@@ -130,7 +130,8 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
 		    current_t = to_t - UITIME_INITIAL_RANGE;
 	  }
      }
-#if 0
+    
+#if 1
      char *diffstr = util_approxtimedist(current_t, to_t);
      str = util_strjoin(util_decdatetime(current_t), " ", diffstr, NULL);;
      g_print("current str=%s (%lu-%lu)\n", str, current_t, to_t);
@@ -143,8 +144,12 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
      g_signal_handlers_block_by_func(G_OBJECT(slider_w), 
 				     G_CALLBACK(uitime_on_slider_value_changed),
 				     NULL);
-     if (from_t != to_t)
-          gtk_range_set_range(GTK_RANGE(slider_w), (float)from_t, (float)to_t);
+     if (from_t != to_t) {
+	 /* g_print("Setting range from_t: %f, to_t: %f\n", 
+	         (gdouble) from_t, (gdouble) to_t);*/
+         gtk_range_set_range(GTK_RANGE(slider_w), 
+                             (gdouble) from_t, (gdouble) to_t);
+     }
      gtk_range_set_value(GTK_RANGE(slider_w), current_t);
      g_signal_handlers_unblock_by_func(G_OBJECT(slider_w), 
 				     G_CALLBACK(uitime_on_slider_value_changed),
