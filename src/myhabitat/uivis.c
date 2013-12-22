@@ -260,7 +260,7 @@ void uivis_draw(char *route, TABLE (*dfunc)(time_t, time_t),
           /* Show the node contents as a chart */
           /* Directly uses tabdata and my graphdbox class to manage the 
 	   * data representation; a tree model is not needed as
-	   * uigraph/graphdbox internally create float arrays that do 
+	   * uigraph/graphdbox internally create double arrays that do 
 	   * a similar thing .*/
 
 #if 0
