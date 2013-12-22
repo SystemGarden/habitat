@@ -1,6 +1,6 @@
 /*
  * Gtk multicurve, multichart, time-based graph widget
- * This is a wrapper over the gtk_databox to manage the drawing of named
+ * This is a wrapper over the gtkdatabox to manage the drawing of named
  * charts and curves with default colours, inside a given Gtk container box.
  *
  * Has a single call to draw a named curve on a named chart. Everything is
@@ -57,6 +57,7 @@ char *graphdbox_colours[] = { "red", "green", "orange", "purple", "cyan",
  * Create our graph set implemented with GtkDataBox and associate with 
  * a empty GtkVBox to be used as a container which is provided by the caller.
  * The vbox is empty at the begining.
+ * Multiple graph sets are supported as each has a unique handle.
  */
 GRAPHDBOX *graphdbox_create(GtkVBox *box)
 {
@@ -153,12 +154,12 @@ GdkColor *graphdbox_draw(GRAPHDBOX *g, char *graph_name, char *curve_name,
      int r;
 
 #if 0
-     g_print("- graphdbox_draw() - graph: %s, curve: %s, vals: %d\n",
-	     graph_name, curve_name, nvals);
+     g_print("-- graphdbox_draw() - graph: %s, curve: %s, nvals: %d\n",
+	     graph_name == NULL ? "SINGLETON" : graph_name, curve_name, nvals);
 
      int i;
      for (i=0; i<nvals; i++) {
-       g_print("    %4d %s %f\n", i, util_decdatetime((time_t)xvals[i]), 
+       g_print("    %4d: t=%s, v=%f\n", i, util_decdatetime((time_t)xvals[i]), 
 	       yvals[i]);
      }
 #endif
@@ -202,6 +203,7 @@ GdkColor *graphdbox_draw(GRAPHDBOX *g, char *graph_name, char *curve_name,
 		    nfree(mycurve->Y);
 	       mycurve->X = xvals;	/* new values */
 	       mycurve->Y = yvals;
+	       mycurve->nvals = nvals;
 	  } else {
 	       g_print("should not be here!!\n");
 	       elog_printf(ERROR, "extending curves not yet supported");
@@ -211,6 +213,7 @@ GdkColor *graphdbox_draw(GRAPHDBOX *g, char *graph_name, char *curve_name,
 		    nfree(mycurve->Y);
 	       mycurve->X = xvals;	/* should we store these vals?? */
 	       mycurve->Y = yvals;
+	       mycurve->nvals = nvals;
 	  }
      } else {
 	  /* -- draw a new curve -- */
@@ -219,6 +222,7 @@ GdkColor *graphdbox_draw(GRAPHDBOX *g, char *graph_name, char *curve_name,
 	  mycurve = nmalloc(sizeof(struct graphdbox_curve));
 	  mycurve->X = xvals;
 	  mycurve->Y = yvals;
+	  mycurve->nvals = nvals;
 	  mycurve->style = gs->style;
 
 	  /* add curve to tree */
@@ -459,7 +463,7 @@ int graphdbox_iscurvedrawn(GRAPHDBOX *g, char *graph_name, char *curve_name)
 }
 
 
-/* return 1 if the graph has been zoomed or 0 otherwise */
+/* Return 1 if an individual graph has been zoomed or 0 otherwise */
 int graphdbox_iszoomed(struct graphdbox_graph *gs) {
      GtkAdjustment *adjX, *adjY;
 
@@ -529,7 +533,7 @@ void graphdbox_settimebase(GRAPHDBOX *g, time_t min, time_t max)
  * graphs currently in existence.
  * A value of 0.0 clears the effect
  */
-void graphdbox_setallminmax(GRAPHDBOX *g, float value)
+void graphdbox_setallminmax(GRAPHDBOX *g, double value)
 {
      struct graphdbox_graph *gs;
 
@@ -863,7 +867,7 @@ struct graphdbox_curve *graphdbox_lookupcurve(GRAPHDBOX *g, char *graph_name,
 
 /* Zoom in to the middle of the graph's x-axis, leaving the 
  * y-axis alone. Zoomin factor is +ve magnification, typically 3.0 */
-void graphdbox_allgraph_zoomin_x(GRAPHDBOX *g, float zoomin)
+void graphdbox_allgraph_zoomin_x(GRAPHDBOX *g, double zoomin)
 {
      struct graphdbox_graph *gs;
      gfloat left, right, top, bottom, width, offset;
@@ -892,7 +896,7 @@ void graphdbox_allgraph_zoomin_x(GRAPHDBOX *g, float zoomin)
 
 /* Zoom in to the middle of the graph's y-axis, leaving the 
  * x-axis alone. Zoomin factor is +ve magnification, typically 3.0 */
-void graphdbox_allgraph_zoomin_y(GRAPHDBOX *g, float zoomin)
+void graphdbox_allgraph_zoomin_y(GRAPHDBOX *g, double zoomin)
 {
      struct graphdbox_graph *gs;
      gfloat left, right, top, bottom, height, offset;
@@ -944,13 +948,13 @@ void graphdbox_allgraph_zoomout_home(GRAPHDBOX *g)
 
 
 /* return the major tick interval */
-gfloat graphdbox_majticks(gfloat max)
+gdouble graphdbox_majticks(gdouble max)
 {
      return 5.0;
 }
 
 /* return the minor tick interval */
-gfloat graphdbox_minticks(gfloat max)
+gdouble graphdbox_minticks(gdouble max)
 {
      return 1.0;
 }
@@ -1126,4 +1130,46 @@ void graphdbox_recyclecolour(GRAPHDBOX *g, char *curvename)
      itree_add(g->colunused, colindex, NULL);
 }
 
+/*
+ * Dump the entire contents of the graph data
+ */
+void graphdbox_dump(GRAPHDBOX *g)
+{
+    /* General summary */
+    g_print("graphdbox_dump() - %d graphs: ", tree_n(g->graphs)); 
+    tree_traverse(g->graphs)
+	g_printf("%s ", tree_getkey(g->graphs)); 
+    g_print("\n    Timebase: %s (%lu) ", util_decdatetime(g->start),
+            g->start);
+    g_print("to %s (%lu) diff %lu\n", util_decdatetime (g->end), g->end, 
+            g->end - g->start);
+
+    /* Detail */
+    tree_traverse(g->graphs) {
+	struct graphdbox_graph *graph;
+	graph = (struct graphdbox_graph *) tree_get(g->graphs);
+	g_printf("    Graph: %s, Curves: %d, Style %d, Minmax: %f\n", 
+	         tree_getkey (g->graphs), tree_n(graph->curves),
+	         graph->style, graph->minmax);
+	tree_traverse(graph->curves) {
+	    struct graphdbox_curve *curve;
+	    int i;
+	    curve = (struct graphdbox_curve *) tree_get(graph->curves);
+	    g_printf("     %s,%s ", tree_getkey(g->graphs), tree_getkey(graph->curves));
+	    g_printf("Colour: %d, NValues: %d -- ", curve->colour, curve->nvals);
+	    for (i=0; i < curve->nvals; i++) 
+		g_printf("(%d:%f,%f) ", i, curve->X[i], curve->Y[i]);
+	    g_printf("\n");
+	}
+    }
+
+    /* Colours */
+    g_print("    Colours %d: ", tree_n(g->curvecol)); 
+    tree_traverse(g->curvecol)
+	g_printf("%s ", tree_getkey(g->curvecol)); 
+    g_print("\n    Recycled colours %d: ", itree_n(g->colunused)); 
+    itree_traverse(g->colunused)
+	g_printf("%s ", itree_get(g->colunused)); 
+    g_print(". Next colour %d\n", g->nextcol); 
+}
 
