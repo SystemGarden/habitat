@@ -28,14 +28,14 @@ GRAPHDBOX *   uigraph_graphset;		/* The graphset from graphdbox;
 
 /* Singleton list of instances. Lists are held in the TREE's keys using
  * nmalloc()ed storage which must be managed by uigraph. */
-TREE *        uigraph_inst_hint;	/* Instance selection hints, used to
-					 * draw the initial view. Matching
-					 * data instance names are selected.
-					 * Typically persisted in .habrc
-					 * List held in keys */
-TREE *        uigraph_inst_avail;       	/* Available instances extracted from
+TREE *        uigraph_inst_avail;       /* Available instances extracted from
 					 * the current data's keys, set by 
 					 * uigraph_inst_load(). List in keys */
+TREE *        uigraph_inst_hint;	/* Instance selection hints, from 
+					 * previous choices or prefs in .habrc.
+					 * Used to draw the initial view, 
+					 * matching data instance names.
+					 * List held in keys */
 TREE *        uigraph_inst_drawn;	/* Selected/drawn list of instances  */
 
 /* Singleton list of curves. Lists are held in the TREE's keys using
@@ -278,7 +278,14 @@ void uigraph_drawgraph(char *instance	/* graph name (instance) */ )
 			     UIGRAPH_CURVE_POSSIBLEMAX, &possmax,
 			     -1);
 
-	  /* if curve is active, get curve data and convert to floats */
+	  /* if curve is active, get curve data and convert to doubles */
+#if 0
+     g_print("-- uigraph_drawgraph() - uigraph_oldest %d, uigraph_youngest %d\n"
+             "diff %d, colname: %s, active: %d\n",
+	     uigraph_oldest, uigraph_youngest, uigraph_youngest-uigraph_oldest,
+     	     colname, active);
+#endif
+    
 	  if (active) {
 	       nvals = gconv_table2arrays(uigraph_graphset, uigraph_datatab, 
 					  uigraph_oldest, uigraph_youngest,
@@ -344,8 +351,8 @@ void uigraph_rm_all_graphs()
  * Returns the colour assigned by graphdbox or NULL for error.
  */
 GdkColor *uigraph_drawcurve(char *curve,	/* curve name */
-			    float scale,	/* curve scale/magnitude */
-			    float offset	/* y-axis offset */ )
+			    double scale,	/* curve scale/magnitude */
+			    double offset	/* y-axis offset */ )
 {
      float *xvals, *yvals;
      int nvals, i;
@@ -433,6 +440,8 @@ void uigraph_draw_all_selected() {
      }
 
      uigraph_curve_scroll_to_active();
+
+     graphdbox_dump(uigraph_graphset); /* Debug */
 }
 
 
@@ -472,7 +481,12 @@ uigraph_on_zoom_out_home (GtkButton      *button,
 /* Return 1 if the graph has been zoomed or 0 otherwise */
 int uigraph_iszoomed()
 {
-     return graphdbox_iszoomed(uigraph_graphset);
+    struct graphdbox_graph *firstgraph;
+    
+    /* We just look at the first graph as a proxy for the rest */
+    tree_first(uigraph_graphset->graphs);
+    firstgraph = tree_get(uigraph_graphset->graphs);
+    return graphdbox_iszoomed(firstgraph);
 }
 
 
@@ -709,7 +723,7 @@ void uigraph_curve_load()
      char *info, *tooltip, *label;
      TREE *hd;
      gboolean active;
-     float max;
+     double max;
      int r;
 
      list = GTK_LIST_STORE(gtk_builder_get_object(gui_builder,
