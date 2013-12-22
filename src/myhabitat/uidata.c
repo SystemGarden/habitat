@@ -190,20 +190,28 @@ G_MODULE_EXPORT void uidata_choice_change (GtkTreeSelection *selection)
 	  } else {
 
 	       /* everything else is assumed to be more complex and support
-		* multiple rings -- ringsotres.
+		* multiple rings -- ringstores.
 		* Get ring information & stats from the route */
 	       snprintf(infopurl, 256, "%s?clinfo", current_choice_purl);
 	       current_info_tab = route_tread(infopurl, NULL);
 	       if ( ! current_info_tab ) {
 		    /* no data, so disable the attempted view and replace with
-		     * a splash for now. Perhaps something more intellegent 
-		     * later */
-		    elog_printf(DIAG, "Unable to read %s as table", infopurl);
-		    uilog_modal_alert("Unable to Load Host", 
-				      "The habitat file, peer or repository "
-				      "either does not exist or is not running "
-				      "to provide us with data (%s)", 
-				      current_choice_purl);
+		     * a splash if non-local or flag it if non-local. 
+		     * Perhaps something more intellegent later */
+		    if (strcmp("local:", current_choice_purl) == 0) {
+			/* Can read from local daemeon: probably not running */
+			/* Do nothing for now, but maybe illuminate an 
+			 * indicator later on TODO */
+		        elog_printf(INFO, "Local data unavailable (%s)",
+		            	    infopurl);
+		    } else {
+		        elog_printf(DIAG, "Unable to read %s as table", infopurl);
+			uilog_modal_alert("Unable to Load Host", 
+				          "The habitat file, peer or repository "
+					  "either does not exist or is not "
+					  "runing to provide us with data (%s)", 
+					  current_choice_purl);
+		    }
 		    uidata_illuminate_ring_btns(NULL);
 		    uidata_illuminate_vis_btns(UIVIS_NONE);
 		    uivis_change_view(UIVIS_SPLASH);
