@@ -17,15 +17,15 @@
 
 #if 0
 /*
- * Convert the RESDAT structure into nmalloc()'ed float arrays ready for
- * plotting with the draw command. Returns the number of samples in the
+ * Convert the RESDAT structure into nmalloc()'ed float arrays ready 
+ * for plotting with the draw command. Returns the number of samples in the
  * arrays and sets the pointers addressed xvals and yvals to the x and y 
  * values as output. If there are no usable samples, 0 is returned.
  * If keycol and keyval are NULL, the data is assumed to have no key;
  * if they are set, however, then keyed data is extracted from the
  * table(s) within RESDAT
  * Count data is transformed into absolute values (difference over time) 
- * for plotting, where as absooute data is left alone. In this case, 
+ * for plotting, where as absolute data is left alone. In this case, 
  * the first value is lost as it is used as a base.
  * Count and absolute types of data are 'rebased' depending on the 
  * g->start value (the only reason we need a UIGRAPH structure passed).
@@ -198,6 +198,7 @@ int gconv_resdat2arrays(UIGRAPH *g,	  /* graph structure */
      clashtim = -1;
      itree_traverse(idx) {
 	  if (itree_getkey(idx) == clashtim) {
+	       g_print("gconv_resdat2arrays() - Found a value clash");
 	       /* key clash found: average out the values */
 	       clashsum += *((float*)itree_get(idx));
 	       clashnum++;
@@ -307,6 +308,16 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
      /* produce a derived table to use for extraction */
      tab = tableset_into(tabsub);	/* supposed not to fail */
      nvals = table_nrows(tab);
+
+#if 0
+     g_print("gconv_table2arrays() - graph timebase: %ld-%ld (diff %ld),\n"
+             "     conversion range: %ld-%ld (diff %ld)\n"
+             "     keycol: %s, keyval: %s, nrows all: %d, nrows extract: %d\n",
+	     g->start, g->end, g->end - g->start, 
+	     oldest_t, youngest_t, youngest_t - oldest_t,
+	     keycol, keyval, table_nrows(intab), nvals);
+#endif
+
      if ( ! nvals ) {
           itree_destroy(collst);
 	  tableset_destroy(tabsub);
@@ -314,6 +325,14 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
           return 0;	/* no valid data to plot (it probably shrank) */  
      }
 
+#if 1
+    /* Dump contents of extracted table */
+    char *tabdump;
+    tabdump = table_outtable (tab);
+    printf("%s\n", tabdump);
+    nfree(tabdump);
+#endif
+    
      /* allocate space */
      *xvals = xnmalloc(nvals * sizeof(gfloat));
      *yvals = xnmalloc(nvals * sizeof(gfloat));
@@ -371,8 +390,8 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
 		    else
 		         newval = 0.0;
 		    if ( timlst && itree_get(timlst) )
-		         newtim = strtol((char *)itree_get(timlst), 
-					 (char**)NULL, 10);
+		         newtim = strtoul((char *)itree_get(timlst), 
+					  (char**)NULL, 10);
 		    else
 		         newtim = mocktim;
 		    if (newtim < lasttim)
@@ -410,8 +429,8 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
 		    (*yvals)[i] = 0.0;	/* missing value goes 0.0 :-( */
 	       /* convert time */
 	       if (timlst && itree_get(timlst))
-		    (*xvals)[i] = strtof((char *)itree_get(timlst), 
-					 (char**)NULL) - g->start;
+		    (*xvals)[i] = strtoul((char *)itree_get(timlst), 
+					  (char**)NULL, 10 ) - g->start;
 	       else
 		    (*xvals)[i] = mocktim;
 	       /* iterate */
@@ -432,14 +451,27 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
 
 #if 0
      /* debug dump of the data converted to floats */
-     elog_startprintf(DEBUG, "values to graph: g->start=%d -> ", g->start);
-     for (int j=0; j<nvals; j++) {
+    int j;
+    elog_startprintf(DEBUG, "values to graph: g->start=%d -> ", g->start);
+     for (j=0; j<nvals; j++) {
 	  elog_contprintf(DEBUG, "j=%d "
 			         "xvals[%d]=%.2f yvals[%d]=%.2f, ", 
 			  j, j, (*xvals)[j], j, (*yvals)[j]);
 	  j++;
      }
-     elog_endprintf(DEBUG, "%d values", i);
+     elog_endprintf(DEBUG, "%d values", nvals);
+#endif
+
+#if 1
+     /* debug dump of the data converted to floats */
+     int j;
+     printf("gconv_table2arrays() - g->start=%lu %s -> ", g->start,
+            iscnt ? "Counter" : "Absolute");
+     for (j=0; j < nvals; j++) {
+	  printf("j=%d xvals[%d]=%.2f yvals[%d]=%.2f, ", 
+			  j, j, (*xvals)[j], j, (*yvals)[j] );
+     }
+     printf("%d values\n", nvals);
 #endif
 
      /* free working storage and return the number of pairs there are */
