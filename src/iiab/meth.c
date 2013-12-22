@@ -156,7 +156,7 @@ void meth_fini()
      while ( ! tree_empty(meth_exitbypid) ) {
 	  itree_first(meth_exitbypid);
 	  pid    = itree_getkey(meth_exitbypid);
-	  status = (int) itree_get(meth_exitbypid);
+	  status = ((long long) itree_get(meth_exitbypid) & 0xffff);
 	  elog_printf(INFO, "Child process %d exited with status %d", pid, 
 		      status);
 	  itree_rm(meth_exitbypid);
@@ -882,9 +882,9 @@ void meth_exitchildren() {
      while ( ! tree_empty(meth_exitbypid) ) {
 	  itree_first(meth_exitbypid);
 	  pid    = itree_getkey(meth_exitbypid);
-	  status = (int) itree_get(meth_exitbypid);
+	  status = ((long long) itree_get(meth_exitbypid) & 0xffff);
        
-          meth_restartselect++;		/* select args may have changed */
+      meth_restartselect++;		/* select args may have changed */
 
 	  /* Process the child's death */
 	  if (itree_find(meth_procbypid, pid) != ITREE_NOVAL) {
