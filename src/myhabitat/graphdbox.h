@@ -1,6 +1,6 @@
 /*
  * Gtk multicurve graph widget
- * This is a wrapper over the gtkplot for convenience
+ * This is a wrapper over the gtkdatabox for convenience
  *
  * Nigel Stuckey, September 1999, October 2010
  * Copyright System Garden Limited 1999-2001,2010. All rights reserved.
@@ -55,9 +55,10 @@ enum graphdbox_graphtype {
 
 struct graphdbox_curve {
      GtkDataboxGraph *dbgraph;		/* curve/graph widget */
+     int nvals;				/* number of data points */
      float *X, *Y;			/* nmalloc'ed allocations for data */
      int colour;			/* colour index */
-     enum graphdbox_graphtype style;	/* how curve is drawn */
+     enum graphdbox_graphtype style;	/* how this curve is drawn */
 };
 
 struct graphdbox_graph {
@@ -65,8 +66,8 @@ struct graphdbox_graph {
      GtkWidget *gtable;			/* GtkTable containing Databox widget */
      TREE *curves;			/* list of curve names drawn: key is
 					 * curve name, data graphdbox_graph */
-     enum graphdbox_graphtype style;	/* how to draw curves */
-     float minmax;			/* min max on y-axis */
+     enum graphdbox_graphtype style;	/* default how to draw curves */
+     double minmax;			/* min max on y-axis */
      struct graphdbox_all *parent;	/* parent pointer to graphdbox_all */
 };
 
@@ -101,7 +102,7 @@ int  graphdbox_iscurvedrawn(GRAPHDBOX *g, char *graph_name, char *curve_name);
 int  graphdbox_iszoomed(struct graphdbox_graph *gs);
 void graphdbox_update(GRAPHDBOX *g, char *graph_name);
 void graphdbox_settimebase(GRAPHDBOX *g, time_t min, time_t max);
-void graphdbox_setallminmax(GRAPHDBOX *g, float value);
+void graphdbox_setallminmax(GRAPHDBOX *g, double value);
 void graphdbox_updateaxis(struct graphdbox_graph *gs);
 void graphdbox_updateallaxis(GRAPHDBOX *g);
 void graphdbox_rmcurve(GRAPHDBOX *g, char *graph_name, char *curve_name);
@@ -112,12 +113,12 @@ void graphdbox_rmallgraphs(GRAPHDBOX *g);
 struct graphdbox_graph *graphdbox_lookupgraph(GRAPHDBOX *g, char *graph_name);
 struct graphdbox_curve *graphdbox_lookupcurve(GRAPHDBOX *g, char *graph_name, 
 					      char *curve_name);
-void graphdbox_allgraph_zoomin_x(GRAPHDBOX *g, float zoomin);
-void graphdbox_allgraph_zoomin_y(GRAPHDBOX *g, float zoomin);
+void graphdbox_allgraph_zoomin_x(GRAPHDBOX *g, double zoomin);
+void graphdbox_allgraph_zoomin_y(GRAPHDBOX *g, double zoomin);
 void graphdbox_allgraph_zoomout(GRAPHDBOX *g);
 void graphdbox_allgraph_zoomout_home(GRAPHDBOX *g);
-gfloat graphdbox_majticks(gfloat max);
-gfloat graphdbox_minticks(gfloat mix);
+gdouble graphdbox_majticks(gdouble max);
+gdouble graphdbox_minticks(gdouble mix);
 void graphdbox_hideallaxis(GRAPHDBOX *g);
 void graphdbox_showallaxis(GRAPHDBOX *g);
 void graphdbox_hideallrulers(GRAPHDBOX *g);
@@ -127,5 +128,6 @@ void graphdbox_graphstyle(GRAPHDBOX *g, char *graph_name,
 			  enum graphdbox_graphtype);
 void graphdbox_usecolour(GRAPHDBOX *g, char *curvename, GdkColor *col);
 void graphdbox_recyclecolour(GRAPHDBOX *g, char *curvename);
+void graphdbox_dump(GRAPHDBOX *g);
 
 #endif /* _GRAPHDBOX_H_ */
