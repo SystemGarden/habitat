@@ -207,7 +207,7 @@ void uitable_freeview(GtkTreeView *view)
 /*
  * Callback for the tooltip cells on the tree view
  */
-static gboolean
+gboolean
 uitable_cb_query_tooltip (GtkWidget  *widget,
 			  gint        x,
 			  gint        y,
