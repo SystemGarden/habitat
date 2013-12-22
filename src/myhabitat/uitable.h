@@ -18,11 +18,11 @@ GtkListStore *uitable_mkmodel  (TABLE tab, time_t view_min, time_t view_max);
 void          uitable_freemodel(GtkListStore *);
 GtkTreeView * uitable_mkview   (TABLE tab, GtkListStore *model);
 void          uitable_freeview (GtkTreeView *view);
-static gboolean uitable_cb_query_tooltip (GtkWidget  *widget,
-					  gint        x,
-					  gint        y,
-					  gboolean    keyboard_tip,
-					  GtkTooltip *tooltip,
-					  gpointer    data);
+gboolean uitable_cb_query_tooltip (GtkWidget  *widget,
+			           gint        x,
+				   gint        y,
+				   gboolean    keyboard_tip,
+				   GtkTooltip *tooltip,
+				   gpointer    data);
 
 #endif /* _UITABLE_H_ */
