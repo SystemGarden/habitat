@@ -55,8 +55,8 @@ void uigraph_drawgraph(char *instance	/* graph name (instance) */ );
 void uigraph_rm_graph(char *instance);
 void uigraph_rm_all_graphs();
 GdkColor *uigraph_drawcurve(char *curve,	/* curve name */
-			    float scale,	/* curve scale/magnitude */
-			    float offset	/* y-axis offset */ );
+			    double scale,	/* curve scale/magnitude */
+			    double offset	/* y-axis offset */ );
 void uigraph_draw_all_selected();
 
 void uigraph_on_zoom_in_horiz (GtkButton *button, gpointer user_data);
