@@ -131,7 +131,7 @@ void uitime_set_slider(time_t from_t, time_t to_t, time_t openage_t)
 	  }
      }
     
-#if 1
+#if 0
      char *diffstr = util_approxtimedist(current_t, to_t);
      str = util_strjoin(util_decdatetime(current_t), " ", diffstr, NULL);;
      g_print("current str=%s (%lu-%lu)\n", str, current_t, to_t);

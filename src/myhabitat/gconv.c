@@ -325,7 +325,7 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
           return 0;	/* no valid data to plot (it probably shrank) */  
      }
 
-#if 1
+#if 0
     /* Dump contents of extracted table */
     char *tabdump;
     tabdump = table_outtable (tab);
@@ -462,7 +462,7 @@ int gconv_table2arrays(GRAPHDBOX *g,	/* graph structure */
      elog_endprintf(DEBUG, "%d values", nvals);
 #endif
 
-#if 1
+#if 0
      /* debug dump of the data converted to floats */
      int j;
      printf("gconv_table2arrays() - g->start=%lu %s -> ", g->start,

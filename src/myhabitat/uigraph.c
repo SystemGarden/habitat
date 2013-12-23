@@ -441,7 +441,7 @@ void uigraph_draw_all_selected() {
 
      uigraph_curve_scroll_to_active();
 
-     graphdbox_dump(uigraph_graphset); /* Debug */
+     /*graphdbox_dump(uigraph_graphset);*/ /* Debug */
 }
 
 
