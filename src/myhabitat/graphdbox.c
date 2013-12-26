@@ -26,7 +26,6 @@
 #include "graphdbox.h"
 #include "main.h"
 #include "callbacks.h"
-#include "gtkdatabox_truler.h"
 #include "../iiab/itree.h"
 #include "../iiab/timeline.h"
 #include "../iiab/util.h"
@@ -312,10 +311,14 @@ struct graphdbox_graph *graphdbox_newgraph(GRAPHDBOX *g, char *graph_name,
      gs->minmax = 0.0;		/* 0.0 is special 'ignore me' value */
      gs->parent = g;
 
-     /* create graph (chart+scrollbars held in a table) and add to containing 
-      * widget */
-     graphdbox_create_box_with_scrollbars_and_rulers(&box, &table, 
-						     TRUE, TRUE, TRUE, TRUE);
+     /* create graph (chart+scrollbars held in a table) with positions
+      * and add to containing widget */
+     gtk_databox_create_box_with_scrollbars_and_rulers_positioned(&box, &table, 
+					  TRUE, TRUE, TRUE, TRUE, TRUE, TRUE);
+     gtk_databox_ruler_set_linear_label_format(
+			gtk_databox_get_ruler_y(GTK_DATABOX(box)), "%%-%dg");
+     gtk_databox_ruler_set_text_hoffset(
+			gtk_databox_get_ruler_y(GTK_DATABOX(box)), -1);
 
      gs->gdbox  = GTK_WIDGET(box);
      gs->gtable = GTK_WIDGET(table);
@@ -371,7 +374,7 @@ struct graphdbox_graph *graphdbox_newgraph(GRAPHDBOX *g, char *graph_name,
      return gs;
 }
 
-
+#if 0
 /** 
  * graphdbox_create_box_with_scrollbars_and_rulers:
  * @p_box: Will contain a pointer to a #GtkDatabox widget
@@ -443,14 +446,14 @@ graphdbox_create_box_with_scrollbars_and_rulers (GtkWidget ** p_box,
    if (ruler_y)
    {
       ruler = gtk_databox_truler_new (GTK_ORIENTATION_VERTICAL);
-      gtk_databox_ruler_set_scale_type (GTK_DATABOX_RULER (ruler),
+      gtk_databox_truler_set_scale_type (GTK_DATABOX_RULER (ruler),
 					 GTK_DATABOX_SCALE_LINEAR);
       gtk_table_attach (table, ruler, 0, 1, 1, 2, GTK_FILL,
 			GTK_FILL | GTK_EXPAND | GTK_SHRINK, 0, 0);
       gtk_databox_set_ruler_y (box, GTK_DATABOX_RULER (ruler));
    }
 }
-
+#endif
 
 
 /* Returns true if the curve has been drawn and its data is being held */
@@ -549,32 +552,13 @@ void graphdbox_setallminmax(GRAPHDBOX *g, double value)
  * if the graph is zoomed */
 void graphdbox_updateaxis(struct graphdbox_graph *gs)
 {
+     gfloat minx, maxx, miny, maxy;
+     gfloat v_minx, v_maxx, v_miny, v_maxy;
+     int r;
+
      /* if in a zoomed state, we need to suspend to axis update */
      if (graphdbox_iszoomed(gs))
 	  return;
-
-#if 0
-     if (gs->parent->end) {
-	  /* timebase has been set: set the timeline for correct 
-	   * translation from 0..max to gs->parent->start..gs->parent->end */
-	  timeline_setoffset(gs->parent->start);
-
-	  /* TO DO */
-	  /* IGNORING THE MAXIMUM SCALE THAT HAS BEEN SET. 
-	   * THIS WILL ALWAYS RUN AN AUTOSCALE AND WILL NEED TO BE FIXED */
-          gtk_databox_auto_rescale(GTK_DATABOX(gs->gdbox), 0.05);
-     } else {
-          /* timebase not set */
-     
-          /* we use a margin on 5% on the start and end times for a
-	   * better appearence and to prevent the impression of clipping */
-          gtk_databox_auto_rescale(GTK_DATABOX(gs->gdbox), 0.05);
-     }
-#endif
-
-#if 1
-     gfloat minx, maxx, miny, maxy;
-     int r;
 
      if (gs->parent->end) {
 	  /* timebase has been set: set the timeline for correct 
@@ -605,6 +589,12 @@ void graphdbox_updateaxis(struct graphdbox_graph *gs)
 	  if (maxy < 1.0) 
 	       maxy = 1.0;
 
+	  /* Keep this state for the x and y rulers */
+	  v_minx = minx; 
+	  v_maxx = maxx; 
+	  v_miny = miny; 
+	  v_maxy = maxy;
+
 	  /* We use a margin on 5% on the start and end times for a
 	   * better appearence and to prevent the impression of clipping */
 	  minx = - ( maxx * .03 );
@@ -621,7 +611,34 @@ void graphdbox_updateaxis(struct graphdbox_graph *gs)
 	  /* timebase not set */
           gtk_databox_auto_rescale(GTK_DATABOX(gs->gdbox), 0.05);
      }
-#endif
+
+     /* Set the custom x-axis to be a timeline */
+     ITREE *timetics;
+     GtkDataboxRuler *ruler;
+     gchar **labels;
+     gfloat *tvals;
+     int count, i;
+
+     ruler = gtk_databox_get_ruler_x(GTK_DATABOX(gs->gdbox));
+     timetics = timeline_calc(v_minx, v_maxx, v_maxx - v_minx, 8);
+     count = itree_n(timetics);
+     labels = xnmalloc(count * sizeof(char *));
+     tvals = xnmalloc(count * sizeof(gfloat));
+     i = 0;
+     itree_traverse(timetics) {
+       tvals[i] = itree_getkey(timetics);
+       if (((struct timeline_tick *)itree_get(timetics))->label) {
+	 labels[i] = ((struct timeline_tick *)itree_get(timetics))->label;
+       } else {
+	 labels[i] = "";
+       }
+       i++;
+     }
+     gtk_databox_ruler_set_manual_ticks(ruler, tvals);
+     gtk_databox_ruler_set_manual_tick_cnt(ruler, count);
+     gtk_databox_ruler_set_manual_tick_labels(ruler, labels);
+     timeline_free(timetics);
+
 #if 0
      elog_printf(DEBUG, "axis updates on %s to min (%.2f,%.2f) "
 		 "max (%.2f,%.2f)",

@@ -137,10 +137,12 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
      struct timeline_tick *tick;	/* tick details */
      char label[TIMELINE_SHORTSTR];	/* working label text */
 
+#if 0
      fprintf(stderr, "min %ld (%s), max %ld (%s), diff %ld, maxchars %d\n", 
 	     min, util_decdatetime(min+timeline_offset), 
 	     max, util_sdecdatetime(max+timeline_offset),
 	     dispdiff, maxchars);
+#endif
 
      /* we must have at least 3 seconds to work sensibly */
      diff = max - min;
@@ -158,12 +160,14 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
 			tickindex++)
 	  if (dispdiff <= timeline_tickpoints[ tickindex ].threshold)
 	       break;
+#if 0
      fprintf(stderr, "tkidx %d, thresh %d, base %d, maj %d, min %d, desc %s\n",
 	     tickindex, timeline_tickpoints[ tickindex ].threshold,
 	     timeline_tickpoints[ tickindex ].base,
 	     timeline_tickpoints[ tickindex ].major,
 	     timeline_tickpoints[ tickindex ].minor,
 	     timeline_tickpoints[ tickindex ].description);
+#endif
 
      /* Start point should be the DATE of the min as a non-tick. Store it */
      t = min + timeline_offset;
@@ -175,9 +179,11 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
      tick->point = min;
      tick->ptime = t;
      itree_add(results, tick->point, tick);
+#if 0
      fprintf(stderr, "  point %ld (%s), type %d, label %s\n", 
 	     tick->point, util_decdatetime(t), 
 	     tick->type, tick->label);
+#endif
 
      /* Min and max are the visible limits of the chart. 
       * The counting, however, needs to start from the greatest major 
@@ -232,10 +238,15 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
 	  tick->point = t - timeline_offset;
 	  tick->ptime = t;
 	  itree_add(results, tick->point, tick); /* really need an itree? */
+#if 0
 	  fprintf(stderr, "  point %ld (%s), type %d, label %s\n", 
 		  tick->point, util_decdatetime(t), 
 		  tick->type, tick->label);
+#endif
      }
+
+#if 0
+     /* DISABLE MINOR TICKS AS GTK_DATABOX DOES NOT SUPPORT IT DIRECTLY */
 
      /* run off minor ticks */
      t = min + timeline_offset;
@@ -262,11 +273,14 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
 	       tick->point = t - timeline_offset;
 	       tick->ptime = t;
 	       itree_add(results, tick->point, tick);
+#if 0
 	       fprintf(stderr, "  point %ld (%s), type %d, label %s\n", 
 		       tick->point, util_decdatetime(t), 
 		       tick->type, tick->label);
+#endif
 	  }
      }
+#endif
 
      /* max point (non-tick) */
      t = max + timeline_offset;
@@ -279,9 +293,11 @@ ITREE *timeline_calc(time_t min,	/* start of the timeline */
      tick->point = max;
      tick->ptime = t;
      itree_add(results, max, tick);
+#if 0
      fprintf(stderr, "  point %ld (%s), type %d, label %s\n", 
 	     tick->point, util_decdatetime(t), 
 	     tick->type, tick->label);
+#endif
 
      return results;
 }

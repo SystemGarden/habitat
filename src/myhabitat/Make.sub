@@ -29,7 +29,6 @@ myhabitat/graphdbox.c	\
 myhabitat/gconv.c	\
 myhabitat/dyndata.c	\
 myhabitat/fileroute.c	\
-myhabitat/gtkdatabox_truler.c	\
 
 
 MYHABPIXMAPS =				\
