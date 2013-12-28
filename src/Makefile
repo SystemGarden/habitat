@@ -114,7 +114,8 @@ LDLIBS += $(EXTRA_LIB) $(SYS_LIB)
 # use the GNU make .PHONY directive
 .PHONY: clean cleanall all really-all test test-mkdir test-all tag tags \
 		install linuxinstall linuxinventory srctar gnubintar \
-		gnubintar bintar rpm ctest cleaninstall cleaninstonly testrun
+		gnubintar bintar rpm ctest cleaninstall cleaninstonly testrun \
+		windows
 
 # Major target
 all: really-all
@@ -315,6 +316,9 @@ rpm:	srctar
 # Create Mac .dmg file, a disk image container
 dmg:	installmac
 	$(HDIUTIL) create $(DMGFILE) -volname "$(PRODUCT)" -fs HFS+ -srcfolder $(DMGDIR) -ov
+
+# Create windows binaries using cross compile config
+windows: all
 
 # Clean the source and build areas
 # There are four levels: 
