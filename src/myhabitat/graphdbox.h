@@ -69,6 +69,7 @@ struct graphdbox_graph {
      enum graphdbox_graphtype style;	/* default how to draw curves */
      double minmax;			/* min max on y-axis */
      struct graphdbox_all *parent;	/* parent pointer to graphdbox_all */
+     ITREE *timeline;			/* current timeline_* storage (or \0) */
 };
 
 struct graphdbox_all {

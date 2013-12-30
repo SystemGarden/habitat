@@ -106,6 +106,8 @@ void graphdbox_destroy(GRAPHDBOX *g)
 	       nfree(tree_getkey(gs->curves));
 	  }
 	  tree_destroy(gs->curves);
+	  if (gs->timeline)
+	       timeline_free(gs->timeline);
 
 	  nfree(tree_getkey(g->graphs));
 	  nfree(gs);
@@ -310,6 +312,7 @@ struct graphdbox_graph *graphdbox_newgraph(GRAPHDBOX *g, char *graph_name,
      gs->style  = type;
      gs->minmax = 0.0;		/* 0.0 is special 'ignore me' value */
      gs->parent = g;
+     gs->timeline = NULL;
 
      /* create graph (chart+scrollbars held in a table) with positions
       * and add to containing widget */
@@ -374,86 +377,6 @@ struct graphdbox_graph *graphdbox_newgraph(GRAPHDBOX *g, char *graph_name,
      return gs;
 }
 
-#if 0
-/** 
- * graphdbox_create_box_with_scrollbars_and_rulers:
- * @p_box: Will contain a pointer to a #GtkDatabox widget
- * @p_table: Will contain a pointer to a #GtkTable widget
- * @scrollbar_x: Whether to attach a horizontal scrollbar
- * @scrollbar_y: Whether to attach a vertical scrollbar
- * @ruler_x: Whether to attach a horizontal ruler
- * @ruler_y: Whether to attach a vertical ruler
- *
- * This is a convenience function which creates a #GtkDatabox widget in a 
- * GtkTable widget optionally accompanied by scrollbars and rulers. You only 
- * have to fill in the data (gtk_databox_graph_add()) and adjust the limits
- * (gtk_databox_set_total_limits() or gtk_databox_auto_rescale()).
- *
- * @see_also: gtk_databox_new(), gtk_databox_set_adjustment_x(), gtk_databox_set_adjustment_y(), gtk_databox_set_ruler_x(), gtk_databox_set_ruler_y()
- */
-void
-graphdbox_create_box_with_scrollbars_and_rulers (GtkWidget ** p_box,
-						 GtkWidget ** p_table,
-						 gboolean scrollbar_x,
-						 gboolean scrollbar_y,
-						 gboolean ruler_x,
-						 gboolean ruler_y)
-{
-   GtkTable *table;
-   GtkDatabox *box;
-   GtkWidget *scrollbar;
-   GtkWidget *ruler;
-
-   *p_table = gtk_table_new (3, 3, FALSE);
-   *p_box = gtk_databox_new ();
-   box = GTK_DATABOX (*p_box);
-   table = GTK_TABLE (*p_table);
-
-   gtk_table_attach (table, GTK_WIDGET (box), 1, 2, 1, 2,
-		     GTK_FILL | GTK_EXPAND | GTK_SHRINK,
-		     GTK_FILL | GTK_EXPAND | GTK_SHRINK, 0, 0);
-
-   if (scrollbar_x)
-   {
-      scrollbar = gtk_hscrollbar_new (NULL);
-      gtk_databox_set_adjustment_x (box,
-				   gtk_range_get_adjustment (GTK_RANGE
-							     (scrollbar)));
-      gtk_table_attach (table, scrollbar, 1, 2, 2, 3,
-			GTK_FILL | GTK_EXPAND | GTK_SHRINK, GTK_FILL, 0, 0);
-   }
-
-   if (scrollbar_y)
-   {
-      scrollbar = gtk_vscrollbar_new (NULL);
-      gtk_databox_set_adjustment_y (box,
-				   gtk_range_get_adjustment (GTK_RANGE
-							     (scrollbar)));
-      gtk_table_attach (table, scrollbar, 2, 3, 1, 2, GTK_FILL,
-			GTK_FILL | GTK_EXPAND | GTK_SHRINK, 0, 0);
-   }
-
-   if (ruler_x)
-   {
-      ruler = gtk_databox_truler_new (GTK_ORIENTATION_HORIZONTAL);
-      gtk_databox_truler_set_scale_type (GTK_DATABOX_TRULER (ruler),
-					 GTK_DATABOX_TSCALE_TIME);
-      gtk_table_attach (table, ruler, 1, 2, 0, 1,
-			GTK_FILL | GTK_EXPAND | GTK_SHRINK, GTK_FILL, 0, 0);
-      gtk_databox_set_ruler_x (box, GTK_DATABOX_RULER (ruler));
-   }
-
-   if (ruler_y)
-   {
-      ruler = gtk_databox_truler_new (GTK_ORIENTATION_VERTICAL);
-      gtk_databox_truler_set_scale_type (GTK_DATABOX_RULER (ruler),
-					 GTK_DATABOX_SCALE_LINEAR);
-      gtk_table_attach (table, ruler, 0, 1, 1, 2, GTK_FILL,
-			GTK_FILL | GTK_EXPAND | GTK_SHRINK, 0, 0);
-      gtk_databox_set_ruler_y (box, GTK_DATABOX_RULER (ruler));
-   }
-}
-#endif
 
 
 /* Returns true if the curve has been drawn and its data is being held */
@@ -637,7 +560,9 @@ void graphdbox_updateaxis(struct graphdbox_graph *gs)
      gtk_databox_ruler_set_manual_ticks(ruler, tvals);
      gtk_databox_ruler_set_manual_tick_cnt(ruler, count);
      gtk_databox_ruler_set_manual_tick_labels(ruler, labels);
-     timeline_free(timetics);
+     if (gs->timeline)
+       timeline_free(gs->timeline);
+     gs->timeline = timetics;
 
 #if 0
      elog_printf(DEBUG, "axis updates on %s to min (%.2f,%.2f) "

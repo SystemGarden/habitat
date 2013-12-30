@@ -498,10 +498,10 @@ void uidata_ring_change (char *ringlabel)
 	    current_ringname = NULL;
      }
 
-     /*fprintf(stderr, "uidata_ring_change() - current_label=%s, "
+     fprintf(stderr, "uidata_ring_change() - current_label=%s, "
 	     "current_ringname=%s\n",
 	     uidata_ring_current_label ? uidata_ring_current_label : "(null)",
-	     current_ringname);*/
+	     current_ringname);
 
      /* Only operate when there is an info table and a ringname */
      if (current_info_tab && current_ringname) {
@@ -567,7 +567,7 @@ void uidata_ring_change (char *ringlabel)
 
 	  }
 
-          /*g_print ("You selected ring label=%s purl=%s ringname=%s "
+          /*fprintf (stderr, "You selected ring label=%s purl=%s ringname=%s "
 		   "ringpurl=%s\n", 
 		   uidata_ring_current_label, current_choice_purl, 
 		   current_ringname, ringpurl);*/
